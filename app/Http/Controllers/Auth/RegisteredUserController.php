@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
+use App\Models\Department;
 
 class RegisteredUserController extends Controller
 {
@@ -20,7 +21,10 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        return view('auth.register');
+        // Ambil semua bidang untuk ditampilkan di dropdown
+        $departments = Department::all();
+
+        return view('auth.register', compact('departments'));
     }
 
     /**
@@ -34,6 +38,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+            'department_id' => ['required', 'exists:departments,id'], // Tambahkan ini
         ]);
 
         $user = User::create([
@@ -42,6 +47,7 @@ class RegisteredUserController extends Controller
             'password' => Hash::make($request->password),
             'role_id' => 2, // 2 adalah ID untuk role 'user'
             'status' => 'pending', // Sekalian set status pending
+            'department_id' => $request->department_id, // Tambahkan ini
         ]);
 
         event(new Registered($user));

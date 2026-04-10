@@ -48,6 +48,11 @@ public function userIndex()
             'description' => 'nullable|string',
         ]);
 
+        // 2. PROTEKSI: Cek apakah user punya departemen
+        if (!Auth::user()->department_id) {
+            return back()->with('error', 'Akun Anda belum terhubung dengan Bidang/Departemen manapun. Silakan hubungi admin.');
+        }
+
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             
@@ -70,6 +75,7 @@ public function userIndex()
                 'user_id' => Auth::id(),
                 'description' => $request->description,
                 'download_count' => 0,
+                'department_id' => Auth::user()->department_id, // Terisi otomatis dari departemen user
             ]);
             return back()->with('success', 'Arsip berhasil diunggah!');
         }

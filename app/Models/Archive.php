@@ -20,6 +20,7 @@ class Archive extends Model
         'user_id',
         'download_count',
         'description',
+        'department_id', // Tambahkan ini
     ];
 
     /**
@@ -36,5 +37,13 @@ class Archive extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Relasi ke Department (Bidang)
+     */
+    public function department()
+    {
+        return $this->belongsTo(Department::class);
     }
 }

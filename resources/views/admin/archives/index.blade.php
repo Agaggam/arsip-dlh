@@ -38,6 +38,7 @@
                             <tr class="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
                                 <th class="px-6 py-4 text-left">Dokumen</th>
                                 <th class="px-6 py-4 text-left">Kategori</th>
+                                <th class="px-6 py-4 text-left">Bidang</th> {{-- Kolom Baru --}}
                                 <th class="px-6 py-4 text-left">Dibuat</th>
                                 <th class="px-6 py-4 text-left">Pengunggah</th>
                                 <th class="px-6 py-4 text-center">Hits</th>
@@ -77,6 +78,12 @@
                                         {{ $archive->category->name }}
                                     </span>
                                 </td>
+                                {{-- Bidang (Data Baru) --}}
+        <td class="px-6 py-4 whitespace-nowrap">
+            <div class="text-xs font-semibold text-slate-600">
+                {{ $archive->department->name ?? 'TANPA BIDANG' }}
+            </div>
+        </td>
                                 <td class="px-6 py-4 text-xs font-medium text-slate-500">
                                     {{ $archive->created_at->format('d M Y, H:i') }}
                                 </td>

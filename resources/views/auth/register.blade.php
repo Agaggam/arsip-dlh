@@ -25,6 +25,22 @@
             <x-input-error :messages="$errors->get('email')" class="mt-2" />
         </div>
 
+        {{-- Input Department --}}
+        <div>
+            <x-input-label for="department_id" :value="__('Bidang / Bagian')" class="font-semibold" />
+            <select id="department_id" name="department_id" 
+                class="block mt-1.5 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm text-sm" 
+                required>
+                <option value="" disabled selected>Pilih Bidang Anda</option>
+                @foreach($departments as $dept)
+                    <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
+                        {{ $dept->name }}
+                    </option>
+                @endforeach
+            </select>
+            <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
+        </div>
+
         <div>
             <x-input-label for="password" :value="__('Password')" class="font-semibold" />
             <x-text-input id="password" class="block mt-1.5 w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm" 

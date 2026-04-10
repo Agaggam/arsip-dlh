@@ -27,6 +27,7 @@
                             <tr class="bg-slate-50/50">
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Dokumen</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Kategori</th>
+                                <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Bidang</th>
                                 <th class="px-6 py-4 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Tgl Dihapus</th>
                                 <th class="px-6 py-4 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
                             </tr>
@@ -51,6 +52,12 @@
                                     <span class="px-3 py-1 text-[10px] font-extrabold rounded-full border bg-slate-50 text-slate-500 border-slate-200 uppercase tracking-wider">
                                         {{ $archive->category->name }}
                                     </span>
+                                </td>
+                                {{-- Bidang (Data Baru) --}}
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="text-xs font-semibold text-slate-600">
+                                        {{ $archive->department->name ?? 'TANPA BIDANG' }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-500 font-medium">
                                     {{ $archive->deleted_at->format('d M Y, H:i') }}

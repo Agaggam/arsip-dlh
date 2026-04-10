@@ -21,6 +21,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'superadmin@example.com',
             'password' => bcrypt('superadmin123'),
             'role_id' => 1, // ID dari role 'super_admin'
+            'department_id' => 1, // ID dari departemen
         ]);
 
         User::factory()->create([
@@ -28,6 +29,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'user@example.com',
             'password' => bcrypt('user123'),
             'role_id' => 2, // ID dari role 'user'
+            'department_id' => 2, // ID dari departemen
         ]);
     }
 }
