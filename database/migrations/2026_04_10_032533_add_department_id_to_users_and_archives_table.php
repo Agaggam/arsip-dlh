@@ -11,12 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
+        // Hubungkan Users ke Departments
         Schema::table('users', function (Blueprint $table) {
         $table->foreignId('department_id')->constrained()->onDelete('cascade');
         });
 
-        Schema::table('archives', function (Blueprint $table) {
+        // Hubungkan Categories ke Departments + Atur Unique Constraint
+        Schema::table('categories', function (Blueprint $table) {
             $table->foreignId('department_id')->constrained()->onDelete('cascade');
+            // Mencegah duplikat nama kategori di DALAM departemen yang sama
+            // Tapi departemen B boleh punya nama yang sama dengan departemen A
+            $table->unique(['department_id', 'name']);
         });
     }
 
@@ -30,7 +35,8 @@ return new class extends Migration
         $table->dropColumn('department_id');
         });
 
-        Schema::table('archives', function (Blueprint $table) {
+        Schema::table('categories', function (Blueprint $table) {
+            $table->dropUnique(['department_id', 'name']);
             $table->dropForeign(['department_id']);
             $table->dropColumn('department_id');
         });

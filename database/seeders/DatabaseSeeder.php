@@ -25,11 +25,35 @@ class DatabaseSeeder extends Seeder
         ]);
 
         User::factory()->create([
+            'name' => 'Admin1',
+            'email' => 'admin1@example.com',
+            'password' => bcrypt('admin123'),
+            'role_id' => 2, // ID dari role 'admin'
+            'department_id' => 2, // ID dari departemen
+        ]);
+
+        User::factory()->create([
+            'name' => 'Admin2',
+            'email' => 'admin2@example.com',
+            'password' => bcrypt('admin123'),
+            'role_id' => 2, // ID dari role 'admin'
+            'department_id' => 3, // ID dari departemen
+        ]);
+
+        User::factory()->create([
+            'name' => 'Admin3',
+            'email' => 'admin3@example.com',
+            'password' => bcrypt('admin123'),
+            'role_id' => 2, // ID dari role 'admin'
+            'department_id' => 4, // ID dari departemen
+        ]);
+
+        User::factory()->create([
             'name' => 'User Biasa',
             'email' => 'user@example.com',
             'password' => bcrypt('user123'),
-            'role_id' => 2, // ID dari role 'user'
-            'department_id' => 2, // ID dari departemen
+            'role_id' => 3, // ID dari role 'user'
+            'department_id' => 4, // ID dari departemen
         ]);
     }
 }

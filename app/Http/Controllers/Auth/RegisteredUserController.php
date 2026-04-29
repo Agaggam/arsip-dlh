@@ -21,8 +21,8 @@ class RegisteredUserController extends Controller
      */
     public function create(): View
     {
-        // Ambil semua bidang untuk ditampilkan di dropdown
-        $departments = Department::all();
+        // Ambil semua bidang kecuali 'System' untuk ditampilkan di dropdown
+        $departments = Department::where('name', '!=', 'System')->get();
 
         return view('auth.register', compact('departments'));
     }
@@ -45,7 +45,7 @@ class RegisteredUserController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role_id' => 2, // 2 adalah ID untuk role 'user'
+            'role_id' => 3, // 3 adalah ID untuk role 'user'
             'status' => 'pending', // Sekalian set status pending
             'department_id' => $request->department_id, // Tambahkan ini
         ]);

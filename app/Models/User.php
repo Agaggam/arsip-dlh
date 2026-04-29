@@ -49,6 +49,9 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
+    /**
+     * RELASI
+     */
     public function role()
     {
         return $this->belongsTo(Role::class);
@@ -57,5 +60,28 @@ class User extends Authenticatable implements MustVerifyEmail
     public function department()
     {
         return $this->belongsTo(Department::class);
+    }
+
+    /**
+     * FUNGSI CEK HAK AKSES (CUSTOM METHODS)
+     */
+    public function isPureSuperAdmin()
+    {
+        return $this->role->name === 'super_admin' && $this->department->name === 'System';
+    }
+
+    public function isAdmin()
+    {
+        return $this->role->name === 'admin';
+    }
+
+    public function isUser()
+    {
+        return $this->role->name === 'user';
+    }
+
+    public function isFromDepartment($department_id)
+    {
+        return $this->department_id === $department_id;
     }
 }

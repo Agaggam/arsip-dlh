@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('archives', function (Blueprint $table) {
             $table->id();
-            $table->string('title');
+            $table->string('title')->index(); // Index untuk pencarian judul
             $table->string('file_path'); // Path penyimpanan file
             $table->string('file_type')->nullable(); // Mime type (pdf, png, dll)
             $table->string('file_size')->nullable(); // Ukuran file (KB/MB)

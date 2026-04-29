@@ -10,12 +10,19 @@
     <div class="py-12 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             
-            {{-- Alert Success --}}
+            <!-- {{-- Alert Success --}}
             @if(session('success'))
                 <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-2xl border-l-4 border-green-500 shadow-sm">
                     <span class="font-bold">{{ session('success') }}</span>
                 </div>
             @endif
+
+            {{-- Alert Error --}}
+            @if(session('error'))
+                <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-2xl border-l-4 border-red-500 shadow-sm">
+                    <span class="font-bold">{{ session('error') }}</span>
+                </div>
+            @endif -->
 
             <div class="bg-white overflow-hidden shadow-sm border border-gray-100 sm:rounded-[1.5rem] p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -53,10 +60,9 @@
                                         {{ $archive->category->name }}
                                     </span>
                                 </td>
-                                {{-- Bidang (Data Baru) --}}
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-xs font-semibold text-slate-600">
-                                        {{ $archive->department->name ?? 'TANPA BIDANG' }}
+                                        {{ $archive->category->department->name ?? 'TANPA BIDANG' }}
                                     </div>
                                 </td>
                                 <td class="px-6 py-4 text-sm text-slate-500 font-medium">
@@ -65,7 +71,7 @@
                                 <td class="px-6 py-4 text-center">
                                     <div class="flex justify-center gap-3">
                                         
-                                        {{-- Tombol Restore (Menggunakan Modal Sukses/Hijau) --}}
+                                        {{-- Tombol Restore (Tanpa Password) --}}
                                         <button 
                                             type="button"
                                             x-data="" 
@@ -73,7 +79,9 @@
                                                 id: 'confirm-restore', 
                                                 action: '{{ route('admin.archives.restore', $archive->id) }}',
                                                 method: 'POST',
-                                                title: 'Pulihkan kembali arsip {{ $archive->title }}?' 
+                                                title: 'Pulihkan Arsip?',
+                                                warning: 'Arsip &quot;{{ addslashes($archive->title) }}&quot; akan dikembalikan ke daftar aktif.',
+                                                withPassword: false
                                             })"
                                             class="p-2 text-emerald-500 hover:bg-emerald-50 rounded-xl transition-all active:scale-90" 
                                             title="Pulihkan Arsip">
@@ -82,7 +90,7 @@
                                             </svg>
                                         </button>
 
-                                        {{-- Tombol Hapus Permanen (Tetap Merah) --}}
+                                        {{-- Tombol Hapus Permanen (Wajib Password) --}}
                                         <button 
                                             type="button"
                                             x-data="" 
@@ -90,7 +98,9 @@
                                                 id: 'confirm-delete', 
                                                 action: '{{ route('admin.archives.force_delete', $archive->id) }}',
                                                 method: 'DELETE',
-                                                title: 'Hapus Permanen arsip {{ $archive->title }}?' 
+                                                title: 'Hapus Permanen?',
+                                                warning: 'Arsip &quot;{{ addslashes($archive->title) }}&quot; akan dihapus selamanya dari sistem. Tindakan ini tidak bisa dibatalkan!',
+                                                withPassword: true 
                                             })"
                                             class="p-2 text-rose-500 hover:bg-rose-50 rounded-xl transition-all active:scale-90" 
                                             title="Hapus Permanen">
@@ -103,7 +113,7 @@
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="4" class="px-6 py-20 text-center">
+                                <td colspan="5" class="px-6 py-20 text-center">
                                     <div class="flex flex-col items-center">
                                         <svg class="w-12 h-12 text-slate-200 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -121,23 +131,9 @@
     </div>
 
     {{-- MODAL HIJAU (RESTORE) --}}
-    <x-confirm-modal 
-        id="confirm-restore" 
-        type="success"
-    >
-        <p class="text-sm text-slate-500">
-            Arsip ini akan dikembalikan ke daftar utama dan dapat diakses kembali oleh pengguna.
-        </p>
-    </x-confirm-modal>
+    <x-confirm-modal id="confirm-restore" method="POST" type="success" />
 
     {{-- MODAL MERAH (FORCE DELETE) --}}
-    <x-confirm-modal 
-        id="confirm-delete" 
-        type="danger"
-    >
-        <p class="text-sm text-slate-500">
-            Tindakan ini <strong>tidak dapat dibatalkan</strong>. File fisik akan dihapus selamanya dari server.
-        </p>
-    </x-confirm-modal>
+    <x-confirm-modal id="confirm-delete" method="DELETE" type="danger" />
 
 </x-app-layout>

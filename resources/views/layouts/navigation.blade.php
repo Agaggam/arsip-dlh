@@ -21,7 +21,7 @@
                 $baseClass = 'flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group font-medium text-sm';
             @endphp
 
-            @php $isAdmin = auth()->user()->role->name === 'super_admin'; @endphp
+            @php $isAdmin = auth()->user()->role->name === 'super_admin' | auth()->user()->role->name === 'admin'; @endphp
             
             @php $isDashboardActive = request()->routeIs('admin.dashboard') || request()->routeIs('dashboard'); @endphp
             <a href="{{ $isAdmin ? route('admin.dashboard') : route('dashboard') }}" 
@@ -42,11 +42,20 @@
                     <span>{{ __('Manajemen User') }}</span>
                 </a>
 
+                @php $isDepartmentsActive = request()->routeIs('admin.departments.*'); @endphp
+                <a href="{{ route('admin.departments.index') }}" 
+                   class="{{ $baseClass }} {{ $isDepartmentsActive ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5 transition-colors {{ $isDepartmentsActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                    </svg>
+                    <span>{{ __('Departemen') }}</span>
+                </a>
+
                 @php $isCategoriesActive = request()->routeIs('categories.*'); @endphp
                 <a href="{{ route('categories.index') }}" 
                    class="{{ $baseClass }} {{ $isCategoriesActive ? $activeClass : $inactiveClass }}">
                     <svg class="w-5 h-5 transition-colors {{ $isCategoriesActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
                     </svg>
                     <span>{{ __('Kategori Arsip') }}</span>
                 </a>
@@ -68,16 +77,55 @@
                     </svg>
                     <span>{{ __('Tong Sampah') }}</span>
                 </a>
-            @else
-                @php $isUserArchiveActive = request()->routeIs('arsip.user'); @endphp
-                <a href="{{ route('arsip.user') }}" 
-                   class="{{ $baseClass }} {{ $isUserArchiveActive ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5 transition-colors {{ $isUserArchiveActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5M5 19v-2a2 2 0 00-2-2m14 4h2a2 2 0 002-2v-5m-2 3h.01"></path>
-                    </svg>
-                    <span>{{ __('Daftar Arsip') }}</span>
+                
+@else
+    @php 
+        $isUserArchiveActive = request()->routeIs('arsip.user');
+        $sidebarDepts = \App\Models\Department::where('name', '!=', 'System')->get();
+    @endphp
+
+    <div x-data="{ open: {{ $isUserArchiveActive ? 'true' : 'false' }} }" class="space-y-1">
+        <button @click="open = !open" 
+            class="w-full group flex items-center justify-between px-4 py-3 text-sm font-semibold rounded-2xl transition-all duration-200
+            {{ $isUserArchiveActive ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-100' : 'text-slate-600 hover:bg-slate-50 hover:text-indigo-600' }}">
+            
+            <div class="flex items-center space-x-3">
+                <svg class="w-5 h-5 {{ $isUserArchiveActive ? 'text-white' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5M5 19v-2a2 2 0 00-2-2m14 4h2a2 2 0 002-2v-5m-2 3h.01"></path>
+                </svg>
+                <span>{{ __('Daftar Arsip') }}</span>
+            </div>
+
+            <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300 {{ $isUserArchiveActive ? 'text-white' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+            </svg>
+        </button>
+
+        <div x-show="open" 
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-2"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-cloak 
+             class="mx-2 mt-1 py-2 px-2 bg-slate-50/80 border border-slate-100 rounded-2xl space-y-1">
+            
+            <a href="{{ route('arsip.user') }}" 
+               class="flex items-center px-4 py-2 text-[13px] font-bold uppercase tracking-wider rounded-xl transition-all
+               {{ !request('dept') && $isUserArchiveActive ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-500 hover:bg-white/50' }}">
+                <span class="w-1.5 h-1.5 rounded-full mr-3 {{ !request('dept') ? 'bg-indigo-500' : 'bg-slate-300' }}"></span>
+                Semua Bidang
+            </a>
+
+            @foreach($sidebarDepts as $dept)
+                <a href="{{ route('arsip.user', ['dept' => $dept->id]) }}" 
+                   class="flex items-center px-4 py-2 text-[13px] font-bold uppercase tracking-wider rounded-xl transition-all
+                   {{ request('dept') == $dept->id ? 'bg-white text-indigo-600 shadow-sm' : 'text-slate-500 hover:text-indigo-500 hover:bg-white/50' }}">
+                    <span class="w-1.5 h-1.5 rounded-full mr-3 {{ request('dept') == $dept->id ? 'bg-indigo-500' : 'bg-slate-300' }}"></span>
+                    {{ $dept->name }}
                 </a>
-            @endif
+            @endforeach
+        </div>
+    </div>
+@endif
         </div>
 
         <div class="p-4 border-t border-slate-100 bg-slate-50/50">
@@ -151,9 +199,56 @@
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="{{ $mobileClasses }}">
                         {{ __('Dashboard') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('arsip.user')" :active="request()->routeIs('arsip.user')" class="{{ $mobileClasses }}">
-                        {{ __('Daftar Arsip') }}
-                    </x-responsive-nav-link>
+                    <div x-data="{ openMobileDept: {{ request('dept') ? 'true' : 'false' }} }" class="space-y-1">
+                        
+                        <button @click="openMobileDept = !openMobileDept" 
+                            class="w-full flex items-center justify-between px-4 py-3 text-sm font-bold uppercase tracking-wider transition-all duration-200
+                            {{ request()->routeIs('arsip.user') 
+                                ? 'text-indigo-600 bg-indigo-50/50' 
+                                : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50' }}">
+                            
+                            <div class="flex items-center gap-3">
+                                <div class="p-2 rounded-lg {{ request()->routeIs('arsip.user') ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-400' }}">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5M5 19v-2a2 2 0 00-2-2m14 4h2a2 2 0 002-2v-5m-2 3h.01"></path>
+                                    </svg>
+                                </div>
+                                <span>{{ __('Daftar Arsip') }}</span>
+                            </div>
+
+                            <svg :class="openMobileDept ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </button>
+
+                        <div x-show="openMobileDept" 
+                            x-cloak 
+                            x-collapse
+                            class="relative ml-4 border-l-2 border-slate-100 mt-1 mb-4 space-y-1">
+                            
+                            <a href="{{ route('arsip.user') }}" 
+                            class="block pl-8 pr-4 py-3 text-sm font-semibold transition-all
+                            {{ request()->routeIs('arsip.user') && !request('dept') 
+                                    ? 'text-indigo-600' 
+                                    : 'text-slate-400 hover:text-slate-600' }}">
+                                {{ __('Semua Bidang') }}
+                            </a>
+
+                            @php 
+                                $sidebarDepts = \App\Models\Department::where('name', '!=', 'System')->get();
+                            @endphp
+
+                            @foreach($sidebarDepts as $dept)
+                                <a href="{{ route('arsip.user', ['dept' => $dept->id]) }}" 
+                                class="block pl-8 pr-4 py-3 text-sm font-semibold transition-all
+                                {{ request('dept') == $dept->id 
+                                        ? 'text-indigo-600' 
+                                        : 'text-slate-400 hover:text-slate-600' }}">
+                                    {{ $dept->name }}
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
                 @endif
             </div>
 

@@ -16,10 +16,8 @@
         <style>
             body { 
                 font-family: 'Inter', sans-serif; 
-                letter-spacing: -0.01em; /* Membuat teks terlihat lebih padat & modern */
+                letter-spacing: -0.01em;
             }
-
-            /* Custom scrollbar yang lebih tipis dan estetik */
             ::-webkit-scrollbar { width: 6px; }
             ::-webkit-scrollbar-track { background: transparent; }
             ::-webkit-scrollbar-thumb { 
@@ -28,8 +26,6 @@
                 border: 2px solid transparent;
             }
             ::-webkit-scrollbar-thumb:hover { background: #cbd5e1; }
-
-            /* Efek halus saat transisi halaman */
             .fade-in {
                 animation: fadeIn 0.5s ease-in-out;
             }
@@ -50,7 +46,7 @@
 
                 @isset($header)
                     <header class="bg-white/70 backdrop-blur-xl sticky top-0 z-30 border-b border-slate-200/80">
-                        <div class="max-w-7xl mx-auto py-4 px-6 sm:px-8 lg:px-10 flex justify-between items-center">
+                        <div class="max-w-full mx-auto py-4 px-6 sm:px-8 lg:px-10 flex justify-between items-center">
                             <div class="flex flex-col">
                                 <h1 class="text-xl font-bold text-slate-800 tracking-tight">
                                     {{ $header }}
@@ -67,23 +63,20 @@
                             </div>
                             
                             <div class="flex items-center gap-4">
-                                <!-- <div class="hidden md:flex items-center bg-slate-100 rounded-full px-4 py-1.5 border border-slate-200">
-                                    <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-                                    <input type="text" placeholder="Cari sesuatu..." class="bg-transparent border-none focus:ring-0 text-xs text-slate-600 placeholder-slate-400 w-32">
-                                </div> TIDAK DIPERLUKAN-->
+                                {{-- tempat untuk tambahan tombol jika perlu --}}
                             </div>
                         </div>
                     </header>
                 @endisset
 
                 <div class="p-6 sm:p-8 lg:p-10 flex-1 fade-in">
-                    <div class="max-w-7xl mx-auto">
+                    <div class="max-w-full mx-auto">
                         {{ $slot }}
                     </div>
                 </div>
 
                 <footer class="py-6 px-10 border-t border-slate-200/60 bg-white/30">
-                    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
+                    <div class="max-w-full mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
                         <p class="text-[13px] text-slate-500 font-medium">
                             &copy; {{ date('Y') }} <span class="text-indigo-600 font-bold">{{ config('app.name') }}</span>.
                         </p>
@@ -95,5 +88,36 @@
                 </footer>
             </main>
         </div>
+
+        {{-- ========== TOAST NOTIFICATIONS (DITEMPATKAN DI LUAR ELEMEN DENGAN TRANSFORM) ========== --}}
+        @if(session('success'))
+            <x-toast type="success" message="{{ session('success') }}" :duration="5000" />
+        @endif
+
+        @if(session('error'))
+            <x-toast type="error" message="{{ session('error') }}" :duration="5000" />
+        @endif
+
+        {{-- Menangkap session status dari ProfileController (profile-updated, password-updated, dll) --}}
+        @if(session('status'))
+            @php
+                $statusMessage = match(session('status')) {
+                    'profile-updated' => 'Profil berhasil diperbarui.',
+                    'password-updated' => 'Kata sandi berhasil diubah.',
+                    default => session('status')
+                };
+            @endphp
+            <x-toast type="success" message="{{ $statusMessage }}" :duration="5000" />
+        @endif
+
+        {{-- Menangkap error validasi dari berbagai form (termasuk userDeletion) --}}
+        @if($errors->any() && !session('success') && !session('error') && !session('status'))
+            <x-toast type="error" message="Terjadi kesalahan. Silakan periksa kembali." :duration="5000" />
+        @endif
+
+        {{-- Menangkap error khusus untuk hapus akun (userDeletion) --}}
+        @if($errors->userDeletion->has('password'))
+            <x-toast type="error" message="Gagal menghapus akun: Kata sandi salah." :duration="5000" />
+        @endif
     </body>
 </html>

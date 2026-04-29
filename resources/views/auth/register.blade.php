@@ -33,9 +33,11 @@
                 required>
                 <option value="" disabled selected>Pilih Bidang Anda</option>
                 @foreach($departments as $dept)
+                    @if($dept->name !== 'System')
                     <option value="{{ $dept->id }}" {{ old('department_id') == $dept->id ? 'selected' : '' }}>
                         {{ $dept->name }}
                     </option>
+                    @endif
                 @endforeach
             </select>
             <x-input-error :messages="$errors->get('department_id')" class="mt-2" />

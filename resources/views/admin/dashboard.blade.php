@@ -72,37 +72,6 @@
                     </div>
                 </div>
                 
-                <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                        <h3 class="text-slate-800 font-bold mb-3 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                            Aksi Cepat
-                        </h3>
-                        <div class="space-y-2">
-                            <a href="{{ route('admin.archives.index') }}" class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:border-indigo-300 border border-transparent transition-all group">
-                                <span class="text-sm font-medium text-slate-600 group-hover:text-indigo-600">Lihat Semua Arsip</span>
-                                <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                            <a href="{{ route('users.index') }}" class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:border-indigo-300 border border-transparent transition-all group">
-                                <span class="text-sm font-medium text-slate-600 group-hover:text-indigo-600">Kelola Pengguna</span>
-                                <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                        </div>
-                    </div>
-
-                    <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                        <h3 class="text-slate-800 font-bold mb-3 flex items-center gap-2">
-                            <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                            Konfigurasi
-                        </h3>
-                        <div class="space-y-2">
-                            <a href="{{ route('categories.index') }}" class="flex items-center justify-between p-3 bg-white rounded-xl shadow-sm hover:border-emerald-300 border border-transparent transition-all group">
-                                <span class="text-sm font-medium text-slate-600 group-hover:text-emerald-600">Master Kategori</span>
-                                <svg class="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
-                            </a>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

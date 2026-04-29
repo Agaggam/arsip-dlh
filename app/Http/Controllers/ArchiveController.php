@@ -4,79 +4,146 @@ namespace App\Http\Controllers;
 
 use App\Models\Archive;
 use App\Models\Category;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 class ArchiveController extends Controller
 {
     /**
-     * Menampilkan daftar arsip aktif
+     * PRIVATE HELPER: Cek otoritas melalui relasi Kategori
+     * Digunakan untuk Restore, dan Delete (Soft/Permanent)
+     */
+    private function hasArchiveAccess($archive)
+    {
+        $user = Auth::user();
+
+        if ($user->isPureSuperAdmin()) {
+            return true;
+        }
+        
+        if ($user->isAdmin() && $archive->category->department_id === $user->department_id) {
+            return true;
+        }
+        
+        return false;
+    }
+
+/**
+     * DAFTAR ARSIP (Dashboard Admin)
      */
     public function index()
     {
-        // Mengambil arsip yang belum dihapus (Soft Delete otomatis terfilter)
-        $archives = Archive::with('category')->latest()->get();
-        $categories = Category::all();
+        $user = Auth::user();
+        $query = Archive::with(['category.department', 'user']);
+
+        if (!$user->isPureSuperAdmin()) {
+            $query->whereHas('category', function($q) use ($user) {
+                $q->where('department_id', $user->department_id);
+            });
+        }
+
+        // Paginate 10 data untuk dashboard admin
+        $archives = $query->latest()->paginate(10);
+        
+        $categories = Category::when(!$user->isPureSuperAdmin(), function($q) use ($user) {
+            return $q->where('department_id', $user->department_id);
+        })->get();
 
         return view('admin.archives.index', compact('archives', 'categories'));
     }
 
-public function userIndex()
-{
-    // Mengambil arsip dan mengelompokkannya berdasarkan nama kategori
-    $groupedArchives = \App\Models\Archive::with(['user', 'category'])
-        ->latest()
-        ->get()
-        ->groupBy(function($item) {
-            return $item->category->name; // Mengelompokkan berdasarkan nama kategori
+    /**
+     * DAFTAR ARSIP PUBLIK (Landing Page)
+     */
+    public function userIndex(Request $request)
+    {
+        // 1. Ambil semua departemen kecuali 'System'
+        $departments = Department::where('name', '!=', 'System')->get();
+
+        // 2. Ambil ID departemen dari URL jika ada
+        $selectedDeptId = $request->query('dept');
+
+        $query = Archive::with(['user', 'category.department'])->latest();
+
+        // 3. Filter berdasarkan departemen jika dipilih
+        if ($selectedDeptId) {
+            $query->whereHas('category', function($q) use ($selectedDeptId) {
+                $q->where('department_id', $selectedDeptId);
+            });
+        }
+
+        // 4. Paginate dulu datanya (10 per halaman) 
+        // appends(request()->all()) agar filter 'dept' tidak hilang saat klik page 2
+        $archives = $query->paginate(10)->appends($request->all());
+        
+        // 5. Grouping HASIL pagination-nya saja agar tidak error links()
+        $groupedArchives = $archives->getCollection()->groupBy(function($item) {
+            return $item->category->name ?? 'Umum';
         });
 
-    return view('archive', compact('groupedArchives'));
-}
+        // 6. Nama departemen untuk judul halaman
+        $currentDeptName = $selectedDeptId 
+            ? $departments->firstWhere('id', $selectedDeptId)->name ?? 'Semua Bidang' 
+            : 'Semua Bidang';
+
+        return view('archive', compact('groupedArchives', 'archives', 'departments', 'currentDeptName'));
+    }
 
     /**
-     * Menyimpan arsip baru
+     * SIMPAN ARSIP BARU (DENGAN PROTEKSI KRUSIAL)
      */
     public function store(Request $request)
     {
+        $user = Auth::user();
+
+
+        // 1. Cek apakah role 'user'
+        if ($user->isUser()) {
+            return back()->with('error', 'Akses Ditolak: Role User tidak memiliki izin.');
+        }
+
+        // 2. PROTEKSI KRUSIAL: Cek apakah dia super_admin tapi bukan dari departemen System
+        // Jika benar, maka tindakannya dianggap ilegal.
+        if ($user->role->name === 'super_admin' && !$user->isPureSuperAdmin()) {
+            return back()->with('error', 'Akses Ilegal: Anda adalah Super Admin tetapi tidak terdaftar!');
+        }
+
         $request->validate([
             'title' => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240', // Max 10MB
+            'file' => 'required|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240',
             'description' => 'nullable|string',
         ]);
 
-        // 2. PROTEKSI: Cek apakah user punya departemen
-        if (!Auth::user()->department_id) {
-            return back()->with('error', 'Akun Anda belum terhubung dengan Bidang/Departemen manapun. Silakan hubungi admin.');
+        $category = Category::findOrFail($request->category_id);
+
+        // 3. Validasi Bidang: Pastikan bukan milik departemen lain
+        if (!$user->isPureSuperAdmin()) {
+            if ($category->department_id !== $user->department_id) {
+                return back()->with('error', 'Akses Ditolak: Kategori ini milik bidang lain!');
+            }
         }
 
         if ($request->hasFile('file')) {
             $file = $request->file('file');
-            
-            // Ambil info file
-            $extension = strtoupper($file->getClientOriginalExtension());
-            $fileSize = $this->formatBytes($file->getSize());
-            
-            // Nama file unik: judul-slug-timestamp.ekstensi
             $fileName = Str::slug($request->title) . '-' . time() . '.' . $file->getClientOriginalExtension();
-            
-            // Simpan ke storage/app/public/archives
             $path = $file->storeAs('archives', $fileName, 'public');
 
             Archive::create([
                 'title' => $request->title,
                 'file_path' => $path,
-                'file_type' => $extension,
-                'file_size' => $fileSize,
+                'file_type' => strtoupper($file->getClientOriginalExtension()),
+                'file_size' => $this->formatBytes($file->getSize()),
                 'category_id' => $request->category_id,
-                'user_id' => Auth::id(),
+                'user_id' => $user->id,
                 'description' => $request->description,
                 'download_count' => 0,
-                'department_id' => Auth::user()->department_id, // Terisi otomatis dari departemen user
             ]);
+
             return back()->with('success', 'Arsip berhasil diunggah!');
         }
 
@@ -84,7 +151,7 @@ public function userIndex()
     }
 
     /**
-     * Method untuk mengunduh file
+     * DOWNLOAD ARSIP
      */
     public function download(Archive $archive)
     {
@@ -101,61 +168,90 @@ public function userIndex()
     }
 
     /**
-     * Method untuk Soft Delete (Pindah ke Trash)
+     * SOFT DELETE (Pindahkan ke Sampah)
      */
-    public function destroy(Archive $archive)
+    public function destroy(Request $request, Archive $archive)
     {
-        $archive->delete();
+        $request->validate(['password' => 'required']);
 
-        return back()->with('success', 'Arsip berhasil dipindahkan ke tempat sampah.');
+        if (!Hash::check($request->password, Auth::user()->password)) {
+            return back()->with('error', 'Password salah!');
+        }
+
+        if (!$this->hasArchiveAccess($archive)) {
+            return back()->with('error', 'Anda tidak berhak menghapus arsip ini.');
+        }
+
+        $archive->delete();
+        return back()->with('success', 'Arsip dipindahkan ke tempat sampah.');
     }
 
     /**
-     * Menampilkan daftar arsip di tempat sampah
+     * TEMPAT SAMPAH (Trash)
      */
     public function trash()
     {
-        $archives = Archive::onlyTrashed()->with('category')->latest()->get();
+        $user = Auth::user();
+        $query = Archive::onlyTrashed()->with(['category.department', 'user']);
+
+        if (!$user->isPureSuperAdmin()) {
+            $query->whereHas('category', function($q) use ($user) {
+                $q->where('department_id', $user->department_id);
+            });
+        }
+
+        $archives = $query->latest()->get();
         return view('admin.archives.trash', compact('archives'));
     }
 
     /**
-     * Mengembalikan arsip yang dihapus
+     * RESTORE
      */
     public function restore($id)
     {
         $archive = Archive::withTrashed()->findOrFail($id);
-        $archive->restore();
+        
+        if (!$this->hasArchiveAccess($archive)) {
+            return back()->with('error', 'Akses ditolak.');
+        }
 
-        return back()->with('success', 'Arsip berhasil dipulihkan!');
+        $archive->restore();
+        return back()->with('success', 'Arsip berhasil dipulihkan.');
     }
 
     /**
-     * Menghapus permanen arsip dan file fisiknya
+     * HAPUS PERMANEN
      */
-    public function forceDelete($id)
+    public function forceDelete(Request $request, $id)
     {
+        $request->validate(['password' => 'required']);
+
+        if (!Hash::check($request->password, Auth::user()->password)) {
+            return back()->with('error', 'Password salah!');
+        }
+
         $archive = Archive::withTrashed()->findOrFail($id);
 
-        // Hapus file dari storage fisik
+        if (!$this->hasArchiveAccess($archive)) {
+            return back()->with('error', 'Akses ditolak.');
+        }
+
         if (Storage::disk('public')->exists($archive->file_path)) {
             Storage::disk('public')->delete($archive->file_path);
         }
 
         $archive->forceDelete();
-
-        return back()->with('success', 'Arsip telah dihapus secara permanen.');
+        return back()->with('success', 'Arsip telah dihapus permanen.');
     }
 
     /**
-     * Helper untuk format ukuran file (MB/KB)
+     * FORMAT UKURAN FILE (Helper)
      */
     private function formatBytes($bytes, $precision = 2) {
         $units = ['B', 'KB', 'MB', 'GB'];
         $pow = floor(($bytes ? log($bytes) : 0) / log(1024));
         $pow = min($pow, count($units) - 1);
         $bytes /= pow(1024, $pow);
-        
         return round($bytes, $precision) . ' ' . $units[$pow];
     }
 }

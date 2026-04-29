@@ -6,6 +6,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\ArchiveController;
+use App\Http\Controllers\DepartmentController;
 use App\Models\User;
 
 // 1. Halaman Utama
@@ -16,6 +17,12 @@ Route::get('/', function () {
 // 2. Group untuk Super Admin (Hanya bisa diakses role 'super_admin')
 Route::middleware(['auth', 'role:super_admin'])->group(function () {
     Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+
+    // Route Manage departements
+    Route::get('/admin/departments', [DepartmentController::class, 'index'])->name('admin.departments.index');
+    Route::post('/admin/departments', [DepartmentController::class, 'store'])->name('admin.departments.store');
+    Route::patch('/admin/departments/{department}', [DepartmentController::class, 'update'])->name('admin.departments.update');
+    Route::delete('/admin/departments/{department}', [DepartmentController::class, 'destroy'])->name('admin.departments.destroy');
 
     // Route Manage Users
     Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
