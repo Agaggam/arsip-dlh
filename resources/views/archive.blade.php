@@ -11,8 +11,28 @@
 
     <div class="py-12 min-h-screen">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
             <div class="bg-white shadow-sm border border-gray-100 sm:rounded-[2rem] overflow-hidden">
+                {{-- Search Bar di atas kanan --}}
+                <div class="flex justify-end p-4 border-b border-gray-100">
+                    <x-search-input 
+                        route="{{ route('arsip.user') }}" 
+                        placeholder="Cari judul atau deskripsi..."
+                        searchParam="search"
+                        buttonText="Cari"
+                        :resetButton="true"
+                        :filters="[
+                            'category_id' => [
+                                'label' => 'Kategori',
+                                'options' => $categories->pluck('name', 'id')->toArray()
+                            ],
+                            'file_type' => [
+                                'label' => 'Format',
+                                'options' => $fileTypes->mapWithKeys(fn($type) => [strtolower($type) => strtoupper($type)])->toArray()
+                            ]
+                        ]"
+                    />
+                </div>
+
                 <div class="overflow-x-auto">
                     <table class="min-w-full border-collapse">
                         <thead>
@@ -32,7 +52,6 @@
                             @endphp
                             
                             @forelse($archives as $archive)
-                                {{-- LOGIKA HEADER KATEGORI OTOMATIS --}}
                                 @php 
                                     $currentCategory = $archive->category->name ?? 'Umum';
                                 @endphp
@@ -62,28 +81,16 @@
                                 @endphp
 
                                 <tr class="hover:bg-slate-50/50 transition-all group">
-                                    <td class="px-6 py-5 text-sm font-medium text-slate-400">
-                                        {{ $iteration++ }}.
-                                    </td>
-                                    <td class="px-6 py-5 text-sm font-normal text-slate-600">
-                                        {{ $archive->title }}
-                                    </td>
+                                    <td class="px-6 py-5 text-sm font-medium text-slate-400">{{ $iteration++ }}. </td>
+                                    <td class="px-6 py-5 text-sm font-normal text-slate-600">{{ $archive->title }}</td>
                                     <td class="px-4 py-5 text-center">
-                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider {{ $bgClass }}">
-                                            {{ $archive->file_type }}
-                                        </span>
+                                        <span class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider {{ $bgClass }}">{{ $archive->file_type }}</span>
                                     </td>
-                                    <td class="px-4 py-5 text-center text-xs font-medium text-slate-500">
-                                        {{ $archive->file_size }}
-                                    </td>
-                                    <td class="px-6 py-5 text-center text-xs font-medium text-slate-400">
-                                        {{ $archive->created_at->format('d/m/Y') }}
-                                    </td>
+                                    <td class="px-4 py-5 text-center text-xs font-medium text-slate-500">{{ $archive->file_size }}</td>
+                                    <td class="px-6 py-5 text-center text-xs font-medium text-slate-400">{{ $archive->created_at->format('d/m/Y') }}</td>
                                     <td class="px-6 py-5 text-center text-sm">
                                         <div class="flex justify-center items-center gap-3">
-                                            <button 
-                                                type="button"
-                                                x-data=""
+                                            <button type="button" x-data
                                                 x-on:click="$dispatch('open-modal', { 
                                                     id: 'preview-modal-user', 
                                                     title: '{{ addslashes($archive->title) }}',
@@ -125,7 +132,7 @@
         </div>
     </div>
 
-    {{-- MODAL PREVIEW FIX --}}
+    {{-- MODAL PREVIEW --}}
     <x-modal name="preview-modal-user" maxWidth="5xl" focusable>
         <div class="p-8" x-data="{ title: '', url: '', type: '', downloadUrl: '' }" 
              x-on:open-modal.window="if($event.detail.id === 'preview-modal-user') { 
@@ -134,7 +141,6 @@
                 type = $event.detail.fileType;
                 downloadUrl = $event.detail.downloadUrl;
              }">
-            
             <div class="flex justify-between items-center mb-6">
                 <div>
                     <h2 class="text-xl font-black text-slate-800 uppercase tracking-tight" x-text="title"></h2>
@@ -148,23 +154,17 @@
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
             </div>
-            
             <div class="bg-slate-50 rounded-[2rem] overflow-hidden border border-slate-100 flex items-center justify-center min-h-[500px] relative shadow-inner text-center">
-                {{-- PREVIEW PDF --}}
                 <template x-if="type === 'pdf'">
                     <iframe :src="url" class="w-full h-[75vh] border-none rounded-xl shadow-lg"></iframe>
                 </template>
-                
-                {{-- PREVIEW GAMBAR --}}
                 <template x-if="['jpg', 'jpeg', 'png', 'webp'].includes(type)">
                     <img :src="url" class="max-w-full max-h-[75vh] object-contain p-4 drop-shadow-2xl">
                 </template>
-
-                {{-- FORMAT TIDAK DIDUKUNG --}}
                 <template x-if="!['pdf', 'jpg', 'jpeg', 'png', 'webp'].includes(type)">
                     <div class="p-12">
                         <div class="w-20 h-20 bg-white rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-4 text-slate-200">
-                             <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                            <svg class="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
                         </div>
                         <h4 class="text-slate-800 font-bold tracking-tight">Pratinjau Tidak Tersedia</h4>
                         <p class="text-xs text-slate-400 mt-1 mb-8 italic">Format file ini tidak mendukung pratinjau langsung.</p>

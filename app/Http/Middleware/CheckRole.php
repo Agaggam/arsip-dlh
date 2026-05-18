@@ -9,40 +9,36 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    /**
-     * Handle an incoming request.
-     *
-     * @param  Closure(Request): (Response)  $next
-     */
     public function handle(Request $request, Closure $next, string $role): Response
     {
-        // 1. Cek apakah user sudah login
         if (!$request->user()) {
             return redirect()->route('login');
         }
 
-        // 2. PROTEKSI: Cek apakah relasi role ada (mencegah error "property on null")
         if (!$request->user()->role) {
-            Auth::logout(); // Logout paksa karena datanya rusak/kosong
+            Auth::logout();
             return redirect()->route('login')->with('status_error', 'Akun Anda belum memiliki Role. Hubungi Admin.');
         }
 
         $userRole = $request->user()->role->name;
 
-        // 3. Cek apakah Role sesuai dengan yang diminta Route
-        if ($userRole !== $role) {
-            
-            // Jika dia admin tapi nyasar ke route user biasa
-            if ($userRole === 'super_admin') {
-                return redirect()->route('admin.dashboard');
-            }
-            
-            // Jika dia user biasa tapi nyasar ke route admin
-            if ($userRole === 'user') {
-                return redirect()->route('dashboard');
-            }
+        // Jika role user sama dengan yang diminta, lanjutkan
+        if ($userRole === $role) {
+            return $next($request);
         }
 
-        return $next($request);
+        // Jika tidak sama, arahkan berdasarkan role user
+        if (in_array($userRole, ['super_admin', 'admin'])) {
+            // Jika admin atau super_admin coba akses route yang bukan untuk mereka, arahkan ke admin.dashboard
+            return redirect()->route('admin.dashboard');
+        }
+
+        if ($userRole === 'user') {
+            return redirect()->route('dashboard');
+        }
+
+        // Default logout
+        Auth::logout();
+        return redirect()->route('login')->withErrors(['error' => 'Akses ditolak.']);
     }
 }

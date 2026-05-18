@@ -6,38 +6,32 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        // Hubungkan Users ke Departments
+        // Users
         Schema::table('users', function (Blueprint $table) {
-        $table->foreignId('department_id')->constrained()->onDelete('cascade');
+            $table->foreignId('department_id')->constrained()->onDelete('cascade');
         });
 
-        // Hubungkan Categories ke Departments + Atur Unique Constraint
+        // Categories
         Schema::table('categories', function (Blueprint $table) {
             $table->foreignId('department_id')->constrained()->onDelete('cascade');
-            // Mencegah duplikat nama kategori di DALAM departemen yang sama
-            // Tapi departemen B boleh punya nama yang sama dengan departemen A
-            $table->unique(['department_id', 'name']);
+            $table->unique(['name', 'department_id']);
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
+        // Users
         Schema::table('users', function (Blueprint $table) {
-        $table->dropForeign(['department_id']);
-        $table->dropColumn('department_id');
+            $table->dropForeign(['department_id']);
+            $table->dropColumn('department_id');
         });
 
+        // Categories
         Schema::table('categories', function (Blueprint $table) {
-            $table->dropUnique(['department_id', 'name']);
             $table->dropForeign(['department_id']);
+            $table->dropUnique(['name', 'department_id']);
             $table->dropColumn('department_id');
         });
     }

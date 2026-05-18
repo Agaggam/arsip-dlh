@@ -77,6 +77,15 @@
                     </svg>
                     <span>{{ __('Tong Sampah') }}</span>
                 </a>
+
+                @php $isLogsActive = request()->routeIs('activity-logs.index'); @endphp
+                <a href="{{ route('activity-logs.index') }}" 
+                class="{{ $baseClass }} {{ $isLogsActive ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                    </svg>
+                    <span>{{ __('Aktivitas Log') }}</span>
+                </a>
                 
 @else
     @php 
@@ -186,6 +195,9 @@
                     <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="{{ $mobileClasses }}">
                         {{ __('Manajemen User') }}
                     </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('admin.departments.index')" :active="request()->routeIs('admin.departments.*')" class="{{ $mobileClasses }}">
+                        {{ __('Departemen') }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')" class="{{ $mobileClasses }}">
                         {{ __('Kategori Arsip') }}
                     </x-responsive-nav-link>
@@ -194,6 +206,9 @@
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.archives.trash')" :active="request()->routeIs('admin.archives.trash')" class="{{ $mobileClasses }}">
                         {{ __('Tong Sampah') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')" class="{{ $mobileClasses }}">
+                        {{ __('Log Aktivitas') }}
                     </x-responsive-nav-link>
                 @else
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="{{ $mobileClasses }}">
@@ -263,7 +278,7 @@
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <x-responsive-nav-link :href="route('profile.edit')" class="justify-center py-2 bg-white border border-slate-200 rounded-lg text-xs font-semibold">
+                    <x-responsive-nav-link :href="route('profile.edit')" :active="request()->routeIs('profile.edit')" class="{{ $mobileClasses }}">
                         {{ __('Profile') }}
                     </x-responsive-nav-link>
                     <form method="POST" action="{{ route('logout') }}">

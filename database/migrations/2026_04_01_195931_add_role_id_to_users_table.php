@@ -12,7 +12,6 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            // Kita kasih default null atau ID user biasa nanti
             $table->foreignId('role_id')->nullable()->constrained()->onDelete('set null');
         });
     }

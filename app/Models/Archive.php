@@ -16,8 +16,9 @@ class Archive extends Model
         'file_path',
         'file_type',
         'file_size',
-        'category_id', // Ini kunci utamanya sekarang
+        'category_id',
         'user_id',
+        'archive_date',
         'download_count',
         'description',
     ];
@@ -44,7 +45,6 @@ class Archive extends Model
      */
     public function department()
     {
-        // Mengambil departemen melalui relasi kategori
         return $this->category->department();
     }
 }

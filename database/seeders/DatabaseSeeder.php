@@ -2,9 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\User;
+use App\Models\Role;
+use App\Models\Department;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,47 +14,59 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
         $this->call(RoleSeeder::class);
+        $this->call(DepartmentSeeder::class);
 
-        User::factory()->create([
+        $superAdminRoleId = Role::where('name', 'super_admin')->first()->id;
+        $adminRoleId = Role::where('name', 'admin')->first()->id;
+        $userRoleId = Role::where('name', 'user')->first()->id;
+
+        $systemDeptId = Department::where('name', 'System')->first()->id;
+        $sekretariatId = Department::where('name', 'Sekretariat')->first()->id;
+        $tataLingkunganId = Department::where('name', 'Tata Lingkungan')->first()->id;
+        $pengelolaanSampahId = Department::where('name', 'Pengelolaan Sampah')->first()->id;
+
+        User::create([
             'name' => 'Super Admin',
             'email' => 'superadmin@example.com',
             'password' => bcrypt('superadmin123'),
-            'role_id' => 1, // ID dari role 'super_admin'
-            'department_id' => 1, // ID dari departemen
+            'role_id' => $superAdminRoleId,
+            'department_id' => $systemDeptId,
         ]);
 
-        User::factory()->create([
-            'name' => 'Admin1',
+        User::create([
+            'name' => 'Admin Sekretariat',
             'email' => 'admin1@example.com',
             'password' => bcrypt('admin123'),
-            'role_id' => 2, // ID dari role 'admin'
-            'department_id' => 2, // ID dari departemen
+            'role_id' => $adminRoleId,
+            'department_id' => $sekretariatId,
         ]);
 
-        User::factory()->create([
-            'name' => 'Admin2',
+        User::create([
+            'name' => 'Admin Tata Lingkungan',
             'email' => 'admin2@example.com',
             'password' => bcrypt('admin123'),
-            'role_id' => 2, // ID dari role 'admin'
-            'department_id' => 3, // ID dari departemen
+            'role_id' => $adminRoleId,
+            'department_id' => $tataLingkunganId,
         ]);
 
-        User::factory()->create([
-            'name' => 'Admin3',
+        User::create([
+            'name' => 'Admin Pengelolaan Sampah',
             'email' => 'admin3@example.com',
             'password' => bcrypt('admin123'),
-            'role_id' => 2, // ID dari role 'admin'
-            'department_id' => 4, // ID dari departemen
+            'role_id' => $adminRoleId,
+            'department_id' => $pengelolaanSampahId,
         ]);
 
-        User::factory()->create([
+        User::create([
             'name' => 'User Biasa',
             'email' => 'user@example.com',
             'password' => bcrypt('user123'),
-            'role_id' => 3, // ID dari role 'user'
-            'department_id' => 4, // ID dari departemen
+            'role_id' => $userRoleId,
+            'department_id' => $pengelolaanSampahId,
         ]);
+
+        // Aktifkan fungsi dibawah ini jika ingin membuat banyak user random
+        $this->call(UserSeeder::class);
     }
 }

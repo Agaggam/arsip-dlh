@@ -7,22 +7,8 @@
         </div>
     </x-slot>
 
-    <div class="py-12 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            
-            <!-- {{-- Alert Success --}}
-            @if(session('success'))
-                <div class="mb-6 p-4 bg-green-100 text-green-700 rounded-2xl border-l-4 border-green-500 shadow-sm">
-                    <span class="font-bold">{{ session('success') }}</span>
-                </div>
-            @endif
-
-            {{-- Alert Error --}}
-            @if(session('error'))
-                <div class="mb-6 p-4 bg-red-100 text-red-700 rounded-2xl border-l-4 border-red-500 shadow-sm">
-                    <span class="font-bold">{{ session('error') }}</span>
-                </div>
-            @endif -->
+    <!-- <div class="py-12 min-h-screen">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8"> -->
 
             <div class="bg-white overflow-hidden shadow-sm border border-gray-100 sm:rounded-[1.5rem] p-6">
                 <div class="flex items-center justify-between mb-6">

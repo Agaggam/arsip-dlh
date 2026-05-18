@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\ArchiveController;
@@ -15,37 +16,45 @@ Route::get('/', function () {
 });
 
 // 2. Group untuk Super Admin (Hanya bisa diakses role 'super_admin')
-Route::middleware(['auth', 'role:super_admin'])->group(function () {
-    Route::get('/admin/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+Route::middleware(['auth'])->prefix('admin')->group(function () {
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     // Route Manage departements
-    Route::get('/admin/departments', [DepartmentController::class, 'index'])->name('admin.departments.index');
-    Route::post('/admin/departments', [DepartmentController::class, 'store'])->name('admin.departments.store');
-    Route::patch('/admin/departments/{department}', [DepartmentController::class, 'update'])->name('admin.departments.update');
-    Route::delete('/admin/departments/{department}', [DepartmentController::class, 'destroy'])->name('admin.departments.destroy');
+    Route::get('/departments', [DepartmentController::class, 'index'])->name('admin.departments.index');
+    Route::post('/departments', [DepartmentController::class, 'store'])->name('admin.departments.store');
+    Route::patch('/departments/{department}', [DepartmentController::class, 'update'])->name('admin.departments.update');
+    Route::delete('/departments/{department}', [DepartmentController::class, 'destroy'])->name('admin.departments.destroy');
 
     // Route Manage Users
-    Route::get('/admin/users', [UserController::class, 'index'])->name('users.index');
-    Route::post('/admin/users', [UserController::class, 'store'])->name('users.store');
-    // BARU DI SINI: Route untuk simpan perubahan Role
-    Route::patch('/admin/users/{user}', [UserController::class, 'update'])->name('users.update');
+    Route::get('/users', [UserController::class, 'index'])->name('users.index');
+    Route::post('/users', [UserController::class, 'store'])->name('users.store');
+    // Route untuk simpan perubahan Departemen
+    Route::patch('/users/{user}/department', [UserController::class, 'updateDepartment'])->name('users.update_department');
+    // Route untuk simpan perubahan Role
+    Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.update_role');
     // Route untuk Approve/Reject Status
-    Route::patch('/admin/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.update_status');
-    Route::delete('/admin/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
+    Route::patch('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.update_status');
+    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
     // Route Kategori
-    Route::get('/admin/categories', [CategoryController::class, 'index'])->name('categories.index');
-    Route::post('/admin/categories', [CategoryController::class, 'store'])->name('categories.store');
-    Route::delete('/admin/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
+    Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+    Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
+    
+    // Activity Logs
+    Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
+    Route::get('/activity-logs/download/{filename}', [ActivityLogController::class, 'downloadExport'])->name('activity-logs.download');
 
     // --- BARU: Route Manage Archives (CRUD & Soft Delete) ---
-    Route::prefix('admin/archives')->name('admin.archives.')->group(function () {
+    Route::prefix('archives')->name('admin.archives.')->group(function () {
         Route::get('/trash', [ArchiveController::class, 'trash'])->name('trash'); // Lihat Tong Sampah
         
         Route::get('/', [ArchiveController::class, 'index'])->name('index'); // Tampil Semua
         Route::post('/', [ArchiveController::class, 'store'])->name('store'); // Simpan Baru
         Route::get('/{archive}/download', [ArchiveController::class, 'download'])->name('download'); // Download
         Route::delete('/{archive}', [ArchiveController::class, 'destroy'])->name('destroy'); // Soft Delete (Ke Trash)
+        Route::delete('/bulk-delete', [ArchiveController::class, 'bulkDelete'])->name('bulk-delete');
 
         // Fitur Pemulihan (Soft Delete Logic)
         Route::post('/{id}/restore', [ArchiveController::class, 'restore'])->name('restore'); // Pulihkan data

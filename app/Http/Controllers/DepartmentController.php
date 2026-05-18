@@ -11,113 +11,115 @@ use Illuminate\Support\Facades\Hash;
 class DepartmentController extends Controller
 {
     /**
-     * PRIVATE HELPER: Proteksi Puncak
-     * Memastikan User adalah super_admin DAN berasal dari departemen System.
+     * Private helper: Pastikan hanya super admin asli yang bisa mengakses.
      */
     private function secureAccess()
     {
-        // Menggunakan method baru di Model User
         if (!Auth::user()->isPureSuperAdmin()) {
-            abort(403, 'Akses Ditolak: Hanya super admin yang asli yang diizinkan.');
+            abort(403, 'Akses Ditolak: Hanya super admin asli yang diizinkan.');
         }
     }
 
     /**
-     * TAMPILKAN DAFTAR DEPARTEMEN
+     * Menampilkan daftar departemen.
      */
     public function index()
     {
         $this->secureAccess();
-
-        $departments = Department::withCount(['users', 'archives'])->get();
+        $departments = Department::withCount(['users','categories', 'archives'])->get();
         return view('admin.departments.index', compact('departments'));
     }
 
     /**
-     * SIMPAN DEPARTEMEN BARU
+     * Menyimpan departemen baru.
      */
     public function store(Request $request)
     {
         $this->secureAccess();
 
         $request->validate([
-            'name' => 'required|string|max:255|unique:departments,name',
-            'description' => 'nullable|string'
+            'name'        => 'required|string|max:255|unique:departments,name',
+            'description' => 'nullable|string',
         ]);
 
-        Department::create([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
+        $department = Department::create([
+            'name'        => $request->name,
+            'slug'        => Str::slug($request->name),
             'description' => $request->description,
         ]);
 
-        return redirect()->route('admin.departments.index')->with('success', 'Departemen baru berhasil ditambahkan.');
+        // Catat aktivitas
+        log_activity(Auth::user(), 'tambah_departemen', "Departemen '{$department->name}' berhasil ditambahkan.");
+
+        return redirect()->route('admin.departments.index')
+                        ->with('success', 'Departemen baru berhasil ditambahkan.');
     }
 
     /**
-     * FORM EDIT DEPARTEMEN
-     */
-    public function edit(Department $department)
-    {
-        $this->secureAccess();
-
-        // Proteksi: Departemen System tidak boleh diedit namanya
-        if ($department->name === 'System') {
-            return redirect()->route('admin.departments.index')->with('error', 'Departemen System adalah proteksi inti dan tidak boleh diubah!');
-        }
-
-        return view('admin.departments.edit', compact('department'));
-    }
-
-    /**
-     * UPDATE DATA DEPARTEMEN
+     * Memperbarui data departemen (via modal).
      */
     public function update(Request $request, Department $department)
     {
         $this->secureAccess();
 
         if ($department->name === 'System') {
-            return back()->with('error', 'Departemen System tidak boleh diubah!');
+            return back()->with('error', 'Departemen System tidak boleh diubah.');
         }
 
         $request->validate([
-            'name' => 'required|string|max:255|unique:departments,name,' . $department->id,
-            'description' => 'nullable|string'
+            'name'        => 'required|string|max:255|unique:departments,name,' . $department->id,
+            'description' => 'nullable|string',
         ]);
 
+        $oldName = $department->name;
         $department->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'name'        => $request->name,
+            'slug'        => Str::slug($request->name),
             'description' => $request->description,
         ]);
 
-        return redirect()->route('admin.departments.index')->with('success', 'Data departemen diperbarui.');
+        // Catat aktivitas
+        log_activity(Auth::user(), 'edit_departemen', "Departemen '{$oldName}' diubah menjadi '{$department->name}'.");
+
+        return redirect()->route('admin.departments.index')
+                        ->with('success', 'Data departemen berhasil diperbarui.');
     }
 
     /**
-     * HAPUS DEPARTEMEN
+     * Menghapus departemen jika tidak memiliki data terkait.
      */
     public function destroy(Request $request, Department $department)
     {
         $this->secureAccess();
 
-        // 1. Larangan mutlak menghapus departemen System
+        // Larangan hapus departemen System
         if ($department->name === 'System') {
-            return back()->with('error', 'Departemen utama sistem tidak bisa dihapus!');
+            return back()->with('error', 'Departemen System tidak bisa dihapus.');
         }
 
-        // 2. Validasi Password Konfirmasi
-        $request->validate([
-            'password' => 'required',
-        ]);
+        // Cek apakah masih ada data terkait (kategori, user, arsip)
+        $totalCategories = $department->categories()->count();
+        $totalUsers      = $department->users()->count();
+        $totalArchives   = $department->categories()->withCount('archives')->get()->sum('archives_count');
 
-        // Verifikasi password user login
+        if ($totalCategories > 0 || $totalUsers > 0 || $totalArchives > 0) {
+            return back()->with('error', 'Departemen tidak dapat dihapus karena masih memiliki data terkait (kategori, user, atau arsip).');
+        }
+
+        // Validasi password konfirmasi
+        $request->validate(['password' => 'required']);
+
         if (!Hash::check($request->password, Auth::user()->password)) {
-            return back()->with('error', 'Konfirmasi gagal. Password salah!');
+            return back()->with('error', 'Konfirmasi gagal. Password salah.');
         }
 
+        $deptName = $department->name;
         $department->delete();
 
-        return redirect()->route('admin.departments.index')->with('success', 'Departemen ' . $department->name . ' berhasil dihapus.');
+        // Catat aktivitas
+        log_activity(Auth::user(), 'hapus_departemen', "Departemen '{$deptName}' berhasil dihapus.");
+
+        return redirect()->route('admin.departments.index')
+                        ->with('success', 'Departemen ' . $deptName . ' berhasil dihapus.');
     }
 }

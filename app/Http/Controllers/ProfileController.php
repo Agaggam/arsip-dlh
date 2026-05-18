@@ -26,13 +26,33 @@ class ProfileController extends Controller
      */
     public function update(ProfileUpdateRequest $request): RedirectResponse
     {
-        $request->user()->fill($request->validated());
+        $user = $request->user();
+        $oldEmail = $user->email;
+        $oldName = $user->name;
 
-        if ($request->user()->isDirty('email')) {
-            $request->user()->email_verified_at = null;
+        $user->fill($request->validated());
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
         }
 
-        $request->user()->save();
+        $user->save();
+
+        // Catat log perubahan
+        $changes = [];
+        if ($user->name != $oldName) {
+            $changes[] = "nama dari '{$oldName}' menjadi '{$user->name}'";
+        }
+        if ($user->email != $oldEmail) {
+            $changes[] = "email dari '{$oldEmail}' menjadi '{$user->email}'";
+        }
+
+        if (!empty($changes)) {
+            log_activity($user, 'update_profile', 'Profil diperbarui: ' . implode(', ', $changes));
+        } else {
+            // Jika tidak ada perubahan (optional, bisa dihilangkan)
+            log_activity($user, 'update_profile', 'Profil diperbarui tanpa perubahan data');
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }
@@ -47,9 +67,13 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+        $userName = $user->name;
+        $userEmail = $user->email;
+
+        // Catat log dengan menyimpan nama dan email ke description
+        log_activity($user, 'delete_account', "Akun {$userName} ({$userEmail}) dihapus sendiri");
 
         Auth::logout();
-
         $user->delete();
 
         $request->session()->invalidate();

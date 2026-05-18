@@ -20,9 +20,10 @@ return new class extends Migration
             
             // Relasi ke tabel categories & users
             $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->foreignId('user_id')->nullable()->constrained()->onDelete('set null');
             
             // Statistik & Deskripsi
+            $table->date('archive_date')->nullable();
             $table->integer('download_count')->default(0);
             $table->text('description')->nullable();
             

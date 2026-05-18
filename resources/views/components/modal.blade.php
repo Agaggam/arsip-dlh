@@ -49,11 +49,9 @@ $maxWidth = [
     x-on:keydown.tab.prevent="$event.shiftKey || nextFocusable().focus()"
     x-on:keydown.shift.tab.prevent="prevFocusable().focus()"
     x-show="show"
-    {{-- PERUBAHAN DISINI: Menambahkan flex, items-center, dan justify-center --}}
+    x-cloak
     class="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto px-4 py-6 sm:px-0"
-    style="display: {{ $show ? 'flex' : 'none' }};"
 >
-    {{-- Background Overlay --}}
     <div
         x-show="show"
         class="fixed inset-0 transform transition-all"
@@ -68,10 +66,8 @@ $maxWidth = [
         <div class="absolute inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
     </div>
 
-    {{-- Box Modal --}}
     <div
         x-show="show"
-        {{-- PERUBAHAN DISINI: Menghapus mb-6 dan memastikan mx-auto tetap ada --}}
         class="bg-white rounded-[2.5rem] overflow-hidden shadow-2xl transform transition-all w-full {{ $maxWidth }} mx-auto z-10"
         x-transition:enter="ease-out duration-300"
         x-transition:enter-start="opacity-0 scale-90"
@@ -83,3 +79,7 @@ $maxWidth = [
         {{ $slot }}
     </div>
 </div>
+
+<style>
+    [x-cloak] { display: none !important; }
+</style>

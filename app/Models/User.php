@@ -21,9 +21,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'name',
         'email',
         'password',
-        'role_id', // Tambahkan ini
+        'role_id',
         'status',
-        'department_id', // Tambahkan ini
+        'department_id',
     ];
 
     /**
@@ -62,6 +62,11 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsTo(Department::class);
     }
 
+    public function activityLogs()
+    {
+        return $this->hasMany(ActivityLog::class);
+    }
+
     /**
      * FUNGSI CEK HAK AKSES (CUSTOM METHODS)
      */
@@ -80,7 +85,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->role->name === 'user';
     }
 
-    public function isFromDepartment($department_id)
+    public function isFromDepartment(int $department_id): bool
     {
         return $this->department_id === $department_id;
     }

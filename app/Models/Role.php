@@ -10,7 +10,7 @@ class Role extends Model
         'name',
         'email',
         'password',
-        'role_id', // Tambahkan ini
+        'role_id',
     ];
 
     public function users()

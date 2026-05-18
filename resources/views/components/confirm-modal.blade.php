@@ -10,7 +10,6 @@
 <style>
     .mask-security {
         -webkit-text-security: disc !important;
-        text-security: disc !important;
     }
 </style>
 
@@ -114,19 +113,19 @@
                             </template>
 
                             <div x-show="needPassword" x-transition class="mb-8 text-left">
-    <label for="password" class="text-[11px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-[0.2em]">Konfirmasi Password</label>
-    <input 
-        id="password"
-        type="text" 
-        name="password" 
-        ::required="needPassword"
-        autocomplete="off"
-        readonly 
-        onfocus="this.removeAttribute('readonly');"
-        class="mask-security mt-1 block w-full rounded-[1.5rem] border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-base p-4 bg-slate-50 transition-all"
-        placeholder="Ketik password untuk verifikasi..."
-    >
-</div>
+                                <label for="password" class="text-[11px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-[0.2em]">Konfirmasi Password</label>
+                                <input 
+                                    id="password"
+                                    type="text" 
+                                    name="password" 
+                                    ::required="needPassword"
+                                    autocomplete="off"
+                                    readonly 
+                                    onfocus="this.removeAttribute('readonly');"
+                                    class="mask-security mt-1 block w-full rounded-[1.5rem] border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-base p-4 bg-slate-50 transition-all"
+                                    placeholder="Ketik password untuk verifikasi..."
+                                >
+                            </div>
 
                             <div class="grid grid-cols-2 gap-4">
                                 <button @click="open = false" type="button" class="text-slate-500 bg-slate-100 hover:bg-slate-200 font-bold rounded-[1.5rem] text-sm px-6 py-4 transition-all">

@@ -14,7 +14,7 @@ class DepartmentSeeder extends Seeder
     public function run(): void
     {
         $departments = [
-        ['name' => 'System', 'slug' => 'system'], // Untuk Super Admin
+        ['name' => 'System', 'slug' => 'system'], // Digunakan Untuk menampung Super Admin yang Asli
         ['name' => 'Sekretariat', 'slug' => 'sekretariat'],
         ['name' => 'Tata Lingkungan', 'slug' => 'tata-lingkungan'],
         ['name' => 'Pengelolaan Sampah', 'slug' => 'pengelolaan-sampah'],
