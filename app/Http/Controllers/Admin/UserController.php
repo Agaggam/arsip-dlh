@@ -40,7 +40,7 @@ class UserController extends Controller
         $statusFilter = $request->get('status');
         $roleFilter = $request->get('role_id');
         $verifiedFilter = $request->get('verified');
-        $deptFilter = $request->get('department_id'); // filter departemen untuk super admin
+        $deptFilter = $request->get('department_id'); // filter semua departemen untuk super admin
 
         $users = User::with(['role', 'department']);
 
