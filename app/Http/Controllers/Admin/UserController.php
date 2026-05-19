@@ -46,10 +46,8 @@ class UserController extends Controller
 
         // Filter dasar berdasarkan role user yang login
         if (!$user->isPureSuperAdmin()) {
-            // Admin: hanya melihat user di departemennya sendiri
             $users->where('department_id', $user->department_id);
         } else {
-            // Super admin: jika ada filter departemen, terapkan
             if ($deptFilter) {
                 $users->where('department_id', $deptFilter);
             }
