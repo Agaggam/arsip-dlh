@@ -16,6 +16,7 @@
     <style>
         html {
             overflow-y: scroll;
+            scroll-behavior: smooth;
         }
         body {
             font-family: 'Inter', sans-serif;
@@ -23,17 +24,18 @@
         }
         ::-webkit-scrollbar {
             width: 6px;
+            height: 6px;
         }
         ::-webkit-scrollbar-track {
-            background: transparent;
+            background: #f1f1f1;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 20px;
-            border: 2px solid transparent;
+            background: #cbd5e1;
+            border-radius: 10px;
         }
         ::-webkit-scrollbar-thumb:hover {
-            background: #cbd5e1;
+            background: #94a3b8;
         }
         .fade-in {
             animation: fadeIn 0.5s ease-in-out;
@@ -50,53 +52,72 @@
         }
     </style>
 </head>
-<body class="antialiased bg-[#f1f5f9] text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
-<div class="min-h-screen sm:flex">
+<body class="antialiased bg-gradient-to-br from-slate-100 to-slate-200 text-slate-900 selection:bg-indigo-100 selection:text-indigo-700">
+<div class="min-h-screen lg:flex">
 
     @include('layouts.navigation')
 
-    <main class="flex-1 sm:ml-64 min-h-screen flex flex-col relative">
+    <main class="flex-1 lg:ml-64 min-h-screen flex flex-col bg-slate-50/30">
 
-        <div class="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-slate-200/50 to-transparent -z-10"></div>
-
+        <!-- Header Baru dengan desain lebih bersih -->
         @isset($header)
-            <header class="bg-indigo-700 sticky top-0 z-30 border-b border-indigo-800 shadow-md">
-                <div class="max-w-full mx-auto py-4 px-6 sm:px-8 lg:px-10 flex justify-between items-center">
-                    <div class="flex flex-col">
-                        <h1 class="text-xl font-bold text-white tracking-tight">
-                            {{ $header }}
-                        </h1>
-                        <div class="flex items-center gap-2 mt-0.5">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
-                            </span>
-                            <p class="text-[11px] text-indigo-100 font-medium tracking-wide uppercase">
-                                {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
-                            </p>
+            <header class="bg-white/90 backdrop-blur-sm sticky top-0 z-30 border-b border-slate-200/80 shadow-sm">
+                <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-5">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <div class="flex items-center gap-3">
+                            <!-- Indikator aktif -->
+                            <div class="hidden sm:block w-1.5 h-8 bg-indigo-500 rounded-full"></div>
+                            <div>
+                                <h1 class="text-xl lg:text-2xl font-bold text-slate-800 tracking-tight">
+                                    {{ $header }}
+                                </h1>
+                                <div class="flex items-center gap-2 mt-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="relative flex h-2 w-2">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <p class="text-xs text-slate-500 font-medium">
+                                            {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }}
+                                        </p>
+                                    </div>
+                                    <span class="text-slate-300 text-xs">•</span>
+                                    <p class="text-xs text-slate-500 font-medium">
+                                        {{ \Carbon\Carbon::now()->format('H:i') }} WIB
+                                    </p>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="flex items-center gap-4">
-                        {{-- tempat untuk tambahan tombol jika perlu --}}
+                        
+                        <!-- Area tambahan tombol (opsional) -->
+                        <div class="flex items-center gap-3">
+                            {{-- Bisa ditambahkan tombol aksi cepat di sini --}}
+                        </div>
                     </div>
                 </div>
             </header>
         @endisset
 
-        <div class="p-6 sm:p-8 lg:p-10 flex-1 fade-in">
-            <div class="max-w-full mx-auto">
+        <!-- Main Content -->
+        <div class="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+            <div class="fade-in">
                 {{ $slot }}
             </div>
         </div>
 
-        <footer class="py-6 px-10 border-t border-slate-200/60 bg-white/30">
-            <div class="max-w-full mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
-                <p class="text-[13px] text-slate-500 font-medium">
-                    &copy; {{ date('Y') }} <span class="text-indigo-600 font-bold">{{ config('app.name') }}</span>.
-                </p>
-                <div class="flex gap-6">
-                    <a href="#" class="text-[12px] text-slate-400 hover:text-slate-600 transition">Panduan</a>
-                    <a href="#" class="text-[12px] text-slate-400 hover:text-slate-600 transition">Bantuan</a>
+        <!-- Footer Minimalis -->
+        <footer class="border-t border-slate-200/60 bg-white/50 backdrop-blur-sm mt-auto">
+            <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex flex-col sm:flex-row justify-between items-center gap-3 text-xs">
+                    <p class="text-slate-500">
+                        &copy; {{ date('Y') }} <span class="text-indigo-600 font-semibold">{{ config('app.name', 'E-Arsip DLH') }}</span>. 
+                        All rights reserved.
+                    </p>
+                    <div class="flex gap-6">
+                        <a href="#" class="text-slate-400 hover:text-indigo-600 transition duration-200">Panduan</a>
+                        <a href="#" class="text-slate-400 hover:text-indigo-600 transition duration-200">Bantuan</a>
+                        <a href="#" class="text-slate-400 hover:text-indigo-600 transition duration-200">Kebijakan Privasi</a>
+                    </div>
                 </div>
             </div>
         </footer>
