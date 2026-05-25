@@ -1,21 +1,20 @@
 <?php
 
-use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\Admin\ActivityLogController;
-use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\DepartmentController;
+use App\Http\Controllers\Admin\CategoryController;
+use App\Http\Controllers\Admin\ActivityLogController;
+use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArchiveController;
-use App\Http\Controllers\DepartmentController;
-use App\Models\User;
 
 // 1. Halaman Utama
 Route::get('/', function () {
     return view('welcome');
 });
 
-// 2. Group untuk Super Admin (Hanya bisa diakses role 'super_admin')
+// 2. Group untuk Super Admin dan Admin Departemen Saja
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
@@ -36,25 +35,24 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::patch('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.update_status');
     Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
 
-    // Route Kategori
+    // Route Manage Categories
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     
-    // Activity Logs
+    // Route Activity Logs
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/download/{filename}', [ActivityLogController::class, 'downloadExport'])->name('activity-logs.download');
 
-    // --- BARU: Route Manage Archives (CRUD & Soft Delete) ---
+    // Route Manage Archives (CRUD & Soft Delete)
     Route::prefix('archives')->name('admin.archives.')->group(function () {
         Route::get('/trash', [ArchiveController::class, 'trash'])->name('trash'); // Lihat Tong Sampah
         
-        Route::get('/', [ArchiveController::class, 'index'])->name('index'); // Tampil Semua
-        Route::post('/', [ArchiveController::class, 'store'])->name('store'); // Simpan Baru
+        Route::get('/', [ArchiveController::class, 'index'])->name('index');
+        Route::post('/', [ArchiveController::class, 'store'])->name('store');
         Route::get('/{archive}/download', [ArchiveController::class, 'download'])->name('download'); // Download
-        Route::delete('/{archive}', [ArchiveController::class, 'destroy'])->name('destroy'); // Soft Delete (Ke Trash)
-        Route::delete('/bulk-delete', [ArchiveController::class, 'bulkDelete'])->name('bulk-delete');
+        Route::delete('/{archive}', [ArchiveController::class, 'destroy'])->name('destroy'); // Soft Delete (Pindah ke Trash)
 
         // Fitur Pemulihan (Soft Delete Logic)
         Route::post('/{id}/restore', [ArchiveController::class, 'restore'])->name('restore'); // Pulihkan data
@@ -68,8 +66,8 @@ Route::middleware(['auth', 'role:user', 'status', 'verified'])->group(function (
         return view('dashboard');
     })->name('dashboard');
 
+    // Route arsip untuk user biasa
     Route::get('/arsip', [ArchiveController::class, 'userIndex'])->name('arsip.user');
-    // Tambahkan route download untuk user biasa agar mereka bisa mengunduh dari halaman list-arsip
     Route::get('/arsip/{archive}/download', [ArchiveController::class, 'download'])->name('arsip.download');
 });
 
