@@ -15,11 +15,44 @@ class UserController extends Controller
     /**
      * Private helper: Pastikan hanya super admin asli yang bisa mengakses.
      */
-    private function secureAccess()
+    private function SuperAdminAccess(): User
     {
-        if (!Auth::user()->isPureSuperAdmin()) {
+        $user = Auth::user();
+        
+        if (!$user || !$user->isPureSuperAdmin()) {
             abort(403, 'Akses Ditolak: Hanya super admin asli yang diizinkan.');
         }
+        
+        return $user;  // ← return user
+    }
+
+    /**
+     * Private helper: Pastikan hanya super admin atau admin departemen yang sesuai yang bisa mengakses.
+     */
+    private function AllAdminAccess(?int $department_id = null): User
+    {
+        $user = Auth::user();
+
+        if (!$user) {
+            abort(403, 'Akses Ditolak: Anda belum login.');
+        }
+
+        // Super admin selalu diizinkan
+        if ($user->isPureSuperAdmin()) {
+            return $user;  // ← return user
+        }
+
+        // Cek apakah dia admin
+        if ($user->isAdmin()) {
+            // Jika ada parameter department_id, cek apakah admin dari departemen tersebut
+            if ($department_id !== null && !$user->isFromDepartment($department_id)) {
+                abort(403, 'Akses Ditolak: Anda bukan admin dari departemen ini.');
+            }
+            return $user;  // ← return user
+        }
+
+        // Bukan super admin dan bukan admin
+        abort(403, 'Akses Ditolak: Hanya super admin atau admin yang diizinkan.');
     }
 
     /**
@@ -30,23 +63,28 @@ class UserController extends Controller
         return Auth::id() === $user->id;
     }
 
+    // ============================================================
+    // CONTROLLER METHODS
+    // ============================================================
+
     /**
      * Menampilkan daftar user sesuai hak akses.
      */
     public function index(Request $request)
     {
-        $user = Auth::user();
+        $authUser = $this->AllAdminAccess();  // ← langsung dapat user
+        
         $search = $request->get('search');
         $statusFilter = $request->get('status');
         $roleFilter = $request->get('role_id');
         $verifiedFilter = $request->get('verified');
-        $deptFilter = $request->get('department_id'); // filter semua departemen untuk super admin
+        $deptFilter = $request->get('department_id');
 
         $users = User::with(['role', 'department']);
 
         // Filter dasar berdasarkan role user yang login
-        if (!$user->isPureSuperAdmin()) {
-            $users->where('department_id', $user->department_id);
+        if (!$authUser->isPureSuperAdmin()) {
+            $users->where('department_id', $authUser->department_id);
         } else {
             if ($deptFilter) {
                 $users->where('department_id', $deptFilter);
@@ -70,34 +108,34 @@ class UserController extends Controller
             $users->whereNull('email_verified_at');
         }
 
-        // Pencarian teks (hanya name & email)
+        // Pencarian teks
         if ($search) {
             $users->where(function ($q) use ($search) {
                 $q->where('name', 'LIKE', "%{$search}%")
-                ->orWhere('email', 'LIKE', "%{$search}%");
+                  ->orWhere('email', 'LIKE', "%{$search}%");
             });
         }
 
         $users = $users->latest()->paginate(10);
 
-        // Role dropdown: super admin bisa lihat semua, admin hanya lihat selain super_admin
-        if ($user->isPureSuperAdmin()) {
+        // Role dropdown
+        if ($authUser->isPureSuperAdmin()) {
             $roles = Role::all();
         } else {
             $roles = Role::where('name', '!=', 'super_admin')->get();
         }
 
-        // Departemen untuk dropdown filter (super admin bisa memilih semua, admin hanya melihat departemen sendiri)
-        if ($user->isPureSuperAdmin()) {
+        // Departemen untuk dropdown filter
+        if ($authUser->isPureSuperAdmin()) {
             $departments = Department::all();
         } else {
-            $departments = Department::where('id', $user->department_id)->get();
+            $departments = Department::where('id', $authUser->department_id)->get();
         }
 
-        // Statistik (difilter sesuai hak akses)
+        // Statistik
         $statQuery = User::query();
-        if (!$user->isPureSuperAdmin()) {
-            $statQuery->where('department_id', $user->department_id);
+        if (!$authUser->isPureSuperAdmin()) {
+            $statQuery->where('department_id', $authUser->department_id);
         }
         $pendingCount   = (clone $statQuery)->where('status', 'pending')->count();
         $approvedCount  = (clone $statQuery)->where('status', 'approved')->count();
@@ -112,7 +150,7 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        $this->secureAccess();
+        $authUser = $this->SuperAdminAccess();  // ← langsung dapat user
 
         $request->validate([
             'name'          => 'required|string|max:255',
@@ -131,7 +169,7 @@ class UserController extends Controller
             'status'        => 'pending',
         ]);
 
-        log_activity(Auth::user(), 'tambah_user', "Menambahkan user baru: {$user->name} ({$user->email})");
+        log_activity($authUser, 'tambah_user', "Menambahkan user baru: {$user->name} ({$user->email})");
 
         return back()->with('success', 'User baru berhasil ditambahkan!');
     }
@@ -141,7 +179,7 @@ class UserController extends Controller
      */
     public function updateRole(Request $request, User $user)
     {
-        $this->secureAccess();
+        $authUser = $this->SuperAdminAccess();  // ← langsung dapat user
 
         if ($this->isSelf($user)) {
             return back()->with('error', 'Anda tidak dapat mengubah role Anda sendiri.');
@@ -155,7 +193,7 @@ class UserController extends Controller
         $user->save();
 
         $newRole = $user->role->name;
-        log_activity(Auth::user(), 'edit_user', "Role user {$user->name} diubah menjadi {$newRole}");
+        log_activity($authUser, 'edit_user', "Role user {$user->name} diubah menjadi {$newRole}");
         
         return back()->with('success', "Role user {$user->name} berhasil diubah menjadi {$newRole}.");
     }
@@ -165,7 +203,7 @@ class UserController extends Controller
      */
     public function updateDepartment(Request $request, User $user)
     {
-        $this->secureAccess();
+        $authUser = $this->SuperAdminAccess();  // ← langsung dapat user
 
         if ($this->isSelf($user)) {
             return back()->with('error', 'Anda tidak dapat mengubah departemen Anda sendiri.');
@@ -179,7 +217,7 @@ class UserController extends Controller
         $user->save();
 
         $newDept = $user->department->name;
-        log_activity(Auth::user(), 'edit_user', "Departemen user {$user->name} diubah menjadi {$newDept}");
+        log_activity($authUser, 'edit_user', "Departemen user {$user->name} diubah menjadi {$newDept}");
         
         return back()->with('success', "Departemen user {$user->name} berhasil diubah menjadi {$newDept}.");
     }
@@ -190,7 +228,15 @@ class UserController extends Controller
      */
     public function updateStatus(Request $request, User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->AllAdminAccess();  // ← langsung dapat user
+
+        if ($this->isSelf($user)) {
+            return back()->with('error', 'Anda tidak dapat mengubah status Anda sendiri.');
+        }
+
+        if (!$authUser->isPureSuperAdmin() && $user->isAdmin()) {
+            return back()->with('error', 'Anda tidak dapat mengubah status admin lain.');
+        }
 
         if (!$authUser->isPureSuperAdmin()) {
             if ($user->department_id !== $authUser->department_id) {
@@ -198,10 +244,6 @@ class UserController extends Controller
             }
         }
 
-        if ($this->isSelf($user)) {
-            return back()->with('error', 'Anda tidak dapat mengubah status Anda sendiri.');
-        }
-        
         $request->validate([
             'status' => 'required|in:approved,rejected'
         ]);
@@ -219,7 +261,7 @@ class UserController extends Controller
      */
     public function destroy(Request $request, User $user)
     {
-        $authUser = Auth::user();
+        $authUser = $this->AllAdminAccess();  // ← langsung dapat user, tidak perlu $authUser = Auth::user() lagi!
 
         if ($this->isSelf($user)) {
             return back()->with('error', 'Anda tidak bisa menghapus akun sendiri!');
