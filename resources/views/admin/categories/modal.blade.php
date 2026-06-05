@@ -51,5 +51,5 @@
         </div>
     </x-modal>
 
-    {{-- MODAL KONFIRMASI HAPUS --}}
-    <x-confirm-modal id="confirm-delete" type="danger" />
+{{-- MODAL KONFIRMASI HAPUS --}}
+<x-confirm-modal id="confirm-delete" type="danger" />

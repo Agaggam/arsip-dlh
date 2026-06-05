@@ -8,8 +8,7 @@
     <!-- CDN Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-    <!-- <div class="py-1"> -->
-        <!-- <div class="max-w-7xl mx-auto sm:px-6 lg:px-8"> -->
+
             <!-- Stats Cards -->
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
                 <!-- Total Pengguna -->
@@ -297,8 +296,7 @@
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
+
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {

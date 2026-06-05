@@ -7,8 +7,7 @@
         </div>
     </x-slot>
 
-    <!-- <div class="py-12 min-h-screen">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8"> -->
+
 
             <div class="bg-white overflow-hidden shadow-sm border border-gray-100 sm:rounded-[1.5rem] p-6">
                 <div class="flex items-center justify-between mb-6">
@@ -113,8 +112,7 @@
                     </table>
                 </div>
             </div>
-        </div>
-    </div>
+
 
     {{-- MODAL HIJAU (RESTORE) --}}
     <x-confirm-modal id="confirm-restore" method="POST" type="success" />

@@ -39,6 +39,7 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/categories', [CategoryController::class, 'index'])->name('categories.index');
     Route::post('/categories', [CategoryController::class, 'store'])->name('categories.store');
     Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
+Route::post('/categories/migrate', [CategoryController::class, 'migrateArchives'])->name('categories.migrate');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
     
     // Route Activity Logs
