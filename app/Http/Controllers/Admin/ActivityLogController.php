@@ -21,7 +21,7 @@ class ActivityLogController extends Controller
     }
 
     /**
-     * Tampilkan daftar log aktivitas (belum diarsipkan)
+     * Tampilkan daftar log aktivitas beserta file arsip excel
      */
     public function index(Request $request)
     {
@@ -44,22 +44,32 @@ class ActivityLogController extends Controller
             ->latest()
             ->paginate(20);
         
-        // Daftar file export Excel yang tersedia
         $exportFiles = [];
-        $files = Storage::disk('local')->files('exports');
-        foreach ($files as $file) {
-            if (preg_match('/logs_.+\.xlsx$/', $file)) {
-                $exportFiles[] = [
-                    'name' => basename($file),
-                    'path' => $file,
-                    'size' => Storage::disk('local')->size($file),
-                    'last_modified' => Storage::disk('local')->lastModified($file),
-                ];
+
+        // PERBAIKAN UTAMA PATH: Cukup tulis 'exports' karena disk 'local' root-nya sudah di 'app/private'
+        $targetFolder = 'exports'; 
+
+        if (Storage::disk('local')->exists($targetFolder)) {
+            $files = Storage::disk('local')->files($targetFolder);
+            
+            foreach ($files as $file) {
+                $filenameOnly = basename($file);
+                
+                // PERBAIKAN REGEX: Menggunakan 'logs.*' agar nama file seperti 'Logs_Juni_2026.xlsx' lolos filter aman
+                if (preg_match('/.*logs.*\.xlsx$/i', $filenameOnly) || preg_match('/.*logs.*\.xls$/i', $filenameOnly)) {
+                    $exportFiles[] = [
+                        'name' => $filenameOnly,
+                        'path' => $file,
+                        'size' => Storage::disk('local')->size($file),
+                        'last_modified' => Storage::disk('local')->lastModified($file),
+                    ];
+                }
             }
         }
-        // Urutkan berdasarkan nama file (berisi bulan) descending
+        
+        // Urutkan berdasarkan waktu modifikasi terbaru (file baru ada di paling atas)
         usort($exportFiles, function($a, $b) {
-            return strcmp($b['name'], $a['name']);
+            return $b['last_modified'] <=> $a['last_modified'];
         });
 
         return view('admin.activity-logs.index', compact('logs', 'exportFiles'));
@@ -72,10 +82,13 @@ class ActivityLogController extends Controller
     {
         $this->secureAccess();
 
+        // PERBAIKAN PATH DOWNLOAD: Mengikuti root disk local yang sudah berada di folder private
         $path = 'exports/' . $filename;
+        
         if (!Storage::disk('local')->exists($path)) {
             abort(404, 'File tidak ditemukan.');
         }
+        
         return Storage::disk('local')->download($path, $filename);
     }
 }

@@ -9,9 +9,7 @@
 
     @include('admin.activity-logs.info')
 
-    <!-- Stats Cards (gaya modern, tetap sama) -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <!-- Total Log -->
         <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
             <div class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="p-6 relative z-10">
@@ -32,7 +30,6 @@
             </div>
         </div>
 
-        <!-- Unique User -->
         <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
             <div class="absolute inset-0 bg-gradient-to-r from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="p-6 relative z-10">
@@ -53,7 +50,6 @@
             </div>
         </div>
 
-        <!-- Log Hari Ini -->
         <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
             <div class="absolute inset-0 bg-gradient-to-r from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="p-6 relative z-10">
@@ -73,7 +69,6 @@
             </div>
         </div>
 
-        <!-- Arsip Excel -->
         <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
             <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
             <div class="p-6 relative z-10">
@@ -95,7 +90,6 @@
         </div>
     </div>
 
-    <!-- Tabel Log -- diperbaiki untuk wrap deskripsi, lebar kolom perangkat, dan warna badge -->
     <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100">
         <div class="p-6">
             <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
@@ -208,34 +202,45 @@
         </div>
     </div>
 
-    <!-- Daftar File Export Excel -->
-    @if(count($exportFiles) > 0)
     <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100 mt-8">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
                 <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                 Arsip Log Bulanan (Excel)
             </h3>
+            
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                @foreach($exportFiles as $file)
-                <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-200 group">
-                    <div class="flex justify-between items-start">
-                        <div class="flex-1">
-                            <p class="font-medium text-gray-800 break-words">{{ $file['name'] }}</p>
-                            <p class="text-xs text-gray-500 mt-1">
-                                {{ round($file['size'] / 1024) }} KB • {{ date('d M Y', $file['last_modified']) }}
-                            </p>
+                @forelse($exportFiles as $file)
+                    <div class="bg-gray-50 rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all duration-200 group">
+                        <div class="flex justify-between items-start">
+                            <div class="flex-1">
+                                <p class="font-medium text-gray-800 break-words">{{ $file['name'] }}</p>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    {{ round($file['size'] / 1024) }} KB • {{ date('d M Y', $file['last_modified']) }}
+                                </p>
+                            </div>
+                            <a href="{{ route('activity-logs.download', $file['name']) }}" 
+                               class="text-indigo-600 hover:text-indigo-800 transition p-1 rounded-lg hover:bg-indigo-50"
+                               title="Download">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            </a>
                         </div>
-                        <a href="{{ route('activity-logs.download', $file['name']) }}" 
-                           class="text-indigo-600 hover:text-indigo-800 transition p-1 rounded-lg hover:bg-indigo-50"
-                           title="Download">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
-                        </a>
                     </div>
-                </div>
-                @endforeach
+                @empty
+                    <div class="col-span-full bg-amber-50 border border-amber-200 text-amber-800 p-4 rounded-xl text-sm">
+                        <div class="flex items-start gap-2">
+                            <span class="text-base">⚠️</span>
+                            <div>
+                                <p class="font-semibold">Data file kosong / Tidak lolos filter nama!</p>
+                                <p class="text-xs text-amber-700 mt-1 leading-relaxed">
+                                    Sistem mendeteksi folder fisik ada, tetapi tidak ada file yang memenuhi kriteria pengiriman Controller. 
+                                    Pastikan nama file di dalam folder <code>storage/app/private/exports/</code> mengandung format kata pencarian (seperti kata 'logs_') jika Anda menerapkan filter regex di Controller Anda.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                @endforelse
             </div>
         </div>
     </div>
-    @endif
 </x-app-layout>
