@@ -7,51 +7,147 @@
         </div>
     </x-slot>
 
-    <div class="bg-white overflow-hidden shadow-sm border border-gray-100 sm:rounded-[1.5rem] p-6">
-        <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-bold text-slate-800">Daftar Arsip Aktif</h3>
-            <div class="flex gap-2">
-                <button id="bulkDeleteBtn" type="button" class="hidden bg-rose-600 hover:bg-rose-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                    </svg>
-                    Hapus Terpilih (<span id="selectedCount">0</span>)
-                </button>
-                <button type="button" x-data x-on:click="$dispatch('open-modal', { id: 'modal-tambah-arsip' })" class="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold py-2.5 px-5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Unggah Arsip
-                </button>
+    {{-- GRID SEKARANG MENGGUNAKAN 4 KOLOM PADA UKURAN MD --}}
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        {{-- CARD 1: Berkas Tersedia --}}
+        <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+            <div class="absolute inset-0 bg-gradient-to-r from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="p-6 relative z-10">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Berkas (Aktif)</p>
+                        <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalAktif) }}</p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-emerald-100 text-emerald-600">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs">
+                    <span class="text-emerald-600 font-medium">Berkas Tersedia Di Storage</span>
+                </div>
             </div>
         </div>
 
-        {{-- Search & Filter Bar --}}
-        <div class="flex items-center justify-end mb-6">
-            <x-search-input 
-                route="{{ route('admin.archives.index') }}" 
-                placeholder="Cari judul atau deskripsi..."
-                searchParam="search"
-                buttonText="Cari"
-                :resetButton="true"
-                :filters="[
-                    'category_id' => [
-                        'label' => 'Kategori',
-                        'options' => $categories->pluck('name', 'id')->toArray()
-                    ],
-                    'file_type' => [
-                        'label' => 'Tipe Dokumen',
-                        'options' => $fileTypes->mapWithKeys(fn($type) => [strtolower($type) => strtoupper($type)])->toArray()
-                    ],
-                ] + (Auth::user()->isPureSuperAdmin() ? [
-                    'department_id' => [
-                        'label' => 'Departemen',
-                        'options' => $departments->pluck('name', 'id')->toArray()
-                    ]
-                ] : [])"
-            />
+        {{-- CARD 2: Berkas Hilang --}}
+        <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+            <div class="absolute inset-0 bg-gradient-to-r from-rose-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="p-6 relative z-10">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Berkas (Hilang)</p>
+                        <p class="text-3xl font-extrabold text-rose-600 mt-2">{{ number_format($totalHilang) }}</p>
+                    </div>
+                    <div class="p-3 rounded-xl bg-rose-100 text-rose-600">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="mt-4 flex items-center text-xs">
+                    <span class="text-rose-600 font-medium">Berkas Tidak Ditemukan Di Storage</span>
+                </div>
+            </div>
         </div>
 
+        {{-- CARD 3 & 4 (DIGABUNG): AKSI UNGHAH ARSIP LEBIH PANJANG --}}
+        <div class="md:col-span-2 relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+            <div class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+            <div class="p-6 relative z-10 h-full flex flex-col md:flex-row md:items-center md:justify-between gap-6">
+                
+                {{-- Bagian Teks Info Kiri --}}
+                <div class="max-w-md">
+                    <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Aksi Pengunggahan Berkas</p>
+                    <p class="text-xs text-gray-400 mt-1">Gunakan tombol aksi di samping untuk menambahkan berkas arsip baru ke dalam sistem, baik secara tunggal maupun massal (*.zip).</p>
+                </div>
+                
+                {{-- Bagian Tombol Aksi Kanan --}}
+                <div class="flex items-center gap-3 flex-1 w-full md:w-auto md:justify-end">
+                    {{-- TOMBOL SINKRON BULK ZIP --}}
+                    <button type="button" x-data x-on:click="$dispatch('open-modal', { id: 'modal-tambah-zip' })" class="bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap flex-1 md:flex-initial">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1M5 19h14a2 2 0 002-2v-5M5 19v-4a2 2 0 012-2h11a2 2 0 012 2v4m-11-4V9m0 0l3-3m-3 3L9 6" />
+                        </svg>
+                        <span>Unggah Via ZIP</span>
+                    </button>
+            
+                    {{-- Tombol Unggah Arsip Tunggal --}}
+                    <button type="button" x-data x-on:click="$dispatch('open-modal', { id: 'modal-tambah-arsip' })" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-3 px-4 rounded-xl shadow-md transition-all active:scale-95 flex items-center justify-center gap-1.5 whitespace-nowrap flex-1 md:flex-initial">
+                        <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path>
+                        </svg>
+                        <span>Unggah Arsip Baru</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- KONTEN UTAMA TABEL --}}
+    <div class="bg-white overflow-visible shadow-sm border border-gray-100 sm:rounded-[1.5rem] p-6">
+        
+        {{-- HEADER DAFTAR ARSIP --}}
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+            <h3 class="text-lg font-bold text-slate-800 whitespace-nowrap">Daftar Arsip</h3>
+
+{{-- Search & Filter Bar --}}
+<div class="flex items-center justify-end w-full md:w-auto relative z-50">
+    <x-search-input 
+        route="{{ route('admin.archives.index') }}" 
+        placeholder="Cari judul arsip..."
+        searchParam="search"
+        buttonText="Cari"
+        :resetButton="true"
+        :filters="
+            (Auth::user()->isPureSuperAdmin() ? [
+                'department_id' => [
+                    'label' => 'Departemen',
+                    'fullWidth' => true,
+                    'options' => $departments->pluck('name', 'id')->toArray()
+                ]
+            ] : []) + [
+                'category_id' => [
+                    'label' => 'Kategori',
+                    'options' => $categories->mapWithKeys(fn($category) => [
+                        $category->id => (Auth::user()->isPureSuperAdmin() && $category->department) 
+                            ? $category->name . ' (' . $category->department->name . ')' 
+                            : $category->name
+                    ])->toArray()
+                ],
+                'file_type' => [
+                    'label' => 'Tipe Dokumen',
+                    'options' => $fileTypes->mapWithKeys(fn($type) => [strtolower($type) => strtoupper($type)])->toArray()
+                ],
+                'status_file' => [
+                    'label' => 'Status Berkas',
+                    'options' => [
+                        'tersedia' => '✔️ TERSEDIA',
+                        'hilang' => '❌ HILANG'
+                    ]
+                ],
+                'sort_download' => [
+                    'label' => 'Urutan Unduhan',
+                    'options' => [
+                        'terbanyak' => '🔥 UNDUHAN TERBANYAK',
+                        'tersedikit' => '📉 UNDUHAN TERSEDIKIT'
+                    ]
+                ],
+                'month' => [
+                    'label' => 'Bulan',
+                    'options' => $months
+                ],
+                'year' => [
+                    'label' => 'Tahun',
+                    'options' => $years->mapWithKeys(fn($yr) => [(string)$yr => (string)$yr])->toArray()
+                ]
+            ]
+        "
+    />
+</div>
+        </div>
+
+        {{-- WRAPPER STRUKTUR TABEL --}}
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-100">
                 <thead>
@@ -68,23 +164,36 @@
                 <tbody class="divide-y divide-gray-50">
                     @forelse($archives as $archive)
                     @php
+                        $fileExists = \Illuminate\Support\Facades\Storage::disk('public')->exists($archive->file_path);
                         $ext = strtolower($archive->file_type);
-                        $bgClass = 'bg-slate-100 text-slate-600'; 
-                        if(in_array($ext, ['pdf'])) $bgClass = 'bg-red-100 text-red-600';
-                        elseif(in_array($ext, ['xlsx', 'xls', 'csv'])) $bgClass = 'bg-emerald-100 text-emerald-600';
-                        elseif(in_array($ext, ['doc', 'docx'])) $bgClass = 'bg-blue-100 text-blue-600';
-                        elseif(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) $bgClass = 'bg-purple-100 text-purple-600';
+                        
+                        if (!$fileExists) {
+                            $bgClass = 'bg-gray-100 text-gray-400 border border-gray-200';
+                        } else {
+                            $bgClass = 'bg-slate-100 text-slate-600'; 
+                            if(in_array($ext, ['pdf'])) $bgClass = 'bg-red-100 text-red-600';
+                            elseif(in_array($ext, ['xlsx', 'xls', 'csv'])) $bgClass = 'bg-emerald-100 text-emerald-600';
+                            elseif(in_array($ext, ['doc', 'docx'])) $bgClass = 'bg-blue-100 text-blue-600';
+                            elseif(in_array($ext, ['jpg', 'jpeg', 'png', 'webp'])) $bgClass = 'bg-purple-100 text-purple-600';
+                        }
                         
                         $downloadRoute = route('admin.archives.download', $archive);
                     @endphp
                     <tr class="hover:bg-slate-50/50 transition-colors group">
                         <td class="px-6 py-4">
                             <div class="flex items-center">
-                                <div class="h-10 w-10 {{ $bgClass }} rounded-xl flex items-center justify-center font-bold uppercase text-[10px]">
+                                <div class="h-10 w-10 {{ $bgClass }} rounded-xl flex items-center justify-center font-bold uppercase text-[10px] select-none">
                                     {{ $archive->file_type }}
                                 </div>
                                 <div class="ml-4">
-                                    <div class="text-sm font-bold text-slate-800">{{ $archive->title }}</div>
+                                    <div class="text-sm font-bold {{ !$fileExists ? 'line-through text-gray-400' : 'text-slate-800' }}">
+                                        {{ $archive->title }}
+                                        @if(!$fileExists)
+                                            <span class="text-[11px] text-red-500 font-bold tracking-normal normal-case ml-1 bg-red-50 px-1.5 py-0.5 rounded-md border border-red-100 inline-block">
+                                                [File Hilang]
+                                            </span>
+                                        @endif
+                                    </div>
                                     <div class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">
                                         {{ $archive->file_size }}
                                     </div>
@@ -109,7 +218,7 @@
                                 <div class="h-6 w-6 rounded-full bg-slate-200 flex items-center justify-center text-[10px] font-bold text-slate-500 uppercase">
                                     {{ substr($archive->user->name ?? 'A', 0, 1) }}
                                 </div>
-                                <span class="text-xs font-bold text-slate-700">{{ $archive->user->name ?? 'Admin' }}</span>
+                                <span class="text-xs font-bold text-slate-700">{{ $archive->user->name ?? 'User Terhapus' }}</span>
                             </div>
                         </td>
                         <td class="px-6 py-4 text-center">
@@ -117,18 +226,114 @@
                         </td>
                         <td class="px-6 py-4 text-center">
                             <div class="flex justify-center gap-1">
-                                <button type="button" x-data x-on:click="$dispatch('open-modal', { id: 'preview-modal', title: 'Preview: {{ addslashes($archive->title) }}', fileUrl: '{{ asset('storage/' . $archive->file_path) }}', fileType: '{{ strtolower($archive->file_type) }}', downloadUrl: '{{ $downloadRoute }}' })" class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" title="Pratinjau">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                                    </svg>
-                                </button>
+                                {{-- BUTTON SALIN TOKEN AKSES --}}
+                                <div x-data="{ 
+                                    copied: false,
+                                    copyToken() {
+                                        const textToCopy = '{{ $archive->hash_token ?? $archive->token ?? '' }}';
+                                        if (!textToCopy) return;
+                                        
+                                        if (navigator.clipboard && window.isSecureContext) {
+                                            navigator.clipboard.writeText(textToCopy).then(() => {
+                                                this.copied = true;
+                                                setTimeout(() => this.copied = false, 1500);
+                                            });
+                                        } else {
+                                            let textArea = document.createElement('textarea');
+                                            textArea.value = textToCopy;
+                                            textArea.style.position = 'fixed';
+                                            textArea.style.left = '-999999px';
+                                            document.body.appendChild(textArea);
+                                            textArea.focus();
+                                            textArea.select();
+                                            try {
+                                                document.execCommand('copy');
+                                                this.copied = true;
+                                                setTimeout(() => this.copied = false, 1500);
+                                            } catch (error) {
+                                                console.error('Gagal menyalin token', error);
+                                            }
+                                            document.body.removeChild(textArea);
+                                        }
+                                    }
+                                }" class="relative flex items-center">
+                                    <button type="button" 
+                                            x-on:click="copyToken()" 
+                                            class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all" 
+                                            title="Salin Token Akses">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+                                        </svg>
+                                    </button>
+                                    
+                                    <div x-show="copied" 
+                                         x-transition:enter="transition ease-out duration-200"
+                                         x-transition:enter-start="opacity-0 translate-y-1"
+                                         x-transition:enter-end="opacity-100 translate-y-0"
+                                         x-transition:leave="transition ease-in duration-150"
+                                         x-transition:leave-start="opacity-100 translate-y-0"
+                                         x-transition:leave-end="opacity-0 translate-y-1"
+                                         class="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-30 px-2.5 py-1 text-[10px] font-bold text-white bg-slate-800 rounded-lg shadow-sm whitespace-nowrap"
+                                         x-cloak>
+                                        Token Disalin!
+                                    </div>
+                                </div>
+
+                                {{-- BUTTON DOWNLOAD --}}
                                 <a href="{{ $downloadRoute }}" class="p-2 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-xl transition-all" title="Download">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
                                     </svg>
                                 </a>
-                                <button type="button" x-data x-on:click="$dispatch('open-modal', { id: 'confirm-delete', action: '{{ route('admin.archives.destroy', $archive) }}', title: 'Hapus Arsip Permanent?', warning: 'Anda akan menghapus arsip: {{ addslashes($archive->title) }}. Tindakan ini tidak dapat dibatalkan!', method: 'DELETE', withPassword: true })" class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all active:scale-90" title="Hapus">
+
+                                {{-- BUTTON PREVIEW --}}
+                                <button type="button" 
+                                        x-data 
+                                        x-on:click="$dispatch('open-modal', { 
+                                            id: 'preview-modal', 
+                                            title: 'Preview: {{ addslashes($archive->title) }}', 
+                                            fileUrl: '{{ route('admin.archives.preview', $archive->hash_token) }}', 
+                                            fileType: '{{ strtolower($archive->file_type) }}', 
+                                            downloadUrl: '{{ $downloadRoute }}' 
+                                        })" 
+                                        class="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all" 
+                                        title="Pratinjau">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                    </svg>
+                                </button>
+
+                                {{-- BUTTON EDIT / UPDATE --}}
+                                <button type="button" 
+                                        x-data
+                                        x-on:click="$dispatch('open-modal', { 
+                                            id: 'modal-edit-arsip', 
+                                            action: '{{ route('admin.archives.update', $archive) }}',
+                                            title: '{{ addslashes($archive->title) }}',
+                                            category_id: '{{ $archive->category_id }}'
+                                        })"
+                                        class="p-2 text-slate-400 hover:text-amber-600 hover:bg-amber-50 rounded-xl transition-all"
+                                        title="Edit Arsip">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                    </svg>
+                                </button>
+
+                                {{-- BUTTON DESTROY --}}
+                                <button type="button" 
+                                        x-data 
+                                        x-on:click="$dispatch('open-modal', { 
+                                            id: 'confirm-delete', 
+                                            action: '{{ route('admin.archives.destroy', $archive) }}', 
+                                            title: 'Pindahkan ke Tempat Sampah?', 
+                                            warning: 'Anda akan menonaktifkan arsip: {{ addslashes($archive->title) }}. Berkas ini akan dipindahkan ke tempat sampah.', 
+                                            method: 'DELETE', 
+                                            withPassword: false,
+                                            withReason: true
+                                        })" 
+                                        class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all active:scale-90" 
+                                        title="Hapus">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
                                     </svg>
@@ -138,7 +343,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="8" class="px-6 py-20 text-center text-slate-400 italic text-sm">Belum ada arsip yang diunggah.</td>
+                        <td colspan="7" class="px-6 py-40 text-center text-slate-400 italic text-sm">Belum ada arsip yang diunggah atau tidak sesuai dengan filter.</td>
                     </tr>
                     @endforelse
                 </tbody>
@@ -153,5 +358,6 @@
         </div>
     @endif
 
+    @include('admin.archives.preview')
     @include('admin.archives.modal')
 </x-app-layout>

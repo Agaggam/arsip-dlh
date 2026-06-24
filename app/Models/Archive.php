@@ -21,6 +21,8 @@ class Archive extends Model
         'archive_date',
         'download_count',
         'description',
+        'hash_token',
+        'delete_reason',
     ];
 
     /**

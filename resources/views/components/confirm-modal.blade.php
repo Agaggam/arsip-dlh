@@ -19,7 +19,8 @@
         dynamicTitle: '{{ $title }}',
         dynamicMethod: '{{ $method }}',
         dynamicWarning: '', 
-        needPassword: false
+        needPassword: false,
+        showReason: false {{-- Ditambahkan untuk kontrol visibilitas textarea alasan --}}
     }"
     x-on:open-modal.window="if ($event.detail.id === '{{ $id }}') { 
         open = true; 
@@ -28,9 +29,18 @@
         dynamicMethod = $event.detail.method || '{{ $method }}';
         dynamicWarning = $event.detail.warning || '';
         needPassword = $event.detail.withPassword || false;
+        showReason = $event.detail.withReason || false; {{-- Menerima parameter reason dari pemanggil --}}
     }"
-    x-on:close-modal.window="if ($event.detail.id === '{{ $id }}') { open = false; $el.querySelector('#password').value = ''; }"
-    x-on:keydown.escape.window="open = false; $el.querySelector('#password').value = '';"
+    x-on:close-modal.window="if ($event.detail.id === '{{ $id }}') { 
+        open = false; 
+        let pwd = $el.querySelector('#password'); if(pwd) pwd.value = '';
+        let rsn = $el.querySelector('#delete_reason'); if(rsn) rsn.value = '';
+    }"
+    x-on:keydown.escape.window="
+        open = false; 
+        let pwd = $el.querySelector('#password'); if(pwd) pwd.value = '';
+        let rsn = $el.querySelector('#delete_reason'); if(rsn) rsn.value = '';
+    "
 >
     <template x-teleport="body">
         <div 
@@ -38,7 +48,7 @@
             style="display: none;"
             class="fixed inset-0 z-[999] flex items-center justify-center p-4 sm:p-6"
         >
-            {{-- Backdrop: Menggunakan bg-gray-900/60 dan backdrop-blur-sm agar identik --}}
+            {{-- Backdrop --}}
             <div 
                 x-show="open"
                 x-transition:enter="transition ease-out duration-300"
@@ -48,7 +58,11 @@
                 x-transition:leave-start="opacity-100"
                 x-transition:leave-end="opacity-0"
                 class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"
-                @click="open = false; $el.closest('[x-data]').querySelector('#password').value = '';"
+                @click="
+                    open = false; 
+                    let pwd = $el.closest('[x-data]').querySelector('#password'); if(pwd) pwd.value = '';
+                    let rsn = $el.closest('[x-data]').querySelector('#delete_reason'); if(rsn) rsn.value = '';
+                "
             ></div>
 
             {{-- Modal Content --}}
@@ -71,7 +85,14 @@
 
                 <div class="p-6 md:p-8">
                     {{-- Tombol Close --}}
-                    <button type="button" @click="open = false; $el.closest('[x-data]').querySelector('#password').value = '';" class="absolute top-6 end-6 text-gray-400 hover:bg-gray-100 hover:text-gray-900 rounded-2xl text-sm w-10 h-10 inline-flex justify-center items-center transition">
+                    <button type="button" 
+                        @click="
+                            open = false; 
+                            let pwd = $el.closest('[x-data]').querySelector('#password'); if(pwd) pwd.value = '';
+                            let rsn = $el.closest('[x-data]').querySelector('#delete_reason'); if(rsn) rsn.value = '';
+                        " 
+                        class="absolute top-6 end-6 text-gray-400 hover:bg-gray-100 hover:text-gray-900 rounded-2xl text-sm w-10 h-10 inline-flex justify-center items-center transition"
+                    >
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
                     </button>
 
@@ -108,11 +129,11 @@
                         <form :action="dynamicAction" method="POST" class="mt-4" autocomplete="off">
                             @csrf
                             
-                            {{-- Modifikasi Utama: Deteksi dinamis jika method BUKAN POST murni --}}
                             <template x-if="dynamicMethod.toUpperCase() !== 'POST'">
                                 <input type="hidden" name="_method" :value="dynamicMethod.toUpperCase()">
                             </template>
 
+                            {{-- KONDISI 1: Tampilkan password jika diset true --}}
                             <div x-show="needPassword" x-transition class="mb-8 text-left">
                                 <label for="password" class="text-[11px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-[0.2em]">Konfirmasi Password</label>
                                 <input 
@@ -128,8 +149,28 @@
                                 >
                             </div>
 
+                            {{-- KONDISI 2: Tampilkan textarea Alasan HANYA JIKA showReason diset true --}}
+                            <div x-show="showReason" x-transition class="mb-8 text-left">
+                                <label for="delete_reason" class="text-[11px] font-black uppercase text-slate-400 ml-2 mb-2 block tracking-[0.2em]">Alasan Penghapusan (Opsional)</label>
+                                <textarea 
+                                    id="delete_reason"
+                                    name="delete_reason" 
+                                    rows="2"
+                                    class="mt-1 block w-full rounded-[1.5rem] border-slate-200 focus:border-indigo-500 focus:ring-indigo-500 shadow-sm text-sm p-4 bg-slate-50 transition-all resize-none"
+                                    placeholder="Masukkan alasan pemindahan berkas (boleh dikosongkan)..."
+                                ></textarea>
+                            </div>
+
                             <div class="grid grid-cols-2 gap-4">
-                                <button @click="open = false; $el.closest('[x-data]').querySelector('#password').value = '';" type="button" class="text-slate-500 bg-slate-100 hover:bg-slate-200 font-bold rounded-[1.5rem] text-sm px-6 py-4 transition-all">
+                                <button 
+                                    @click="
+                                        open = false; 
+                                        let pwd = $el.closest('[x-data]').querySelector('#password'); if(pwd) pwd.value = '';
+                                        let rsn = $el.closest('[x-data]').querySelector('#delete_reason'); if(rsn) rsn.value = '';
+                                    " 
+                                    type="button" 
+                                    class="text-slate-500 bg-slate-100 hover:bg-slate-200 font-bold rounded-[1.5rem] text-sm px-6 py-4 transition-all"
+                                >
                                     Batal
                                 </button>
 

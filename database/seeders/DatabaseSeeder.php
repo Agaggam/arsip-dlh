@@ -32,6 +32,8 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('superadmin123'),
             'role_id' => $superAdminRoleId,
             'department_id' => $systemDeptId,
+            'status' => 'approved',
+            'email_verified_at' => now(),
         ]);
 
         User::create([
@@ -40,6 +42,8 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('admin123'),
             'role_id' => $adminRoleId,
             'department_id' => $sekretariatId,
+            'status' => 'approved',
+            'email_verified_at' => now(),
         ]);
 
         User::create([
@@ -48,6 +52,8 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('admin123'),
             'role_id' => $adminRoleId,
             'department_id' => $tataLingkunganId,
+            'status' => 'approved',
+            'email_verified_at' => now(),
         ]);
 
         User::create([
@@ -56,6 +62,8 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('admin123'),
             'role_id' => $adminRoleId,
             'department_id' => $pengelolaanSampahId,
+            'status' => 'approved',
+            'email_verified_at' => now(),
         ]);
 
         User::create([
@@ -64,9 +72,11 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('user123'),
             'role_id' => $userRoleId,
             'department_id' => $pengelolaanSampahId,
+            'status' => 'approved',
+            'email_verified_at' => now(),
         ]);
 
-        // Aktifkan fungsi dibawah ini jika ingin membuat banyak user random
+        // Untuk membuat user secara acak dengan memanggil UserSeeder
         $this->call(UserSeeder::class);
     }
 }

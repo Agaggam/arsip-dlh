@@ -60,7 +60,7 @@ class DepartmentController extends Controller
             'description' => $request->description,
         ]);
 
-        log_activity($authUser, 'tambah_departemen', "Departemen '{$department->name}' berhasil ditambahkan.");
+        log_activity($authUser, 'tambah_departemen', "Departemen ({$department->name}) berhasil ditambahkan.");
 
         return redirect()->route('admin.departments.index')
                         ->with('success', 'Departemen baru berhasil ditambahkan.');
@@ -90,7 +90,7 @@ class DepartmentController extends Controller
             'description' => $request->description,
         ]);
 
-        log_activity($authUser, 'edit_departemen', "Departemen '{$oldName}' diubah menjadi '{$department->name}'.");
+        log_activity($authUser, 'ubah_departemen', "Departemen ({$oldName}) diubah menjadi ({$department->name}).");
 
         return redirect()->route('admin.departments.index')
                         ->with('success', 'Data departemen berhasil diperbarui.');
@@ -129,7 +129,7 @@ class DepartmentController extends Controller
         $deptName = $department->name;
         $department->delete();
 
-        log_activity($authUser, 'hapus_departemen', "Departemen '{$deptName}' berhasil dihapus.");
+        log_activity($authUser, 'hapus_departemen', "Departemen ({$deptName}) berhasil dihapus.");
 
         return redirect()->route('admin.departments.index')
                         ->with('success', 'Departemen ' . $deptName . ' berhasil dihapus.');

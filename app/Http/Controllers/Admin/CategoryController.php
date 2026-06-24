@@ -123,7 +123,7 @@ class CategoryController extends Controller
             'description' => $request->description,
         ]);
 
-        log_activity($authUser, 'tambah_kategori', "Kategori '{$category->name}' berhasil ditambahkan di departemen '{$category->department->name}'.");
+        log_activity($authUser, 'tambah_kategori', "Kategori ({$category->name}) berhasil ditambahkan di departemen ({$category->department->name}).");
 
         return back()->with('success', 'Kategori berhasil ditambahkan.');
     }
@@ -149,7 +149,7 @@ class CategoryController extends Controller
             'description' => $request->description,
         ]);
 
-        log_activity($authUser, 'edit_kategori', "Kategori '{$oldName}' diubah menjadi '{$category->name}'.");
+        log_activity($authUser, 'ubah_kategori', "Kategori ({$oldName}) diubah menjadi ({$category->name}).");
 
         return back()->with('success', 'Kategori berhasil diperbarui.');
     }
@@ -205,7 +205,7 @@ class CategoryController extends Controller
             ->update(['category_id' => $targetCategory->id]);
 
         // Rekam aktivitas log sistem
-        log_activity($authUser, 'migrasi_kategori', "Memindahkan {$archivesCount} arsip dari kategori '{$category->name}' ke kategori '{$targetCategory->name}'.");
+        log_activity($authUser, 'pindah_kategori', "Memindahkan ({$archivesCount}) arsip dari kategori ({$category->name}) ke kategori ({$targetCategory->name}).");
 
         return back()->with('success', "Berhasil memindahkan {$archivesCount} arsip ke kategori '{$targetCategory->name}'.");
     }
@@ -230,7 +230,7 @@ class CategoryController extends Controller
         $categoryName = $category->name;
         $category->delete();
 
-        log_activity($authUser, 'hapus_kategori', "Kategori '{$categoryName}' berhasil dihapus.");
+        log_activity($authUser, 'hapus_kategori', "Kategori ({$categoryName}) dari departemen ({$category->department->name}) berhasil dihapus.");
 
         return back()->with('success', 'Kategori berhasil dihapus.');
     }

@@ -169,7 +169,7 @@ class UserController extends Controller
             'status'        => 'pending',
         ]);
 
-        log_activity($authUser, 'tambah_user', "Menambahkan user baru: {$user->name} ({$user->email})");
+        log_activity($authUser, 'tambah_user', "Menambahkan user baru: ({$user->name}) Dengan Email: ({$user->email})");
 
         return back()->with('success', 'User baru berhasil ditambahkan!');
     }
@@ -193,7 +193,7 @@ class UserController extends Controller
         $user->save();
 
         $newRole = $user->role->name;
-        log_activity($authUser, 'edit_user', "Role user {$user->name} diubah menjadi {$newRole}");
+        log_activity($authUser, 'ubah_user', "Role user ({$user->name}) diubah menjadi ({$newRole})");
         
         return back()->with('success', "Role user {$user->name} berhasil diubah menjadi {$newRole}.");
     }
@@ -217,7 +217,7 @@ class UserController extends Controller
         $user->save();
 
         $newDept = $user->department->name;
-        log_activity($authUser, 'edit_user', "Departemen user {$user->name} diubah menjadi {$newDept}");
+        log_activity($authUser, 'ubah_user', "Departemen user ({$user->name}) diubah menjadi ({$newDept})");
         
         return back()->with('success', "Departemen user {$user->name} berhasil diubah menjadi {$newDept}.");
     }
@@ -251,7 +251,7 @@ class UserController extends Controller
         $user->status = $request->status;
         $user->save();
         
-        log_activity($authUser, 'update_status', "Status user {$user->name} diubah menjadi {$request->status}");
+        log_activity($authUser, 'ubah_status_user', "Status user ({$user->name}) diubah menjadi ({$request->status})");
         
         return back()->with('success', "Status akun {$user->name} berhasil diubah menjadi {$request->status}!");
     }
@@ -261,7 +261,7 @@ class UserController extends Controller
      */
     public function destroy(Request $request, User $user)
     {
-        $authUser = $this->AllAdminAccess();  // ← langsung dapat user, tidak perlu $authUser = Auth::user() lagi!
+        $authUser = $this->AllAdminAccess();
 
         if ($this->isSelf($user)) {
             return back()->with('error', 'Anda tidak bisa menghapus akun sendiri!');
@@ -280,7 +280,7 @@ class UserController extends Controller
             $userName = $user->name;
             $userEmail = $user->email;
             $user->delete();
-            log_activity($authUser, 'hapus_user', "User {$userName} ({$userEmail}) dihapus oleh super admin.");
+            log_activity($authUser, 'hapus_user', "User ({$userName}) Dengan Email ({$userEmail}) dihapus oleh super admin.");
             return back()->with('success', 'User berhasil dihapus!');
         }
         
@@ -294,7 +294,7 @@ class UserController extends Controller
             $userName = $user->name;
             $userEmail = $user->email;
             $user->delete();
-            log_activity($authUser, 'hapus_user', "User {$userName} ({$userEmail}) dihapus oleh admin departemen.");
+            log_activity($authUser, 'hapus_user', "User ({$userName}) Dengan Email ({$userEmail}) dihapus oleh admin departemen {$authUser->department->name}.");
             return back()->with('success', 'User berhasil dihapus!');
         }
         
