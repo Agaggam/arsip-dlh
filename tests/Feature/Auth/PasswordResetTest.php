@@ -121,5 +121,4 @@ class PasswordResetTest extends TestCase
             return true;
         });
     }
-    //halo
 }

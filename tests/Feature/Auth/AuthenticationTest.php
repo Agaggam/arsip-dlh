@@ -126,5 +126,4 @@ class AuthenticationTest extends TestCase
 
         $response->assertSessionHasErrors('email');
     }
-    //halo
 }

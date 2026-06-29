@@ -81,5 +81,4 @@ class RegistrationTest extends TestCase
         $response->assertSessionHasErrors('department_id');
         $this->assertGuest();
     }
-    //halo
 }

@@ -110,5 +110,4 @@ class EmailVerificationTest extends TestCase
         // Memastikan user di database TETAP berstatus belum terverifikasi (null)
         $this->assertFalse($user->fresh()->hasVerifiedEmail());
     }
-    //halo
 }
