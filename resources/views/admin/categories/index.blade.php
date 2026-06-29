@@ -81,7 +81,7 @@
                 </div>
             </div>
 
-            {{-- Tombol Tambah Kategori (Sejajar di sebelah kanan card migrasi pada layar md/lg) --}}
+            {{-- Tombol Tambah Kategori --}}
             <div class="flex items-stretch md:items-center">
                 <button type="button" x-data x-on:click="$dispatch('open-modal', 'modal-tambah-kategori')" 
                     class="w-full md:w-auto bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-4 px-5 md:py-6 md:px-6 rounded-2xl shadow-sm transition-all active:scale-95 flex flex-row md:flex-col justify-center items-center gap-2 border border-indigo-700 whitespace-nowrap">
@@ -94,18 +94,16 @@
 
         </div>
 
-        {{-- Section Tabel Utama --}}
-        <div class="bg-white overflow-hidden shadow-sm sm:rounded-[1.5rem] p-4 sm:p-6 border border-gray-100">
+        {{-- Section Tabel Utama menggunakan Komponen Global <x-table> --}}
+        <x-table :isEmpty="$categories->isEmpty()" emptyMessage="Belum ada kategori tersedia.">
             
-            {{-- Header Konten (Hanya ada Judul, Search, dan Filter) --}}
-            <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800">Daftar Kategori Arsip</h3>
-                    <p class="text-xs text-slate-500">Kategori aktif di unit kerja Anda</p>
-                </div>
-                
-                {{-- Area Search & Filter --}}
-                <div class="w-full lg:w-auto">
+            {{-- Slot Judul & Informasi Tabel --}}
+            <x-slot name="title">
+                Daftar Kategori Arsip
+            </x-slot>
+
+            {{-- Slot Form Search & Filter Dropdown --}}
+            <x-slot name="actions">
                     @php
                         $filters = [];
                         if (Auth::user()->isPureSuperAdmin()) {
@@ -132,105 +130,92 @@
                         :resetButton="true"
                         :filters="$filters"
                     />
-                </div>
-            </div>
+            </x-slot>
 
-            {{-- Tabel Responsif --}}
-            <div class="overflow-x-auto -mx-4 sm:mx-0">
-                <div class="inline-block min-w-full align-middle">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-slate-50">
-                            <tr>
-                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-16">No</th>
-                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Informasi Kategori</th>
-                                <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Departemen</th>
-                                <th class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Total Arsip</th>
-                                <th class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody class="bg-white divide-y divide-gray-100">
-                            @forelse($categories as $index => $category)
-                            <tr class="hover:bg-slate-50/50 transition-colors">
-                                <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs font-bold text-slate-400">
-                                    {{ $categories->firstItem() + $index }}
-                                </td>
-                                <td class="px-4 sm:px-6 py-3">
-                                    <div class="flex items-center gap-3">
-                                        <div class="h-9 w-9 flex-shrink-0 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-xs uppercase shadow-sm">
-                                            {{ substr($category->name, 0, 1) }}
-                                        </div>
-                                        <div>
-                                            <div class="text-sm font-bold text-slate-800">{{ $category->name }}</div>
-                                            <div class="text-xs text-slate-500 max-w-xs truncate">{{ $category->description ?? 'Tidak ada deskripsi' }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-4 sm:px-6 py-3 whitespace-nowrap">
-                                    <span class="px-2.5 py-0.5 inline-flex text-[10px] font-bold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-100 uppercase tracking-wider">
-                                        {{ $category->department->name ?? '-' }}
-                                    </span>
-                                </td>
-                                <td class="px-4 sm:px-6 py-3 text-center whitespace-nowrap">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold rounded-full 
-                                        {{ $category->archives_count > 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-gray-50 text-gray-400 border border-gray-100' }}">
-                                        @if($category->archives_count > 0)
-                                            📄 {{ $category->archives_count }} Arsip
-                                        @else
-                                            Kosong
-                                        @endif
-                                    </span>
-                                </td>
-                                <td class="px-4 sm:px-6 py-3 text-center whitespace-nowrap">
-                                    <div class="flex justify-center gap-1 sm:gap-2">
-                                        {{-- Tombol Edit --}}
-                                        <button type="button" x-data
-                                            x-on:click="
-                                                $dispatch('open-modal', 'modal-edit-kategori');
-                                                $dispatch('set-edit-data', {
-                                                    id: {{ $category->id }},
-                                                    name: '{{ addslashes($category->name) }}',
-                                                    description: '{{ addslashes($category->description) }}'
-                                                })
-                                            "
-                                            class="text-amber-500 hover:text-amber-700 p-1.5 sm:p-2 hover:bg-amber-50 rounded-xl transition-all"
-                                            title="Edit Kategori">
-                                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                            </svg>
-                                        </button>
-                                        
-                                        {{-- Tombol Hapus --}}
-                                        <button type="button" x-data
-                                            x-on:click="$dispatch('open-modal', { 
-                                                id: 'confirm-delete', 
-                                                action: '{{ route('categories.destroy', $category) }}',
-                                                title: 'Hapus kategori {{ $category->name }}?',
-                                                warning: 'PERHATIAN: Seluruh arsip di dalam kategori ini akan ikut terhapus secara permanen!',
-                                                withPassword: true
-                                            })"
-                                            class="text-rose-500 hover:text-rose-700 p-1.5 sm:p-2 hover:bg-rose-50 rounded-xl transition-all"
-                                            title="Hapus Kategori">
-                                            <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                            @empty
-                            <tr>
-                                <td colspan="5" class="px-4 sm:px-6 py-8 text-center text-slate-400 italic text-xs bg-slate-50/50">
-                                    Belum ada kategori tersedia.
-                                </td>
-                            </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{-- Slot Bagian Atas / Header Kolom Tabel --}}
+            <x-slot name="thead">
+                <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider w-16">No</th>
+                <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Informasi Kategori</th>
+                <th class="px-4 sm:px-6 py-3 text-left text-xs font-bold text-slate-500 uppercase tracking-wider">Departemen</th>
+                <th class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Total Arsip</th>
+                <th class="px-4 sm:px-6 py-3 text-center text-xs font-bold text-slate-500 uppercase tracking-wider">Aksi</th>
+            </x-slot>
 
-        </div>
-        {{-- Pagination Inside Card --}}
+            {{-- Slot Bagian Konten Data Baris Tabel --}}
+            <x-slot name="tbody">
+                @foreach($categories as $index => $category)
+                <tr class="hover:bg-slate-50/50 transition-colors">
+                    <td class="px-4 sm:px-6 py-3 whitespace-nowrap text-xs font-bold text-slate-400">
+                        {{ $categories->firstItem() + $index }}
+                    </td>
+                    <td class="px-4 sm:px-6 py-3">
+                        <div class="flex items-center gap-3">
+                            <div class="h-9 w-9 flex-shrink-0 bg-indigo-100 text-indigo-600 rounded-full flex items-center justify-center font-bold text-xs uppercase shadow-sm">
+                                {{ substr($category->name, 0, 1) }}
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold text-slate-800">{{ $category->name }}</div>
+                                <div class="text-xs text-slate-500 max-w-xs truncate">{{ $category->description ?? 'Tidak ada deskripsi' }}</div>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 sm:px-6 py-3 whitespace-nowrap">
+                        <span class="px-2.5 py-0.5 inline-flex text-[10px] font-bold rounded-full border bg-emerald-50 text-emerald-700 border-emerald-100 uppercase tracking-wider">
+                            {{ $category->department->name ?? '-' }}
+                        </span>
+                    </td>
+                    <td class="px-4 sm:px-6 py-3 text-center whitespace-nowrap">
+                        <span class="inline-flex items-center gap-1 px-2.5 py-0.5 text-[10px] font-bold rounded-full 
+                            {{ $category->archives_count > 0 ? 'bg-blue-50 text-blue-700 border border-blue-100' : 'bg-gray-50 text-gray-400 border border-gray-100' }}">
+                            @if($category->archives_count > 0)
+                                📄 {{ $category->archives_count }} Arsip
+                            @else
+                                Kosong
+                            @endif
+                        </span>
+                    </td>
+                    <td class="px-4 sm:px-6 py-3 text-center whitespace-nowrap">
+                        <div class="flex justify-center gap-1 sm:gap-2">
+                            {{-- Tombol Edit --}}
+                            <button type="button" x-data
+                                x-on:click="
+                                    $dispatch('open-modal', 'modal-edit-kategori');
+                                    $dispatch('set-edit-data', {
+                                        id: {{ $category->id }},
+                                        name: '{{ addslashes($category->name) }}',
+                                        description: '{{ addslashes($category->description) }}'
+                                    })
+                                "
+                                class="text-amber-500 hover:text-amber-700 p-1.5 sm:p-2 hover:bg-amber-50 rounded-xl transition-all"
+                                title="Edit Kategori">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                                </svg>
+                            </button>
+                            
+                            {{-- Tombol Hapus --}}
+                            <button type="button" x-data
+                                x-on:click="$dispatch('open-modal', { 
+                                    id: 'confirm-delete', 
+                                    action: '{{ route('categories.destroy', $category) }}',
+                                    title: 'Hapus kategori {{ $category->name }}?',
+                                    warning: 'PERHATIAN: Seluruh arsip di dalam kategori ini akan ikut terhapus secara permanen!',
+                                    withPassword: true
+                                })"
+                                class="text-rose-500 hover:text-rose-700 p-1.5 sm:p-2 hover:bg-rose-50 rounded-xl transition-all"
+                                title="Hapus Kategori">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                @endforeach
+            </x-slot>
+        </x-table>
+
+        {{-- Pagination berada di luar box agar konsisten layoutnya --}}
         @if($categories->hasPages())
             <div class="mt-6">
                 {{ $categories->links() }}

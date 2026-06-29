@@ -9,6 +9,7 @@
 
     @include('admin.activity-logs.info')
 
+    {{-- --- CARD STATISTIK LOG --- --}}
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
             <div class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
@@ -90,118 +91,114 @@
         </div>
     </div>
 
-    <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100">
-        <div class="p-6">
-            <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
-                <div>
-                    <h3 class="text-lg font-bold text-slate-800">Log Aktivitas</h3>
-                    <p class="text-sm text-slate-500">Rekaman jejak sistem</p>
-                </div>
-                <x-search-input 
-                    route="{{ route('activity-logs.index') }}" 
-                    placeholder="Cari aktivitas, user, atau IP..."
-                    searchParam="search"
-                    buttonText="Cari"
-                    :resetButton="true"
-                />
-            </div>
+    {{-- --- TABEL DATA LOG AKTIVITAS MENGGUNAKAN KOMPONEN REUSABLE --- --}}
+    <x-table :isEmpty="$logs->isEmpty()" emptyMessage="Belum ada log aktivitas yang tercatat.">
+        
+        {{-- Slot Judul Tabel Kiri Atas --}}
+        <x-slot name="title">
+            Log Aktivitas Sistem
+        </x-slot>
 
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">User</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Aktivitas</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider w-80">Deskripsi</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">IP Address</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider min-w-[200px]">Perangkat</th>
-                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider">Waktu</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-100">
-                        @forelse($logs as $log)
-                        @php
-                            $displayName = $log->causer_name ?? ($log->user->name ?? 'Guest');
-                            $displayEmail = $log->causer_email ?? ($log->user->email ?? '');
-                            $isDeleted = is_null($log->user_id) && $log->causer_name;
-                            $avatarColor = $isDeleted ? 'bg-red-100 text-red-600' : 'bg-indigo-100 text-indigo-800';
-                            
-                            $activity = $log->activity;
-                            $badgeClass = 'bg-gray-100 text-gray-800';
-                            if (str_contains($activity, 'tambah')) {
-                                $badgeClass = 'bg-emerald-100 text-emerald-800';
-                            } elseif (str_contains($activity, 'edit')) {
-                                $badgeClass = 'bg-amber-100 text-amber-800';
-                            } elseif (str_contains($activity, 'hapus')) {
-                                $badgeClass = 'bg-rose-100 text-rose-800';
-                            } elseif (str_contains($activity, 'login')) {
-                                $badgeClass = 'bg-blue-100 text-blue-800';
-                            } elseif (str_contains($activity, 'logout')) {
-                                $badgeClass = 'bg-gray-100 text-gray-800';
-                            } elseif (str_contains($activity, 'restore')) {
-                                $badgeClass = 'bg-teal-100 text-teal-800';
-                            } elseif (str_contains($activity, 'force_delete')) {
-                                $badgeClass = 'bg-red-200 text-red-900';
-                            }
-                        @endphp
-                        <tr class="hover:bg-slate-50 transition-colors duration-200">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div class="h-8 w-8 rounded-full {{ $avatarColor }} flex items-center justify-center font-semibold text-sm shrink-0">
-                                        {{ strtoupper(substr($displayName, 0, 1)) }}
-                                    </div>
-                                    <div class="ml-3">
-                                        <p class="text-sm font-medium text-gray-900">{{ $displayName }}</p>
-                                        <p class="text-xs text-gray-500">{{ $displayEmail }}</p>
-                                    </div>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $badgeClass }}">
-                                    {{ $activity }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600 break-words max-w-md">
-                                {{ $log->description ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
-                                {{ $log->ip_address ?? '-' }}
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-500 whitespace-normal break-words max-w-xs md:max-w-sm" title="{{ $log->user_agent }}">
-                                <div class="flex items-start gap-1">
-                                    @php
-                                        $ua = $log->user_agent ?? '';
-                                        $icon = '🌐';
-                                        if (str_contains($ua, 'Windows')) $icon = '🪟';
-                                        elseif (str_contains($ua, 'Mac')) $icon = '🍎';
-                                        elseif (str_contains($ua, 'Linux')) $icon = '🐧';
-                                        elseif (str_contains($ua, 'Android')) $icon = '📱';
-                                        elseif (str_contains($ua, 'iPhone')) $icon = '📱';
-                                    @endphp
-                                    <span class="text-base shrink-0">{{ $icon }}</span>
-                                    <span class="break-words">{{ $ua ? Str::limit($ua, 50) : '-' }}</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                                {{ $log->created_at->translatedFormat('d M Y, H:i:s') }}
-                            </td>
-                        </tr>
-                        @empty
-                        <tr>
-                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                                Belum ada log aktivitas.
-                            </td>
-                        </tr>
-                        @endforelse
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-6">
-                {{ $logs->withQueryString()->links() }}
-            </div>
-        </div>
+        {{-- Slot Input Pencarian Kanan Atas --}}
+        <x-slot name="actions">
+            <x-search-input 
+                route="{{ route('activity-logs.index') }}" 
+                placeholder="Cari aktivitas, user, atau IP..."
+                searchParam="search"
+                buttonText="Cari"
+                :resetButton="true"
+            />
+        </x-slot>
+
+        {{-- Slot Kolom Header Tabel (Thead polos, style warna diwarisi otomatis dari komponen) --}}
+        <x-slot name="thead">
+            <th class="px-6 py-4 text-left">User</th>
+            <th class="px-6 py-4 text-left">Aktivitas</th>
+            <th class="px-6 py-4 text-left w-80">Deskripsi</th>
+            <th class="px-6 py-4 text-left">IP Address</th>
+            <th class="px-6 py-4 text-left min-w-[200px]">Perangkat</th>
+            <th class="px-6 py-4 text-left">Waktu</th>
+        </x-slot>
+
+        {{-- Slot Isi Data Baris Tabel (Tbody) --}}
+        <x-slot name="tbody">
+            @foreach($logs as $log)
+                @php
+                    $displayName = $log->causer_name ?? ($log->user->name ?? 'Guest');
+                    $displayEmail = $log->causer_email ?? ($log->user->email ?? '');
+                    $isDeleted = is_null($log->user_id) && $log->causer_name;
+                    $avatarColor = $isDeleted ? 'bg-red-100 text-red-600' : 'bg-indigo-100 text-indigo-800';
+                    
+                    $activity = $log->activity;
+                    $badgeClass = 'bg-gray-100 text-gray-800';
+                    if (str_contains($activity, 'tambah')) {
+                        $badgeClass = 'bg-blue-100 text-blue-800';
+                    } elseif (str_contains($activity, 'ubah')) {
+                        $badgeClass = 'bg-amber-100 text-amber-800';
+                    } elseif (str_contains($activity, 'hapus')) {
+                        $badgeClass = 'bg-rose-100 text-rose-800';
+                    } elseif (str_contains($activity, 'login')) {
+                        $badgeClass = 'bg-gray-100 text-gray-800';
+                    } elseif (str_contains($activity, 'logout')) {
+                        $badgeClass = 'bg-gray-100 text-gray-800';
+                    } elseif (str_contains($activity, 'pulihkan')) {
+                        $badgeClass = 'bg-green-100 text-green-800';
+                    } elseif (str_contains($activity, 'unduh')) {
+                        $badgeClass = 'bg-purple-200 text-purple-800';
+                    }
+                @endphp
+                <tr class="hover:bg-slate-50 transition-colors duration-200">
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="flex items-center">
+                            <div class="h-8 w-8 rounded-full {{ $avatarColor }} flex items-center justify-center font-semibold text-sm shrink-0">
+                                {{ strtoupper(substr($displayName, 0, 1)) }}
+                            </div>
+                            <div class="ml-3">
+                                <p class="text-sm font-medium text-gray-900">{{ $displayName }}</p>
+                                <p class="text-xs text-gray-500">{{ $displayEmail }}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $badgeClass }}">
+                            {{ $activity }}
+                        </span>
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-600 break-words max-w-md">
+                        {{ $log->description ?? '-' }}
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-500">
+                        {{ $log->ip_address ?? '-' }}
+                    </td>
+                    <td class="px-6 py-4 text-sm text-gray-500 whitespace-normal break-words max-w-xs md:max-w-sm" title="{{ $log->user_agent }}">
+                        <div class="flex items-start gap-1">
+                            @php
+                                $ua = $log->user_agent ?? '';
+                                $icon = '🌐';
+                                if (str_contains($ua, 'Windows')) $icon = '🪟';
+                                elseif (str_contains($ua, 'Mac')) $icon = '🍎';
+                                elseif (str_contains($ua, 'Linux')) $icon = '🐧';
+                                elseif (str_contains($ua, 'Android')) $icon = '📱';
+                                elseif (str_contains($ua, 'iPhone')) $icon = '📱';
+                            @endphp
+                            <span class="text-base shrink-0">{{ $icon }}</span>
+                            <span class="break-words">{{ $ua ? Str::limit($ua, 50) : '-' }}</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ $log->created_at->translatedFormat('d M Y, H:i:s') }}
+                    </td>
+                </tr>
+            @endforeach
+        </x-slot>
+    </x-table>
+
+    {{-- Pagination links diletakkan di luar komponen tabel --}}
+    <div class="mt-6">
+        {{ $logs->withQueryString()->links() }}
     </div>
 
+    {{-- --- BLOK BAGIAN BAWAH: ARSIP BULANAN (EXCEL CARD GRID) --- --}}
     <div class="bg-white overflow-hidden shadow-sm rounded-xl border border-gray-100 mt-8">
         <div class="p-6">
             <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">

@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Archive;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use PHPUnit\Framework\Attributes\Test;
 
 class DepartmentControllerTest extends TestCase
@@ -25,46 +26,73 @@ class DepartmentControllerTest extends TestCase
     {
         parent::setUp();
 
-        // Create roles
-        Role::create(['name' => 'super_admin']);
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'user']);
+        // Mock fungsi log_activity jika berupa global helper agar tidak mengganggu testing
+        if (!function_exists('log_activity')) {
+            function log_activity($user, $action, $description) {
+                // Dimock agar bypass
+            }
+        }
 
-        // Create department System
+        // 1. Create roles dengan ID terikat
+        $superAdminRole = Role::create(['id' => 1, 'name' => 'super_admin']);
+        $adminRole      = Role::create(['id' => 2, 'name' => 'admin']);
+        $userRole       = Role::create(['id' => 3, 'name' => 'user']);
+
+        // 2. Create master departemen 1 (SYSTEM)
         $this->systemDept = Department::create([
             'name' => 'System',
             'slug' => 'system'
         ]);
 
-        // Create Super Admin
+        // 3. Create departemen 2 & 3 sesuai data dari gambar UI
+        $sekretariatDept = Department::create([
+            'name' => 'Sekretariat',
+            'slug' => 'sekretariat'
+        ]);
+
+        $tataLingkunganDept = Department::create([
+            'name' => 'Tata Lingkungan',
+            'slug' => 'tata-lingkungan'
+        ]);
+
+        // 4. Create Super Admin (Wajib berdepartemen SYSTEM)
         $this->superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 1,
-            'department_id' => $this->systemDept->id,
-            'status' => 'approved'
+            'name'              => 'Super Admin Real',
+            'email'             => 'superadmin@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => $superAdminRole->id,
+            'department_id'     => $this->systemDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(), 
         ]);
+        $this->superAdmin->markEmailAsVerified();
+        $this->superAdmin->load(['role', 'department']); 
 
-        // Create Admin
+        // 5. Create Admin (Berada di departemen Sekretariat)
         $this->admin = User::create([
-            'name' => 'Admin',
-            'email' => 'admin@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 2,
-            'department_id' => $this->systemDept->id,
-            'status' => 'approved'
+            'name'              => 'Admin Sekretariat',
+            'email'             => 'admin@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => $adminRole->id,
+            'department_id'     => $sekretariatDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->admin->markEmailAsVerified();
+        $this->admin->load(['role', 'department']);
 
-        // Create Regular User
+        // 6. Create Regular User (Berada di departemen Tata Lingkungan)
         $this->regularUser = User::create([
-            'name' => 'Regular User',
-            'email' => 'user@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $this->systemDept->id,
-            'status' => 'approved'
+            'name'              => 'Regular User Tata Lingkungan',
+            'email'             => 'user@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => $userRole->id,
+            'department_id'     => $tataLingkunganDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->regularUser->markEmailAsVerified();
+        $this->regularUser->load(['role', 'department']);
     }
 
     // ============================================================
@@ -86,7 +114,7 @@ class DepartmentControllerTest extends TestCase
     public function non_super_admin_cannot_view_departments_index()
     {
         $nonSuperAdmins = [
-            'Admin' => $this->admin,
+            'Admin'        => $this->admin,
             'Regular User' => $this->regularUser,
         ];
         
@@ -107,16 +135,16 @@ class DepartmentControllerTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->post(route('admin.departments.store'), [
-                'name' => 'Departemen Baru',
-                'description' => 'Deskripsi departemen baru'
+                'name'        => 'Pengelolaan Sampah',
+                'description' => 'Deskripsi bidang pengelolaan sampah'
             ]);
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'Departemen baru berhasil ditambahkan.');
 
         $this->assertDatabaseHas('departments', [
-            'name' => 'Departemen Baru',
-            'slug' => 'departemen-baru'
+            'name' => 'Pengelolaan Sampah',
+            'slug' => 'pengelolaan-sampah'
         ]);
     }
 
@@ -124,15 +152,15 @@ class DepartmentControllerTest extends TestCase
     public function non_super_admin_cannot_store_department()
     {
         $nonSuperAdmins = [
-            'Admin' => $this->admin,
+            'Admin'        => $this->admin,
             'Regular User' => $this->regularUser,
         ];
         
         foreach ($nonSuperAdmins as $role => $user) {
             $response = $this->actingAs($user)
                 ->post(route('admin.departments.store'), [
-                    'name' => 'Departemen Baru',
-                    'description' => 'Deskripsi departemen baru'
+                    'name'        => 'Pengelolaan Sampah',
+                    'description' => 'Deskripsi'
                 ]);
             
             $response->assertStatus(403);
@@ -144,7 +172,7 @@ class DepartmentControllerTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->post(route('admin.departments.store'), [
-                'name' => 'System',
+                'name'        => 'System',
                 'description' => 'Deskripsi'
             ]);
 
@@ -170,13 +198,13 @@ class DepartmentControllerTest extends TestCase
     public function super_admin_can_update_department()
     {
         $dept = Department::create([
-            'name' => 'Dept Test',
-            'slug' => 'dept-test'
+            'name' => 'Bidang Lawas',
+            'slug' => 'bidang-lawas'
         ]);
 
         $response = $this->actingAs($this->superAdmin)
             ->patch(route('admin.departments.update', $dept->id), [
-                'name' => 'Dept Test Updated',
+                'name'        => 'Bidang Baru Updated',
                 'description' => 'Deskripsi baru'
             ]);
 
@@ -184,8 +212,8 @@ class DepartmentControllerTest extends TestCase
         $response->assertSessionHas('success', 'Data departemen berhasil diperbarui.');
 
         $dept->refresh();
-        $this->assertEquals('Dept Test Updated', $dept->name);
-        $this->assertEquals('dept-test-updated', $dept->slug);
+        $this->assertEquals('Bidang Baru Updated', $dept->name);
+        $this->assertEquals('bidang-baru-updated', $dept->slug);
     }
 
     #[Test]
@@ -193,7 +221,7 @@ class DepartmentControllerTest extends TestCase
     {
         $response = $this->actingAs($this->superAdmin)
             ->patch(route('admin.departments.update', $this->systemDept->id), [
-                'name' => 'System Updated',
+                'name'        => 'System Updated',
                 'description' => 'Deskripsi baru'
             ]);
 
@@ -208,19 +236,19 @@ class DepartmentControllerTest extends TestCase
     public function non_super_admin_cannot_update_department()
     {
         $dept = Department::create([
-            'name' => 'Dept Test',
-            'slug' => 'dept-test'
+            'name' => 'Sekretariat Edit',
+            'slug' => 'sekretariat-edit'
         ]);
 
         $nonSuperAdmins = [
-            'Admin' => $this->admin,
+            'Admin'        => $this->admin,
             'Regular User' => $this->regularUser,
         ];
         
         foreach ($nonSuperAdmins as $role => $user) {
             $response = $this->actingAs($user)
                 ->patch(route('admin.departments.update', $dept->id), [
-                    'name' => 'Dept Test Updated',
+                    'name'        => 'Ilegal Ubah',
                     'description' => 'Deskripsi baru'
                 ]);
             
@@ -228,7 +256,7 @@ class DepartmentControllerTest extends TestCase
         }
         
         $dept->refresh();
-        $this->assertEquals('Dept Test', $dept->name);
+        $this->assertEquals('Sekretariat Edit', $dept->name);
     }
 
     // ============================================================
@@ -268,7 +296,7 @@ class DepartmentControllerTest extends TestCase
         $response->assertSessionHas('error', 'Departemen System tidak bisa dihapus.');
         
         $this->assertDatabaseHas('departments', [
-            'id' => $this->systemDept->id,
+            'id'   => $this->systemDept->id,
             'name' => 'System'
         ]);
     }
@@ -321,7 +349,7 @@ class DepartmentControllerTest extends TestCase
         ]);
 
         $nonSuperAdmins = [
-            'Admin' => $this->admin,
+            'Admin'        => $this->admin,
             'Regular User' => $this->regularUser,
         ];
         
@@ -351,14 +379,16 @@ class DepartmentControllerTest extends TestCase
             'slug' => 'dept-with-users'
         ]);
         
-        User::create([
-            'name' => 'Test User',
-            'email' => 'testuser@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $dept->id,
-            'status' => 'approved'
+        $userRelation = User::create([
+            'name'              => 'Test User',
+            'email'             => 'testuser@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 3,
+            'department_id'     => $dept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $userRelation->markEmailAsVerified();
         
         $response = $this->actingAs($this->superAdmin)
             ->delete(route('admin.departments.destroy', $dept->id), [
@@ -369,7 +399,7 @@ class DepartmentControllerTest extends TestCase
         $response->assertSessionHas('error', 'Departemen tidak dapat dihapus karena masih memiliki data terkait (kategori, user, atau arsip).');
         
         $this->assertDatabaseHas('departments', [
-            'id' => $dept->id,
+            'id'   => $dept->id,
             'name' => 'Dept With Users'
         ]);
     }
@@ -396,7 +426,7 @@ class DepartmentControllerTest extends TestCase
         $response->assertSessionHas('error', 'Departemen tidak dapat dihapus karena masih memiliki data terkait (kategori, user, atau arsip).');
         
         $this->assertDatabaseHas('departments', [
-            'id' => $dept->id,
+            'id'   => $dept->id,
             'name' => 'Dept With Categories'
         ]);
     }
@@ -415,10 +445,11 @@ class DepartmentControllerTest extends TestCase
         ]);
         
         $category->archives()->create([
-            'title' => 'Test Archive',
+            'title'       => 'Test Archive',
             'description' => 'Test Description',
-            'file_path' => '/test/file.pdf',
-            'user_id' => $this->superAdmin->id
+            'file_path'   => '/test/file.pdf',
+            'user_id'     => $this->superAdmin->id,
+            'hash_token'  => Str::random(40)
         ]);
         
         $response = $this->actingAs($this->superAdmin)
@@ -430,7 +461,7 @@ class DepartmentControllerTest extends TestCase
         $response->assertSessionHas('error', 'Departemen tidak dapat dihapus karena masih memiliki data terkait (kategori, user, atau arsip).');
         
         $this->assertDatabaseHas('departments', [
-            'id' => $dept->id,
+            'id'   => $dept->id,
             'name' => 'Dept With Archives'
         ]);
     }
@@ -443,14 +474,16 @@ class DepartmentControllerTest extends TestCase
             'slug' => 'dept-with-multiple'
         ]);
         
-        User::create([
-            'name' => 'Test User',
-            'email' => 'testuser2@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $dept->id,
-            'status' => 'approved'
+        $userRelation = User::create([
+            'name'              => 'Test User',
+            'email'             => 'testuser2@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 3,
+            'department_id'     => $dept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $userRelation->markEmailAsVerified();
         
         $category = $dept->categories()->create([
             'name' => 'Test Category',
@@ -458,10 +491,11 @@ class DepartmentControllerTest extends TestCase
         ]);
         
         $category->archives()->create([
-            'title' => 'Test Archive',
+            'title'       => 'Test Archive',
             'description' => 'Test Description',
-            'file_path' => '/test/file.pdf',
-            'user_id' => $this->superAdmin->id
+            'file_path'   => '/test/file.pdf',
+            'user_id'     => $this->superAdmin->id,
+            'hash_token'  => Str::random(40)
         ]);
         
         $response = $this->actingAs($this->superAdmin)
@@ -473,7 +507,7 @@ class DepartmentControllerTest extends TestCase
         $response->assertSessionHas('error', 'Departemen tidak dapat dihapus karena masih memiliki data terkait (kategori, user, atau arsip).');
         
         $this->assertDatabaseHas('departments', [
-            'id' => $dept->id,
+            'id'   => $dept->id,
             'name' => 'Dept With Multiple Relations'
         ]);
     }
@@ -497,7 +531,7 @@ class DepartmentControllerTest extends TestCase
 
         $response = $this->actingAs($this->superAdmin)
             ->patch(route('admin.departments.update', $dept->id), [
-                'name' => 'Existing Dept',
+                'name'        => 'Existing Dept',
                 'description' => 'Deskripsi'
             ]);
 

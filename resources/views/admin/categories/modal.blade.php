@@ -9,15 +9,35 @@
                     <x-text-input id="name" name="name" type="text" autocomplete="off" class="mt-1 block w-full rounded-xl" placeholder="Misal: Laporan Keuangan" required />
                     <x-input-error :messages="$errors->get('name')" class="mt-2" />
                 </div>
+                
                 <div>
                     <x-input-label for="description" value="Deskripsi" class="text-xs font-bold uppercase text-slate-500" />
                     <textarea name="description" id="description" rows="3" autocomplete="off" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm" placeholder="Berikan sedikit konteks tentang kategori ini..."></textarea>
                 </div>
-                <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Unit Kerja Terdeteksi</p>
-                    <p class="text-sm font-bold text-indigo-700">{{ Auth::user()->department->name }}</p>
-                </div>
+
+                {{-- KONDISIONAL PILIHAN DEPARTEMEN --}}
+                @if(Auth::user()->isPureSuperAdmin())
+                    <div>
+                        <x-input-label for="department_id" value="Pilih Departemen / Unit Kerja" class="text-xs font-bold uppercase text-slate-500" />
+                        <select name="department_id" id="department_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm text-sm text-slate-700">
+                            <option value="">-- Departemen Sendiri ({{ Auth::user()->department->name }}) --</option>
+                            {{-- Pastikan variabel $departments dikirim dari Controller ke View index --}}
+                            @foreach($departments as $dept)
+                                @if($dept->id !== Auth::user()->department_id)
+                                    <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                                @endif
+                            @endforeach
+                        </select>
+                        <x-input-error :messages="$errors->get('department_id')" class="mt-2" />
+                    </div>
+                @else
+                    <div class="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                        <p class="text-[10px] text-slate-500 uppercase font-bold tracking-widest">Unit Kerja Terdeteksi</p>
+                        <p class="text-sm font-bold text-indigo-700">{{ Auth::user()->department->name }}</p>
+                    </div>
+                @endif
             </div>
+            
             <div class="mt-6 flex justify-end gap-3">
                 <x-secondary-button x-on:click="$dispatch('close')" class="rounded-xl">Batal</x-secondary-button>
                 <x-primary-button class="bg-indigo-600 rounded-xl">Simpan Kategori</x-primary-button>

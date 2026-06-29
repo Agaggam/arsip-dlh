@@ -40,33 +40,42 @@ class ActivityLogTest extends TestCase
         $this->systemDept = Department::create(['name' => 'System', 'slug' => 'system']);
         $this->sekretariatDept = Department::create(['name' => 'Sekretariat', 'slug' => 'sekretariat']);
 
-        // 4. Buat User dummy dengan relasi department_id dan role_id yang valid
+        // 4. Buat User dengan kelengkapan status & verifikasi email agar tidak terkena redirect 302 middleware
         $this->superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 1,
-            'department_id' => $this->systemDept->id,
-            'status' => 'approved'
+            'name'              => 'Super Admin',
+            'email'             => 'superadmin@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 1,
+            'department_id'     => $this->systemDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->superAdmin->markEmailAsVerified();
+        $this->superAdmin->load(['role', 'department']);
 
         $this->admin = User::create([
-            'name' => 'Admin Sekretariat',
-            'email' => 'admin@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 2,
-            'department_id' => $this->sekretariatDept->id,
-            'status' => 'approved'
+            'name'              => 'Admin Sekretariat',
+            'email'             => 'admin@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 2,
+            'department_id'     => $this->sekretariatDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->admin->markEmailAsVerified();
+        $this->admin->load(['role', 'department']);
 
         $this->regularUser = User::create([
-            'name' => 'Regular User',
-            'email' => 'user@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $this->sekretariatDept->id,
-            'status' => 'approved'
+            'name'              => 'Regular User',
+            'email'             => 'user@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 3,
+            'department_id'     => $this->sekretariatDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->regularUser->markEmailAsVerified();
+        $this->regularUser->load(['role', 'department']);
     }
 
     // =========================================================================

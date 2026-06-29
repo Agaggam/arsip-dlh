@@ -25,56 +25,59 @@ class UserControllerTest extends TestCase
     {
         parent::setUp();
 
-        // Create roles
-        Role::create(['name' => 'super_admin']);
-        Role::create(['name' => 'admin']);
-        Role::create(['name' => 'user']);
+        // Mock fungsi log_activity jika berupa global helper agar tidak mengganggu testing
+        if (!function_exists('log_activity')) {
+            function log_activity($user, $action, $description) {
+                // Dimock agar bypass
+            }
+        }
 
-        // Create departments
-        $this->systemDept = Department::create([
-            'name' => 'System',
-            'slug' => 'system'
-        ]);
+        // 1. Create roles terikat ID secara eksplisit
+        Role::create(['id' => 1, 'name' => 'super_admin']);
+        Role::create(['id' => 2, 'name' => 'admin']);
+        Role::create(['id' => 3, 'name' => 'user']);
 
-        $this->sekretariatDept = Department::create([
-            'name' => 'Sekretariat',
-            'slug' => 'sekretariat'
-        ]);
+        // 2. Create departments
+        $this->systemDept = Department::create(['name' => 'System', 'slug' => 'system']);
+        $this->sekretariatDept = Department::create(['name' => 'Sekretariat', 'slug' => 'sekretariat']);
+        $this->tataLingkunganDept = Department::create(['name' => 'Tata Lingkungan', 'slug' => 'tata-lingkungan']);
 
-        $this->tataLingkunganDept = Department::create([
-            'name' => 'Tata Lingkungan',
-            'slug' => 'tata-lingkungan'
-        ]);
-
-        // Create Super Admin (Pure Super Admin - department System)
+        // 3. Create Users dengan kelengkapan status untuk bypass middleware route
         $this->superAdmin = User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 1,
-            'department_id' => $this->systemDept->id,
-            'status' => 'approved'
+            'name'              => 'Super Admin',
+            'email'             => 'superadmin@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 1,
+            'department_id'     => $this->systemDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->superAdmin->markEmailAsVerified();
+        $this->superAdmin->load(['role', 'department']);
 
-        // Create Admin (department Sekretariat)
         $this->admin = User::create([
-            'name' => 'Admin Sekretariat',
-            'email' => 'admin@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 2,
-            'department_id' => $this->sekretariatDept->id,
-            'status' => 'approved'
+            'name'              => 'Admin Sekretariat',
+            'email'             => 'admin@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 2,
+            'department_id'     => $this->sekretariatDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->admin->markEmailAsVerified();
+        $this->admin->load(['role', 'department']);
 
-        // Create Regular User (department Sekretariat)
         $this->regularUser = User::create([
-            'name' => 'Regular User',
-            'email' => 'user@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $this->sekretariatDept->id,
-            'status' => 'pending'
+            'name'              => 'Regular User',
+            'email'             => 'user@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 3,
+            'department_id'     => $this->sekretariatDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $this->regularUser->markEmailAsVerified();
+        $this->regularUser->load(['role', 'department']);
     }
 
     // ============================================================
@@ -395,13 +398,16 @@ class UserControllerTest extends TestCase
     public function admin_cannot_update_user_status_in_other_department()
     {
         $otherUser = User::create([
-            'name' => 'Other User',
-            'email' => 'other@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $this->tataLingkunganDept->id,
-            'status' => 'pending'
+            'name'              => 'Other User',
+            'email'             => 'other@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 3,
+            'department_id'     => $this->tataLingkunganDept->id,
+            'status'            => 'pending',
+            'email_verified_at' => now(),
         ]);
+        $otherUser->markEmailAsVerified();
+        $otherUser->load(['role', 'department']);
 
         $response = $this->actingAs($this->admin)
             ->patch(route('users.update_status', $otherUser->id), [
@@ -428,13 +434,16 @@ class UserControllerTest extends TestCase
     public function admin_cannot_update_status_of_admin_user()
     {
         $anotherAdmin = User::create([
-            'name' => 'Another Admin',
-            'email' => 'another_admin2@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 2,
-            'department_id' => $this->sekretariatDept->id,
-            'status' => 'pending'
+            'name'              => 'Another Admin',
+            'email'             => 'another_admin2@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 2,
+            'department_id'     => $this->sekretariatDept->id,
+            'status'            => 'pending',
+            'email_verified_at' => now(),
         ]);
+        $anotherAdmin->markEmailAsVerified();
+        $anotherAdmin->load(['role', 'department']);
 
         $response = $this->actingAs($this->admin)
             ->patch(route('users.update_status', $anotherAdmin->id), [
@@ -531,13 +540,16 @@ class UserControllerTest extends TestCase
     public function admin_cannot_delete_user_with_role_admin()
     {
         $anotherAdmin = User::create([
-            'name' => 'Another Admin',
-            'email' => 'another_admin@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 2,
-            'department_id' => $this->sekretariatDept->id,
-            'status' => 'approved'
+            'name'              => 'Another Admin',
+            'email'             => 'another_admin@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 2,
+            'department_id'     => $this->sekretariatDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $anotherAdmin->markEmailAsVerified();
+        $anotherAdmin->load(['role', 'department']);
 
         $response = $this->actingAs($this->admin)
             ->delete(route('users.destroy', $anotherAdmin->id), [
@@ -557,13 +569,16 @@ class UserControllerTest extends TestCase
     public function admin_cannot_delete_user_from_other_department()
     {
         $otherUser = User::create([
-            'name' => 'Other User',
-            'email' => 'other@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $this->tataLingkunganDept->id,
-            'status' => 'pending'
+            'name'              => 'Other User',
+            'email'             => 'other@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 3,
+            'department_id'     => $this->tataLingkunganDept->id,
+            'status'            => 'pending',
+            'email_verified_at' => now(),
         ]);
+        $otherUser->markEmailAsVerified();
+        $otherUser->load(['role', 'department']);
 
         $response = $this->actingAs($this->admin)
             ->delete(route('users.destroy', $otherUser->id), [
@@ -692,13 +707,16 @@ class UserControllerTest extends TestCase
     public function admin_only_sees_users_from_their_department()
     {
         $otherUser = User::create([
-            'name' => 'Other Dept User',
-            'email' => 'otherdept@test.com',
-            'password' => Hash::make('password'),
-            'role_id' => 3,
-            'department_id' => $this->tataLingkunganDept->id,
-            'status' => 'approved'
+            'name'              => 'Other Dept User',
+            'email'             => 'otherdept@test.com',
+            'password'          => Hash::make('password'),
+            'role_id'           => 3,
+            'department_id'     => $this->tataLingkunganDept->id,
+            'status'            => 'approved',
+            'email_verified_at' => now(),
         ]);
+        $otherUser->markEmailAsVerified();
+        $otherUser->load(['role', 'department']);
 
         $response = $this->actingAs($this->admin)
             ->get(route('users.index'));

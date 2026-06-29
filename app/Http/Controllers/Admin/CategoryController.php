@@ -64,6 +64,7 @@ class CategoryController extends Controller
 
     public function index(Request $request)
     {
+        // 1. Hak Akses ditaruh paling atas
         $authUser = $this->AllAdminAccess();
         
         $search = $request->get('search');
@@ -90,7 +91,6 @@ class CategoryController extends Controller
             $query->doesntHave('archives');
         }
 
-        // Mengganti ->get() menjadi ->paginate() dan mempertahankan filter di URL query string
         $categories = $query->latest()->paginate(10)->withQueryString();
 
         if ($authUser->isPureSuperAdmin()) {
@@ -104,11 +104,15 @@ class CategoryController extends Controller
 
     public function store(Request $request)
     {
+        // 1. Hak Akses ditaruh paling atas
         $authUser = $this->AllAdminAccess();
 
-        $dept_id = $authUser->department_id;
+        $dept_id = ($authUser->isPureSuperAdmin() && $request->filled('department_id')) 
+            ? $request->department_id 
+            : $authUser->department_id;
 
         $request->validate([
+            'department_id' => $authUser->isPureSuperAdmin() ? 'nullable|exists:departments,id' : 'nullable',
             'name' => [
                 'required', 'string', 'max:255',
                 Rule::unique('categories')->where(fn ($q) => $q->where('department_id', $dept_id))
@@ -118,18 +122,25 @@ class CategoryController extends Controller
 
         $category = Category::create([
             'department_id' => $dept_id,
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
-            'description' => $request->description,
+            'name'          => $request->name,
+            'slug'          => Str::slug($request->name),
+            'description'   => $request->description,
         ]);
+
+        $category->load('department');
 
         log_activity($authUser, 'tambah_kategori', "Kategori ({$category->name}) berhasil ditambahkan di departemen ({$category->department->name}).");
 
         return back()->with('success', 'Kategori berhasil ditambahkan.');
     }
 
-    public function update(Request $request, Category $category)
+    // Mengubah parameter dari Category $category menjadi $id untuk mengamankan kebocoran informasi data
+    public function update(Request $request, $id)
     {
+        // 1. Ambil data mentah dulu demi mengekstrak departemen asal
+        $category = Category::findOrFail($id);
+
+        // 2. Hak Akses ditaruh di atas sebelum manipulasi data dijalankan
         $authUser = $this->AllAdminAccess($category->department_id);
 
         $dept_id = $category->department_id;
@@ -144,8 +155,8 @@ class CategoryController extends Controller
 
         $oldName = $category->name;
         $category->update([
-            'name' => $request->name,
-            'slug' => Str::slug($request->name),
+            'name'        => $request->name,
+            'slug'        => Str::slug($request->name),
             'description' => $request->description,
         ]);
 
@@ -154,31 +165,30 @@ class CategoryController extends Controller
         return back()->with('success', 'Kategori berhasil diperbarui.');
     }
 
-    /**
-     * Memproses migrasi arsip antar kategori secara massal.
-     * Menerima input ID via Query String / Request parameters dari Alpine dynamic action.
-     */
     public function migrateArchives(Request $request)
     {
-        // 1. Validasi Input Data Form dasar & kehadiran Password
+        // 1. Hak Akses awal ditaruh paling atas (Akses Admin Umum)
+        $authUser = $this->AllAdminAccess();
+
+        // 2. Baru lakukan validasi muatan form request
         $request->validate([
             'source_category_id' => 'required|exists:categories,id',
             'target_category_id' => 'required|exists:categories,id',
             'password'           => 'required'
         ]);
 
-        // Find data model kategori sumber berdasarkan request form
         $category = Category::findOrFail($request->source_category_id);
 
-        // Ambil data autentikasi & validasi hak akses departemen asal
-        $authUser = $this->AllAdminAccess($category->department_id);
+        // 3. Hak Akses tingkat lanjut: Cek apakah dia berhak mengelola departemen asal kategori tersebut
+        if (!$authUser->isPureSuperAdmin() && !$authUser->isFromDepartment($category->department_id)) {
+            abort(403, 'Akses Ditolak: Anda bukan admin dari departemen ini.');
+        }
 
-        // 2. Verifikasi keamanan password (dari x-confirm-modal)
+        // 4. Verifikasi keamanan password
         if (!Hash::check($request->password, $authUser->password)) {
             return back()->with('error', 'Konfirmasi gagal. Password yang Anda masukkan salah!');
         }
 
-        // Find data model kategori tujuan
         $targetCategory = Category::findOrFail($request->target_category_id);
 
         // Cek akses ke departemen kategori tujuan (jika bukan super admin)
@@ -188,30 +198,31 @@ class CategoryController extends Controller
             }
         }
 
-        // Cek apakah kategori sumber dan tujuan sama
         if ($category->id === $targetCategory->id) {
             return back()->with('error', 'Kategori sumber dan tujuan tidak boleh sama.');
         }
 
-        // Hitung jumlah arsip yang akan dipindahkan
         $archivesCount = $category->archives()->count();
 
         if ($archivesCount === 0) {
             return back()->with('error', 'Kategori ini tidak memiliki arsip untuk dipindahkan.');
         }
 
-        // Pindahkan semua arsip dari kategori lama ke kategori baru menggunakan Query Builder massal
         Archive::where('category_id', $category->id)
             ->update(['category_id' => $targetCategory->id]);
 
-        // Rekam aktivitas log sistem
         log_activity($authUser, 'pindah_kategori', "Memindahkan ({$archivesCount}) arsip dari kategori ({$category->name}) ke kategori ({$targetCategory->name}).");
 
         return back()->with('success', "Berhasil memindahkan {$archivesCount} arsip ke kategori '{$targetCategory->name}'.");
     }
 
-    public function destroy(Request $request, Category $category)
+    // Mengubah parameter dari Category $category menjadi $id untuk mengamankan kebocoran informasi data
+    public function destroy(Request $request, $id)
     {
+        // 1. Ambil data mentah dulu demi mengekstrak departemen asal
+        $category = Category::findOrFail($id);
+
+        // 2. Hak Akses ditaruh di atas sebelum manipulasi data dilakukan
         $authUser = $this->AllAdminAccess($category->department_id);
 
         $request->validate(['password' => 'required']);
@@ -220,7 +231,6 @@ class CategoryController extends Controller
             return back()->with('error', 'Konfirmasi gagal. Password yang Anda masukkan salah!');
         }
 
-        // Cek apakah kategori masih memiliki arsip
         $archivesCount = $category->archives()->count();
 
         if ($archivesCount > 0) {
@@ -228,9 +238,11 @@ class CategoryController extends Controller
         }
 
         $categoryName = $category->name;
+        $deptName = $category->department->name ?? 'Tidak Ada Departemen';
+        
         $category->delete();
 
-        log_activity($authUser, 'hapus_kategori', "Kategori ({$categoryName}) dari departemen ({$category->department->name}) berhasil dihapus.");
+        log_activity($authUser, 'hapus_kategori', "Kategori ({$categoryName}) dari departemen ({$deptName}) berhasil dihapus.");
 
         return back()->with('success', 'Kategori berhasil dihapus.');
     }
