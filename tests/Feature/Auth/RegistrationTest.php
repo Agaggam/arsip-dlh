@@ -49,7 +49,7 @@ class RegistrationTest extends TestCase
             'email'                 => 'test@example.com',
             'password'              => 'password',
             'password_confirmation' => 'password',
-            'department_id'         => $department->id, // Wajib memilih departemen
+            'department_id'         => $department->id,
         ]);
 
         // 3. Pastikan user berhasil login otomatis setelah register (walau belum verifikasi)
@@ -62,9 +62,9 @@ class RegistrationTest extends TestCase
         $this->assertDatabaseHas('users', [
             'email'         => 'test@example.com',
             'department_id' => $department->id,
-            'status'        => 'pending', // Otomatis pending
-            'role_id'       => 3,         // Otomatis menjadi role biasa (user)
-            'email_verified_at' => null,  // Memastikan email memang belum terverifikasi saat awal daftar
+            'status'        => 'pending',
+            'role_id'       => 3,
+            'email_verified_at' => null,
         ]);
     }
 
@@ -76,10 +76,10 @@ class RegistrationTest extends TestCase
             'email'                 => 'test2@example.com',
             'password'              => 'password',
             'password_confirmation' => 'password',
-            // 'department_id' sengaja dikosongkan
         ]);
 
         $response->assertSessionHasErrors('department_id');
         $this->assertGuest();
     }
+    //halo
 }

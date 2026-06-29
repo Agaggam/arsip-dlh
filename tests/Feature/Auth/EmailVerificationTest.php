@@ -41,7 +41,7 @@ class EmailVerificationTest extends TestCase
     }
 
     /**
-     * Helper privat untuk membuat user baru yang BELUM terverifikasi emailnya
+     * Helper privat membuat user baru yang BELUM terverifikasi emailnya
      */
     private function createUnverifiedUser(): User
     {
@@ -110,4 +110,5 @@ class EmailVerificationTest extends TestCase
         // Memastikan user di database TETAP berstatus belum terverifikasi (null)
         $this->assertFalse($user->fresh()->hasVerifiedEmail());
     }
+    //halo
 }

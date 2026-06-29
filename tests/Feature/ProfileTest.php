@@ -92,7 +92,6 @@ class ProfileTest extends TestCase
         $this->assertSame('New Profile Name', $user->name);
         $this->assertSame('newemail@example.com', $user->email);
         
-        // Karena email berubah, status verifikasi biasanya otomatis reset menjadi null (wajib verifikasi ulang)
         $this->assertNull($user->email_verified_at);
     }
 
@@ -111,7 +110,6 @@ class ProfileTest extends TestCase
             ->assertSessionHasNoErrors()
             ->assertRedirect('/profile');
 
-        // Pastikan status verifikasi email tetap aman dan tidak bernilai null
         $this->assertNotNull($user->refresh()->email_verified_at);
     }
 
@@ -150,4 +148,5 @@ class ProfileTest extends TestCase
 
         $this->assertNotNull($user->fresh());
     }
+    //halo
 }

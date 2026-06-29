@@ -93,7 +93,7 @@ class DashboardTest extends TestCase
     }
 
     // ============================================================
-    // 1. PENGUJIAN AKSES SUPER ADMIN & ADMIN
+    // 1. PENGUJIAN AKSES SUPER ADMIN & ADMIN BIDANG
     // ============================================================
 
     public function test_super_admin_can_access_admin_dashboard(): void
@@ -117,7 +117,6 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($this->superAdmin)
             ->get(route('dashboard'));
 
-        // Sesuai baris terakhir middleware CheckRole: dialihkan kembali ke admin dashboard
         $response->assertRedirect(route('admin.dashboard'));
     }
 
@@ -138,7 +137,6 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($this->approvedUser)
             ->get(route('admin.dashboard'));
 
-        // Sesuai logic middleware CheckRole jika $userRole === 'user'
         $response->assertRedirect(route('dashboard'));
     }
 
@@ -147,8 +145,6 @@ class DashboardTest extends TestCase
         $response = $this->actingAs($this->pendingUser)
             ->get(route('dashboard'));
 
-        // Dialihkan oleh middleware 'status'. Jika ke login, biarkan route('login')
-        // Jika middleware status Anda me-redirect ke halaman lain, sesuaikan rutenya di bawah ini
         $response->assertRedirect(route('login')); 
     }
 
@@ -161,4 +157,5 @@ class DashboardTest extends TestCase
         $this->get(route('dashboard'))->assertRedirect(route('login'));
         $this->get(route('admin.dashboard'))->assertRedirect(route('login'));
     }
+    //halo
 }

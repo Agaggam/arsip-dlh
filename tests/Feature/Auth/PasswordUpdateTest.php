@@ -39,7 +39,7 @@ class PasswordUpdateTest extends TestCase
     }
 
     /**
-     * Helper privat untuk membuat user yang berstatus valid (Approved & Verified)
+     * Helper privat membuat user yang berstatus valid (Approved & Verified)
      */
     private function createValidUser(): User
     {
@@ -98,4 +98,5 @@ class PasswordUpdateTest extends TestCase
             ->assertSessionHasErrorsIn('updatePassword', 'current_password')
             ->assertRedirect('/profile');
     }
+    //halo
 }

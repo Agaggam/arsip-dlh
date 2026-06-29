@@ -110,7 +110,6 @@ class AuthenticationTest extends TestCase
     {
         $user = $this->createValidUser();
 
-        // Lakukan percobaan login salah sebanyak 5 kali berturut-turut (batas default Laravel)
         for ($i = 0; $i < 5; $i++) {
             $response = $this->post('/login', [
                 'email'    => $user->email,
@@ -125,8 +124,7 @@ class AuthenticationTest extends TestCase
             'password' => 'wrong-password',
         ]);
 
-        // Laravel biasanya mengembalikan error session berupa validasi email
-        // yang mengabarkan bahwa user terlalu banyak mencoba login.
         $response->assertSessionHasErrors('email');
     }
+    //halo
 }
