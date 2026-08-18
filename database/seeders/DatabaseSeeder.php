@@ -77,6 +77,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Untuk membuat user secara acak dengan memanggil UserSeeder
-        $this->call(UserSeeder::class);
+        // $this->call(UserSeeder::class);
     }
 }

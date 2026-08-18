@@ -76,7 +76,18 @@ class ArchiveController extends Controller
             });
         }
 
-        // === IMPLEMENTASI FILTER BULAN & TAHUN ===
+        $dateFrom = $request->get('date_from'); // Filter: Tanggal Mulai
+        $dateTo = $request->get('date_to');     // Filter: Tanggal Sampai
+
+        // === IMPLEMENTASI FILTER BULAN & TAHUN & RENTANG TANGGAL ===
+        if ($dateFrom) {
+            $query->whereDate('archive_date', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $query->whereDate('archive_date', '<=', $dateTo);
+        }
+
         if ($month) {
             $query->whereMonth('archive_date', $month);
         }
@@ -308,6 +319,22 @@ class ArchiveController extends Controller
 
             // LOG AKTIVITAS
             log_activity($user, 'tambah_arsip', "Arsip ({$archive->title}) Dengan (ID: {$archive->id}) berhasil diunggah ke kategori ({$category->name}).");
+
+            // Kirim Notifikasi Email ke Super Admin dan Admin Departemen
+            try {
+                $admins = \App\Models\User::whereHas('role', function($q) {
+                    $q->whereIn('name', ['super_admin', 'admin']);
+                })->get();
+
+                foreach ($admins as $adminUser) {
+                    // Jika super_admin atau admin dengan departemen yang sama
+                    if ($adminUser->isPureSuperAdmin() || $adminUser->department_id === $category->department_id) {
+                        $adminUser->notify(new \App\Notifications\NewArchiveNotification($archive));
+                    }
+                }
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error("Gagal mengirim email notifikasi arsip baru: " . $e->getMessage());
+            }
 
             return back()->with('success', 'Arsip berhasil diunggah!');
         }

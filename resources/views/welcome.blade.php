@@ -16,12 +16,15 @@
 
     <style>
         /* Custom base styles */
-        body {
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #eef2f5 100%);
-        }
         .hero-gradient {
             background: radial-gradient(circle at 10% 20%, rgba(16, 185, 129, 0.08) 0%, rgba(5, 150, 105, 0.02) 90%);
+        }
+        @keyframes ken-burns {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.15); }
+        }
+        .animate-ken-burns {
+            animation: ken-burns 20s ease-in-out infinite alternate;
         }
         .card-hover {
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -47,6 +50,41 @@
             0% { transform: translateY(0px); }
             50% { transform: translateY(-12px); }
             100% { transform: translateY(0px); }
+        }
+        .animate-float-slow {
+            animation: float-slow 8s ease-in-out infinite;
+        }
+        @keyframes float-slow {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-15px) rotate(1.5deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-glow-breath {
+            animation: glow-breath 4s ease-in-out infinite alternate;
+        }
+        @keyframes glow-breath {
+            0% { opacity: 0.3; transform: scale(0.9); }
+            100% { opacity: 0.65; transform: scale(1.05); }
+        }
+        .animate-fade-orbit {
+            animation: fade-orbit 4s ease-in-out infinite alternate;
+        }
+        @keyframes fade-orbit {
+            0% { opacity: 0.1; transform: translateY(10px); }
+            100% { opacity: 0.9; transform: translateY(-10px); }
+        }
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-fade-in-up {
+            animation: fade-in-up 1s cubic-bezier(0.16, 1, 0.3, 1) both;
         }
         .blur-bg {
             backdrop-filter: blur(8px);
@@ -94,37 +132,35 @@
         }
     </style>
 </head>
-<body class="antialiased overflow-x-hidden">
+<body class="font-sans antialiased overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100">
 
     <!-- Navbar dengan mobile menu -->
     <nav class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16 lg:h-20">
+            <div class="flex justify-between items-center h-20 lg:h-24">
                 <!-- Logo -->
-                <div class="flex items-center gap-2">
-                    <div class="w-8 h-8 bg-gradient-to-br from-emerald-600 to-teal-500 rounded-xl flex items-center justify-center shadow-sm">
-                        <i class="fas fa-leaf text-white text-sm"></i>
-                    </div>
-                    <span class="font-bold text-gray-800 text-base sm:text-lg tracking-tight">{{ config('app.name', 'E-Arsip DLH') }}</span>
+                <div class="flex items-center gap-3">
+                    <img src="{{ asset('images/logo-dlh.png') }}" alt="Logo" class="w-10 h-10 sm:w-12 sm:h-12 object-contain drop-shadow-md">
+                    <span class="font-extrabold text-gray-900 text-lg sm:text-xl tracking-tight">{{ config('app.name', 'E-Arsip DLH') }}</span>
                 </div>
 
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center gap-6 lg:gap-8">
-                    <a href="#features" class="text-gray-600 hover:text-emerald-600 transition text-sm font-medium">Fitur</a>
-                    <a href="#stats" class="text-gray-600 hover:text-emerald-600 transition text-sm font-medium">Statistik</a>
-                    <a href="#about" class="text-gray-600 hover:text-emerald-600 transition text-sm font-medium">Tentang</a>
+                <div class="hidden md:flex items-center gap-8 lg:gap-10">
+                    <a href="#features" class="text-gray-600 hover:text-emerald-600 hover:-translate-y-0.5 transition-all text-base font-semibold">Fitur</a>
+                    <a href="#stats" class="text-gray-600 hover:text-emerald-600 hover:-translate-y-0.5 transition-all text-base font-semibold">Statistik</a>
+                    <a href="{{ route('about') }}" class="text-gray-600 hover:text-emerald-600 hover:-translate-y-0.5 transition-all text-base font-semibold">Tentang</a>
                 </div>
 
                 <!-- Auth Buttons (Desktop) -->
-                <div class="hidden md:flex items-center gap-3">
+                <div class="hidden md:flex items-center gap-4">
                     @if (Route::has('login'))
                         @auth
-                            <a href="{{ url('/dashboard') }}" class="px-5 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-xl shadow-sm hover:bg-emerald-700 transition btn-glow">
+                            <a href="{{ url('/dashboard') }}" class="px-6 py-2.5 text-base font-bold bg-emerald-600 text-white rounded-xl shadow-sm hover:bg-emerald-700 transition btn-glow">
                                 Dashboard
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-emerald-600 transition">Masuk</a>
-                            <a href="{{ route('register') }}" class="px-5 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-xl shadow-sm hover:bg-emerald-700 transition btn-glow">
+                            <a href="{{ route('login') }}" class="px-5 py-2.5 text-base font-semibold text-gray-700 hover:text-emerald-600 transition">Masuk</a>
+                            <a href="{{ route('register') }}" class="px-6 py-2.5 text-base font-bold bg-emerald-600 text-white rounded-xl shadow-md hover:bg-emerald-700 hover:-translate-y-0.5 transition-all btn-glow">
                                 Daftar
                             </a>
                         @endauth
@@ -142,7 +178,7 @@
                 <div class="py-4 border-t border-gray-100 space-y-3">
                     <a href="#features" class="block py-2 text-gray-600 hover:text-emerald-600 transition font-medium">Fitur</a>
                     <a href="#stats" class="block py-2 text-gray-600 hover:text-emerald-600 transition font-medium">Statistik</a>
-                    <a href="#about" class="block py-2 text-gray-600 hover:text-emerald-600 transition font-medium">Tentang</a>
+                    <a href="{{ route('about') }}" class="block py-2 text-gray-600 hover:text-emerald-600 transition font-medium">Tentang</a>
                     <div class="pt-3 flex flex-col gap-2">
                         @if (Route::has('login'))
                             @auth
@@ -163,182 +199,197 @@
     </nav>
 
     <!-- Hero Section -->
-    <section class="relative pt-24 sm:pt-28 lg:pt-36 pb-12 sm:pb-20 lg:pb-28 overflow-hidden hero-gradient">
-        <div class="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-            <div class="absolute -top-24 -right-24 w-96 h-96 bg-emerald-200/30 rounded-full blur-3xl"></div>
-            <div class="absolute bottom-0 left-0 w-80 h-80 bg-teal-200/20 rounded-full blur-3xl"></div>
+    <section class="relative pt-24 sm:pt-28 lg:pt-36 pb-12 sm:pb-20 lg:pb-28 overflow-hidden">
+        <!-- Animated Background Image -->
+        <div class="absolute inset-0 z-0">
+            <img src="https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?q=80&w=2000&auto=format&fit=crop" 
+                 alt="Nature Background" 
+                 class="w-full h-full object-cover animate-ken-burns">
+            <div class="absolute inset-0 bg-emerald-950/60 mix-blend-multiply"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-12 bg-gradient-to-t from-gray-50 to-transparent"></div>
         </div>
 
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="flex flex-col lg:flex-row items-center gap-8 md:gap-12">
-                <div class="flex-1 text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 bg-white/60 backdrop-blur-sm rounded-full px-3 py-1.5 border border-gray-200 shadow-sm mb-4 sm:mb-6">
-                        <span class="relative flex h-2 w-2">
-                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                        </span>
-                        <span class="text-[11px] sm:text-xs font-semibold text-emerald-700">Sistem Arsip Digital Terintegrasi</span>
-                    </div>
-                    <h1 class="text-3xl sm:text-4xl lg:text-6xl font-extrabold tracking-tight text-gray-900 leading-tight">
-                        Kelola Arsip <span class="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">Dinas Lingkungan Hidup</span> dengan Mudah
-                    </h1>
-                    <p class="text-base sm:text-lg text-gray-600 mt-4 sm:mt-6 max-w-xl mx-auto lg:mx-0">
-                        Platform pengelolaan arsip digital yang aman, cepat, dan ramah lingkungan. Akses dokumen kapan saja, di mana saja.
-                    </p>
-                    <div class="flex flex-wrap justify-center lg:justify-start gap-3 sm:gap-4 mt-6 sm:mt-8">
-                        <a href="{{ route('register') }}" class="px-5 sm:px-6 py-2.5 sm:py-3 bg-emerald-600 text-white rounded-xl font-semibold shadow-lg hover:bg-emerald-700 transition btn-glow flex items-center gap-2 text-sm sm:text-base">
-                            Mulai Sekarang <i class="fas fa-arrow-right text-xs sm:text-sm"></i>
-                        </a>
-                        <a href="#features" class="px-5 sm:px-6 py-2.5 sm:py-3 bg-white text-gray-700 rounded-xl font-semibold border border-gray-300 hover:border-emerald-300 hover:text-emerald-600 transition shadow-sm text-sm sm:text-base">
-                            Pelajari Fitur
-                        </a>
-                    </div>
-                    <div class="flex flex-wrap items-center justify-center lg:justify-start gap-4 sm:gap-6 mt-6 sm:mt-8 text-xs sm:text-sm text-gray-500">
-                        <div class="flex items-center gap-1"><i class="fas fa-check-circle text-emerald-500 text-xs sm:text-sm"></i> <span>Tanpa ribet</span></div>
-                        <div class="flex items-center gap-1"><i class="fas fa-shield-alt text-emerald-500 text-xs sm:text-sm"></i> <span>Aman & Terenkripsi</span></div>
-                        <div class="flex items-center gap-1"><i class="fas fa-cloud-upload-alt text-emerald-500 text-xs sm:text-sm"></i> <span>Akses 24/7</span></div>
-                    </div>
+            <div class="max-w-4xl mx-auto text-center flex flex-col items-center justify-center pt-4 sm:pt-8 pb-8 sm:pb-12">
+                
+                <!-- Badge Terintegrasi -->
+                <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20 shadow-sm mb-6 sm:mb-8 animate-fade-in-up">
+                    <span class="relative flex h-2.5 w-2.5">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-300 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-400"></span>
+                    </span>
+                    <span class="text-xs sm:text-sm font-semibold text-emerald-50 tracking-wide uppercase">Sistem Arsip Digital Terintegrasi</span>
                 </div>
-                <div class="flex-1 relative mt-8 lg:mt-0">
-                    <div class="relative animate-float">
-                        <img src="https://cdn-icons-png.flaticon.com/512/921/921490.png" alt="Arsip Digital" class="w-48 sm:w-64 md:w-72 lg:w-80 mx-auto drop-shadow-2xl opacity-90">
-                        <!-- Floating badges (responsive position) -->
-                        <div class="absolute -bottom-4 -left-2 sm:-bottom-6 sm:-left-6 bg-white rounded-xl sm:rounded-2xl shadow-xl p-2 sm:p-4 w-32 sm:w-44 backdrop-blur-sm border border-gray-100">
-                            <div class="flex items-center gap-1 sm:gap-2">
-                                <i class="fas fa-file-alt text-emerald-600 text-xs sm:text-base"></i>
-                                <span class="text-[10px] sm:text-xs font-semibold">+1.250 Arsip</span>
-                            </div>
-                            <div class="text-[8px] sm:text-[10px] text-gray-500 mt-0.5 sm:mt-1">Tersimpan aman</div>
-                        </div>
-                        <div class="absolute -top-2 -right-2 sm:-top-4 sm:-right-4 bg-white rounded-xl sm:rounded-2xl shadow-xl p-2 sm:p-3 w-28 sm:w-36 backdrop-blur-sm border border-gray-100">
-                            <div class="flex items-center gap-1 sm:gap-2">
-                                <i class="fas fa-clock text-teal-500 text-xs sm:text-base"></i>
-                                <span class="text-[10px] sm:text-xs font-semibold">Akses cepat</span>
-                            </div>
-                        </div>
-                    </div>
+                
+                <!-- Main Headline -->
+                <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold tracking-tight text-white leading-[1.15] drop-shadow-lg mb-6 animate-fade-in-up" style="animation-delay: 0.1s;">
+                    Kelola Arsip <br class="hidden sm:block" />
+                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-md">Lingkungan Hidup</span> dengan Mudah
+                </h1>
+                
+                <!-- Subheadline -->
+                <p class="text-base sm:text-lg md:text-xl text-emerald-50/90 max-w-2xl mx-auto drop-shadow-md mb-10 leading-relaxed font-light animate-fade-in-up" style="animation-delay: 0.2s;">
+                    Platform pengelolaan arsip digital yang aman, cepat, dan ramah lingkungan. Akses dokumen penting Anda kapan saja, di mana saja tanpa ribet.
+                </p>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto animate-fade-in-up" style="animation-delay: 0.3s;">
+                    <a href="{{ route('register') }}" class="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-emerald-500 text-white rounded-xl font-bold shadow-xl shadow-emerald-500/30 hover:bg-emerald-400 hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2 text-base">
+                        Mulai Sekarang <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#features" class="w-full sm:w-auto px-8 py-3.5 sm:py-4 bg-white/10 text-white rounded-xl font-bold border border-white/20 hover:bg-white/20 hover:border-white/40 hover:-translate-y-1 backdrop-blur-sm transition-all duration-300 shadow-lg text-base">
+                        Pelajari Fitur
+                    </a>
                 </div>
+                
+                <!-- Feature Highlights -->
+                <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-8 mt-10 sm:mt-16 text-xs sm:text-sm text-gray-200 bg-black/20 backdrop-blur-sm py-3 sm:py-4 px-4 sm:px-10 rounded-2xl border border-white/10 shadow-2xl animate-fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="flex items-center gap-2"><i class="fas fa-check-circle text-emerald-400 text-base"></i> <span class="font-medium">Tanpa ribet</span></div>
+                    <div class="hidden sm:block text-gray-500">•</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-shield-alt text-emerald-400 text-base"></i> <span class="font-medium">Aman & Terenkripsi</span></div>
+                    <div class="hidden sm:block text-gray-500">•</div>
+                    <div class="flex items-center gap-2"><i class="fas fa-cloud-upload-alt text-emerald-400 text-base"></i> <span class="font-medium">Akses 24/7</span></div>
+                </div>
+
             </div>
         </div>
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="py-12 sm:py-16 lg:py-20 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center max-w-2xl mx-auto mb-10 sm:mb-16">
-                <span class="text-emerald-600 font-semibold text-xs sm:text-sm uppercase tracking-wide">Keunggulan</span>
-                <h2 class="text-2xl sm:text-3xl lg:text-4xl font-bold text-gray-900 mt-2">Fitur Unggulan Sistem Arsip</h2>
-                <p class="text-gray-600 mt-3 sm:mt-4 text-sm sm:text-base">Dirancang untuk memudahkan pengelolaan dokumen lingkungan hidup secara digital dan efisien.</p>
+    <section id="features" class="relative py-16 sm:py-24 bg-gray-50 overflow-hidden">
+        <!-- Batik Pattern Background -->
+        <div class="absolute inset-0 opacity-[0.04] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23065f46\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
+        <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M20 20.5V18H0v-2h20v-2.5l10 3.5-10 3.5zm-8 4h-2v-2H8v2H6v-2H4v2H2v-2H0v4h12v-2zm-8-14h2v2H8v-2H6v2H4v-2H2v2H0V8h12v2zm28 22h-2v-2h-2v2h-2v-2h-2v2h-2v-2h-2v2h-2v-2h-2v4h20v-2zm-18-26h2v2h2V6h2v2h2V6h2v2h2V6h2v2h2V6h2v4H14V6z\' fill=\'%23047857\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');"></div>
+        
+        <!-- Abstract Background Shapes for Eco-Digital feel -->
+        <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-emerald-200/20 blur-3xl pointer-events-none"></div>
+        <div class="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 rounded-full bg-teal-200/20 blur-3xl pointer-events-none"></div>
+
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-2xl mx-auto mb-12 sm:mb-20">
+                <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-100/50 border border-emerald-200 mb-4 text-emerald-700 text-xs font-bold tracking-widest uppercase">
+                    <i class="fas fa-leaf"></i> Teknologi Hijau
+                </div>
+                <h2 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-gray-900 tracking-tight">Fitur Unggulan Sistem</h2>
+                <p class="text-gray-500 mt-4 text-base sm:text-lg">Dirancang khusus untuk memudahkan pengelolaan dokumen lingkungan hidup secara digital, efisien, dan modern.</p>
             </div>
 
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 <!-- Feature 1 -->
-                <div class="bg-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 card-hover border border-gray-100">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5">
-                        <i class="fas fa-search text-emerald-600 text-lg sm:text-xl"></i>
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-emerald-50 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-100 to-teal-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-emerald-100/50">
+                        <i class="fas fa-search text-emerald-600 text-xl"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Pencarian Cepat</h3>
-                    <p class="text-gray-500 mt-2 text-xs sm:text-sm leading-relaxed">Temukan arsip berdasarkan kata kunci, kategori, departemen, atau tahun dengan fitur pencarian canggih.</p>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-emerald-700 transition-colors">Pencarian Cepat</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Temukan arsip berdasarkan kata kunci, kategori, departemen, atau tahun dengan fitur pencarian yang canggih.</p>
                 </div>
                 <!-- Feature 2 -->
-                <div class="bg-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 card-hover border border-gray-100">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5">
-                        <i class="fas fa-folder-open text-emerald-600 text-lg sm:text-xl"></i>
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-emerald-50 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-teal-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-teal-100 to-emerald-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-teal-100/50">
+                        <i class="fas fa-folder-open text-teal-600 text-xl"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Kategori Terstruktur</h3>
-                    <p class="text-gray-500 mt-2 text-xs sm:text-sm leading-relaxed">Arsip dikelompokkan berdasarkan bidang, jenis dokumen, dan tingkat kerahasiaan untuk kemudahan akses.</p>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-teal-700 transition-colors">Kategori Terstruktur</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Arsip dikelompokkan berdasarkan bidang, jenis dokumen, dan tingkat kerahasiaan untuk kemudahan akses.</p>
                 </div>
                 <!-- Feature 3 -->
-                <div class="bg-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 card-hover border border-gray-100">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5">
-                        <i class="fas fa-users text-emerald-600 text-lg sm:text-xl"></i>
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-emerald-50 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-100 to-teal-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-emerald-100/50">
+                        <i class="fas fa-users-cog text-emerald-600 text-xl"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Manajemen Role</h3>
-                    <p class="text-gray-500 mt-2 text-xs sm:text-sm leading-relaxed">Atur hak akses pengguna (Admin, Operator, User) dengan sistem perizinan yang fleksibel.</p>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-emerald-700 transition-colors">Manajemen Role</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Atur hak akses pengguna (Admin, Operator, User) dengan sistem perizinan yang fleksibel namun ketat.</p>
                 </div>
                 <!-- Feature 4 -->
-                <div class="bg-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 card-hover border border-gray-100">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5">
-                        <i class="fas fa-chart-line text-emerald-600 text-lg sm:text-xl"></i>
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-emerald-50 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-teal-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-teal-100 to-emerald-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-teal-100/50">
+                        <i class="fas fa-chart-pie text-teal-600 text-xl"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Statistik Real-time</h3>
-                    <p class="text-gray-500 mt-2 text-xs sm:text-sm leading-relaxed">Pantau jumlah arsip, aktivitas pengguna, dan tren dokumen melalui dashboard interaktif.</p>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-teal-700 transition-colors">Statistik Real-time</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Pantau jumlah arsip, aktivitas pengguna, dan tren dokumen melalui dashboard analitik interaktif.</p>
                 </div>
                 <!-- Feature 5 -->
-                <div class="bg-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 card-hover border border-gray-100">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5">
-                        <i class="fas fa-trash-alt text-emerald-600 text-lg sm:text-xl"></i>
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-emerald-50 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-emerald-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-100 to-teal-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-emerald-100/50">
+                        <i class="fas fa-recycle text-emerald-600 text-xl"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Tempat Sampah Digital</h3>
-                    <p class="text-gray-500 mt-2 text-xs sm:text-sm leading-relaxed">Arsip yang dihapus sementara disimpan di trash, dapat dipulihkan kapan saja.</p>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-emerald-700 transition-colors">Digitalisasi Ramah</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Mendukung program Go Green DLH dengan mengurangi penggunaan kertas hingga 90% di setiap divisi.</p>
                 </div>
                 <!-- Feature 6 -->
-                <div class="bg-gray-50 rounded-xl sm:rounded-2xl p-5 sm:p-6 card-hover border border-gray-100">
-                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-lg sm:rounded-xl flex items-center justify-center mb-4 sm:mb-5">
-                        <i class="fas fa-lock text-emerald-600 text-lg sm:text-xl"></i>
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-emerald-50 shadow-sm hover:shadow-xl hover:shadow-emerald-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-teal-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-teal-100 to-emerald-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-teal-100/50">
+                        <i class="fas fa-shield-virus text-teal-600 text-xl"></i>
                     </div>
-                    <h3 class="text-lg sm:text-xl font-bold text-gray-800">Keamanan Terjamin</h3>
-                    <p class="text-gray-500 mt-2 text-xs sm:text-sm leading-relaxed">Enkripsi data dan autentikasi dua faktor untuk melindungi dokumen penting lingkungan hidup.</p>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-teal-700 transition-colors">Keamanan Lapis Ganda</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Enkripsi data arsip dan riwayat aktivitas sistem untuk melindungi seluruh dokumen penting.</p>
+                </div>
+                <!-- Feature 7 -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-amber-50 shadow-sm hover:shadow-xl hover:shadow-amber-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-amber-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-amber-100 to-yellow-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-amber-100/50">
+                        <i class="fas fa-file-invoice-dollar text-amber-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-amber-700 transition-colors">Usulan SSH & SBU</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Kelola dan ajukan usulan Standar Satuan Harga (SSH) dan Standar Biaya Umum (SBU) secara digital lengkap dengan cetak PDF otomatis.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Stats Section -->
-    <section id="stats" class="py-12 sm:py-16 bg-gradient-to-br from-emerald-50 to-teal-50">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8 text-center">
-                <div class="scroll-reveal">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-700">2.500+</div>
-                    <p class="text-gray-600 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Arsip Tersimpan</p>
+    <section id="stats" class="relative py-16 sm:py-24 bg-emerald-950 overflow-hidden text-white border-t border-emerald-900">
+        <!-- Eco-Digital Pattern Background -->
+        <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#34d399 1.5px, transparent 1.5px); background-size: 32px 32px;"></div>
+        <div class="absolute -right-20 top-1/2 -translate-y-1/2 w-80 h-80 bg-emerald-500/20 blur-[100px] rounded-full pointer-events-none"></div>
+        <div class="absolute -left-20 bottom-0 w-64 h-64 bg-teal-500/20 blur-[100px] rounded-full pointer-events-none"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 text-center">
+                <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover">
+                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ number_format($totalArsip, 0, ',', '.') }}</div>
+                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Arsip Digital</p>
                 </div>
-                <div class="scroll-reveal">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-700">45+</div>
-                    <p class="text-gray-600 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Instansi Terhubung</p>
+                <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 100ms;">
+                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalDepartemen }}</div>
+                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Bidang DLH</p>
                 </div>
-                <div class="scroll-reveal">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-700">98%</div>
-                    <p class="text-gray-600 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Kepuasan Pengguna</p>
+                <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 200ms;">
+                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalKategori }}</div>
+                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Kategori</p>
                 </div>
-                <div class="scroll-reveal">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl font-black text-emerald-700">24/7</div>
-                    <p class="text-gray-600 mt-1 sm:mt-2 font-medium text-sm sm:text-base">Akses Layanan</p>
+                <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 300ms;">
+                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalUser }}</div>
+                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Pengguna Aktif</p>
+                </div>
+                <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 400ms;">
+                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-200 drop-shadow-sm">{{ number_format($totalUsulan, 0, ',', '.') }}</div>
+                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Usulan Harga</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
-    <section class="py-12 sm:py-16 lg:py-20 bg-white">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <div class="bg-gray-900 rounded-2xl sm:rounded-3xl p-6 sm:p-8 lg:p-12 shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-48 sm:w-64 h-48 sm:h-64 bg-emerald-500/10 rounded-full blur-2xl"></div>
-                <div class="absolute bottom-0 left-0 w-48 sm:w-64 h-48 sm:h-64 bg-teal-500/10 rounded-full blur-2xl"></div>
-                <h2 class="text-xl sm:text-2xl lg:text-4xl font-bold text-white relative z-10">Siap Mengelola Arsip Lebih Efisien?</h2>
-                <p class="text-gray-300 mt-2 sm:mt-3 max-w-md mx-auto relative z-10 text-sm sm:text-base">Bergabunglah sekarang dan rasakan kemudahan sistem arsip digital Dinas Lingkungan Hidup.</p>
-                <div class="mt-6 sm:mt-8 relative z-10">
-                    <a href="{{ route('register') }}" class="inline-flex items-center gap-2 bg-white text-gray-900 px-6 sm:px-8 py-2.5 sm:py-3 rounded-xl font-semibold shadow-lg hover:bg-gray-100 transition transform hover:-translate-y-1 text-sm sm:text-base">
-                        Daftar Akun Gratis <i class="fas fa-arrow-right text-xs sm:text-sm"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
-    </section>
+
 
     <!-- Footer -->
     <footer class="bg-gray-50 border-t border-gray-200 py-8 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
                 <div class="flex items-center gap-2">
-                    <div class="w-6 h-6 sm:w-7 sm:h-7 bg-emerald-600 rounded-lg flex items-center justify-center">
-                        <i class="fas fa-leaf text-white text-[10px] sm:text-xs"></i>
-                    </div>
+                    <img src="{{ asset('images/logo-dlh.png') }}" alt="Logo" class="w-7 h-7 object-contain grayscale opacity-80">
                     <span class="font-bold text-gray-800 text-sm sm:text-base">{{ config('app.name', 'E-Arsip DLH') }}</span>
                 </div>
                 <div class="flex flex-wrap justify-center gap-4 sm:gap-8 text-xs sm:text-sm text-gray-500">
-                    <a href="#" class="hover:text-emerald-600 transition">Kebijakan Privasi</a>
-                    <a href="#" class="hover:text-emerald-600 transition">Syarat & Ketentuan</a>
-                    <a href="#" class="hover:text-emerald-600 transition">Bantuan</a>
+                    <a href="{{ route('about') }}" class="hover:text-emerald-600 transition">Tentang Kami</a>
+                    <a href="{{ route('panduan') }}" class="hover:text-emerald-600 transition">Panduan</a>
+                    <a href="{{ route('bantuan') }}" class="hover:text-emerald-600 transition">Bantuan</a>
+                    <a href="{{ route('kebijakan-privasi') }}" class="hover:text-emerald-600 transition">Kebijakan Privasi</a>
                 </div>
                 <div class="text-xs sm:text-sm text-gray-400">
                     &copy; {{ date('Y') }} Dinas Lingkungan Hidup. All rights reserved.

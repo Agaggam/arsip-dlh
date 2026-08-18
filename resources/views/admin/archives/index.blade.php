@@ -140,11 +140,25 @@
                             ],
                             'year' => [
                                 'label' => 'Tahun',
-                                'options' => $years->mapWithKeys(fn($yr) => [(string)$yr => (string)$yr])->toArray()
+                                'options' => $years->mapWithKeys(fn($y) => [$y => $y])->toArray()
                             ]
                         ]
                     "
                 />
+
+                {{-- Filter Rentang Tanggal Tambahan --}}
+                <form action="{{ route('admin.archives.index') }}" method="GET" class="flex items-center gap-2 mt-2 md:mt-0">
+                    @foreach(request()->except(['date_from', 'date_to', 'page']) as $k => $v)
+                        <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                    @endforeach
+                    <div class="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5 text-xs text-slate-600">
+                        <span class="font-semibold text-slate-500">Tgl:</span>
+                        <input type="date" name="date_from" value="{{ request('date_from') }}" class="bg-transparent border-0 p-0 text-xs focus:ring-0">
+                        <span>s/d</span>
+                        <input type="date" name="date_to" value="{{ request('date_to') }}" class="bg-transparent border-0 p-0 text-xs focus:ring-0">
+                        <button type="submit" class="bg-indigo-600 text-white px-2 py-1 rounded-lg text-xs font-semibold hover:bg-indigo-700">Filter</button>
+                    </div>
+                </form>
         </x-slot>
 
         {{-- Slot Kolom Header Tabel (Thead) --}}

@@ -1,19 +1,23 @@
 <?php
 
 use App\Models\User;
+use App\Jobs\LogActivityJob;
 
 if (!function_exists('log_activity')) {
+    /**
+     * Catat aktivitas user secara asinkron via Queue.
+     * Tidak memblokir response — diproses di background.
+     */
     function log_activity(?User $user, string $activity, ?string $description = null): void
     {
-        $user_id = $user ? $user->id : null;
-        \App\Models\ActivityLog::create([
-            'user_id'     => $user_id,
-            'causer_name'  => $user?->name,
-            'causer_email' => $user?->email,
-            'activity'    => $activity,
-            'description' => $description,
-            'ip_address'  => request()->ip(),
-            'user_agent'  => request()->userAgent(),
-        ]);
+        LogActivityJob::dispatch(
+            userId:      $user?->id,
+            causerName:  $user?->name,
+            causerEmail: $user?->email,
+            activity:    $activity,
+            description: $description,
+            ipAddress:   request()->ip(),
+            userAgent:   request()->userAgent(),
+        );
     }
 }

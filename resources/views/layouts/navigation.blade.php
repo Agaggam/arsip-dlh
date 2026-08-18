@@ -2,13 +2,24 @@
     <div class="hidden sm:flex flex-col w-64 bg-white border-r border-slate-200 fixed h-full z-40 shadow-sm transition-all duration-300">
         
         <div class="flex items-center px-8 h-20 border-b border-slate-50">
-            <a href="{{ route('dashboard') }}" class="flex items-center gap-3 group">
+            @php
+                $logoRoute = auth()->user()->isUser() ? route('dashboard') : route('admin.dashboard');
+            @endphp
+            <a href="{{ $logoRoute }}" class="flex items-center gap-3 group">
                 <div class="p-1.5 bg-indigo-50 rounded-xl group-hover:bg-indigo-100 transition-colors">
                     <x-application-logo class="block h-7 w-auto fill-current text-indigo-600 transition-transform group-hover:scale-110" />
                 </div>
-                <span class="text-base font-extrabold tracking-tight text-slate-800 leading-tight">
-                    {{ config('app.name') }}
-                </span>
+                <div>
+                    <span class="text-base font-extrabold tracking-tight text-slate-800 leading-tight block">
+                        {{ config('app.name') }}
+                    </span>
+                    <span class="text-[10px] font-medium text-slate-400 uppercase tracking-widest">
+                        @if(auth()->user()->isPureSuperAdmin()) Super Admin
+                        @elseif(auth()->user()->isAdmin()) Admin
+                        @else User
+                        @endif
+                    </span>
+                </div>
             </a>
         </div>
 
@@ -33,59 +44,116 @@
             </a>
 
             @if($isAdmin)
-                @php $isUsersActive = request()->routeIs('users.*'); @endphp
-                <a href="{{ route('users.index') }}" 
-                   class="{{ $baseClass }} {{ $isUsersActive ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5 transition-colors {{ $isUsersActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                    </svg>
-                    <span>{{ __('Manajemen User') }}</span>
-                </a>
+                {{-- GROUP: MASTER DATA --}}
+                @php 
+                    $isMasterDataActive = request()->routeIs('categories.*') || request()->routeIs('admin.departments.*') || request()->routeIs('kepegawaian.*');
+                @endphp
+                <div x-data="{ open: {{ $isMasterDataActive ? 'true' : 'false' }} }" class="space-y-1 mt-1">
+                    <button @click="open = !open" 
+                            class="w-full group flex items-center justify-between px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200
+                            {{ $isMasterDataActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 {{ $isMasterDataActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path>
+                            </svg>
+                            <span>{{ __('Master Data') }}</span>
+                        </div>
+                        <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300 {{ $isMasterDataActive ? 'text-indigo-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-collapse x-cloak class="pl-11 pr-4 space-y-1 mt-1">
+                        @php $isCategoriesActive = request()->routeIs('categories.*'); @endphp
+                        <a href="{{ route('categories.index') }}" 
+                           class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isCategoriesActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                            {{ __('Kategori Arsip') }}
+                        </a>
+                        
+                        @if(auth()->user()->isPureSuperAdmin())
+                            @php $isDepartmentsActive = request()->routeIs('admin.departments.*'); @endphp
+                            <a href="{{ route('admin.departments.index') }}" 
+                               class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isDepartmentsActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                                {{ __('Departemen') }}
+                            </a>
 
-                @php $isDepartmentsActive = request()->routeIs('admin.departments.*'); @endphp
-                <a href="{{ route('admin.departments.index') }}" 
-                   class="{{ $baseClass }} {{ $isDepartmentsActive ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5 transition-colors {{ $isDepartmentsActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"></path>
-                    </svg>
-                    <span>{{ __('Departemen') }}</span>
-                </a>
+                            @php $isKepegawaianActive = request()->routeIs('kepegawaian.*'); @endphp
+                            <a href="{{ route('kepegawaian.index') }}" 
+                               class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isKepegawaianActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                                {{ __('Data Kepegawaian') }}
+                            </a>
+                        @endif
+                    </div>
+                </div>
 
-                @php $isCategoriesActive = request()->routeIs('categories.*'); @endphp
-                <a href="{{ route('categories.index') }}" 
-                   class="{{ $baseClass }} {{ $isCategoriesActive ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5 transition-colors {{ $isCategoriesActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
-                    </svg>
-                    <span>{{ __('Kategori Arsip') }}</span>
-                </a>
-
+                {{-- DATA ARSIP (STANDALONE) --}}
                 @php $isArchivesActive = request()->routeIs('admin.archives.index'); @endphp
-                <a href="{{ route('admin.archives.index') }}" 
+                <a href="{{ route('admin.archives.index') }}"
                    class="{{ $baseClass }} {{ $isArchivesActive ? $activeClass : $inactiveClass }}">
                     <svg class="w-5 h-5 transition-colors {{ $isArchivesActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path>
                     </svg>
-                    <span>{{ __('Manajemen Arsip') }}</span>
+                    <span>{{ __('Data Arsip') }}</span>
                 </a>
 
-                @php $isTrashActive = request()->routeIs('admin.archives.trash'); @endphp
-                <a href="{{ route('admin.archives.trash') }}" 
-                   class="{{ $baseClass }} {{ $isTrashActive ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5 transition-colors {{ $isTrashActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                {{-- GROUP: USULAN HARGA SSH/SBU --}}
+                @php $isSurveyActive = request()->routeIs('survey-harga.*'); @endphp
+                <a href="{{ route('survey-harga.index') }}"
+                   class="{{ $baseClass }} {{ $isSurveyActive ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5 transition-colors {{ $isSurveyActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
                     </svg>
-                    <span>{{ __('Tong Sampah') }}</span>
+                    <span>{{ __('Usulan Harga') }}</span>
+                    @if($isSurveyActive)
+                    <span class="ml-auto text-[10px] font-bold bg-indigo-600 text-white px-2 py-0.5 rounded-full">SSH/SBU</span>
+                    @else
+                    <span class="ml-auto text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">SSH/SBU</span>
+                    @endif
                 </a>
 
-                @php $isLogsActive = request()->routeIs('activity-logs.index'); @endphp
-                <a href="{{ route('activity-logs.index') }}" 
-                class="{{ $baseClass }} {{ $isLogsActive ? $activeClass : $inactiveClass }}">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                    </svg>
-                    <span>{{ __('Aktivitas Log') }}</span>
-                </a>
+                {{-- GROUP: PENGATURAN SISTEM --}}
+                @php 
+                    $isSuperAdmin = auth()->user()->isPureSuperAdmin();
+                    $isSettingsActive = ($isSuperAdmin && (request()->routeIs('users.*') || request()->routeIs('activity-logs.*') || request()->routeIs('admin.backup.*'))) || request()->routeIs('admin.trash.*');
+                @endphp
+                <div x-data="{ open: {{ $isSettingsActive ? 'true' : 'false' }} }" class="space-y-1 mt-1">
+                    <button @click="open = !open" 
+                            class="w-full group flex items-center justify-between px-4 py-3 text-sm font-semibold rounded-xl transition-all duration-200
+                            {{ $isSettingsActive ? 'bg-indigo-50 text-indigo-700' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-800' }}">
+                        <div class="flex items-center gap-3">
+                            <svg class="w-5 h-5 {{ $isSettingsActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37-2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span>{{ __('Pengaturan') }}</span>
+                        </div>
+                        <svg :class="open ? 'rotate-180' : ''" class="w-4 h-4 transition-transform duration-300 {{ $isSettingsActive ? 'text-indigo-600' : 'text-slate-400' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path></svg>
+                    </button>
+                    <div x-show="open" x-collapse x-cloak class="pl-11 pr-4 space-y-1 mt-1">
+                        @php $isTrashActive = request()->routeIs('admin.trash.index'); @endphp
+                        <a href="{{ route('admin.trash.index') }}" 
+                           class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isTrashActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                            {{ __('Tong Sampah') }}
+                        </a>
+
+                        @if($isSuperAdmin)
+                        @php $isUsersActive = request()->routeIs('users.*'); @endphp
+                        <a href="{{ route('users.index') }}" 
+                           class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isUsersActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                            {{ __('Manajemen User') }}
+                        </a>
+
+                        @php $isLogsActive = request()->routeIs('activity-logs.index'); @endphp
+                        <a href="{{ route('activity-logs.index') }}" 
+                           class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isLogsActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                            {{ __('Aktivitas Log') }}
+                        </a>
+                        
+                        @php $isBackupActive = request()->routeIs('admin.backup.*'); @endphp
+                        <a href="{{ route('admin.backup.index') }}" 
+                           class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isBackupActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                            {{ __('Backup Database') }}
+                        </a>
+                        @endif
+                    </div>
+                </div>
                 
 @else
     @php 
@@ -188,28 +256,35 @@
             <div class="p-4 space-y-1">
                 @php $mobileClasses = 'flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200'; @endphp
                 
-                @if(auth()->user()->role->name === 'super_admin')
+                @php $mobileIsAdmin = auth()->user()->role->name === 'admin' || auth()->user()->role->name === 'super_admin'; @endphp
+                @if($mobileIsAdmin)
                     <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')" class="{{ $mobileClasses }}">
                         {{ __('Dashboard') }}
                     </x-responsive-nav-link>
+                    @if(auth()->user()->isPureSuperAdmin())
                     <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="{{ $mobileClasses }}">
                         {{ __('Manajemen User') }}
                     </x-responsive-nav-link>
+                    @endif
+                    @if(auth()->user()->isPureSuperAdmin())
                     <x-responsive-nav-link :href="route('admin.departments.index')" :active="request()->routeIs('admin.departments.*')" class="{{ $mobileClasses }}">
                         {{ __('Departemen') }}
                     </x-responsive-nav-link>
+                    @endif
                     <x-responsive-nav-link :href="route('categories.index')" :active="request()->routeIs('categories.*')" class="{{ $mobileClasses }}">
                         {{ __('Kategori Arsip') }}
                     </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.archives.index')" :active="request()->routeIs('admin.archives.index')" class="{{ $mobileClasses }}">
-                        {{ __('Manajemen Arsip') }}
+                        {{ __('Data Arsip') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('admin.archives.trash')" :active="request()->routeIs('admin.archives.trash')" class="{{ $mobileClasses }}">
+                    <x-responsive-nav-link :href="route('admin.trash.index')" :active="request()->routeIs('admin.trash.index')" class="{{ $mobileClasses }}">
                         {{ __('Tong Sampah') }}
                     </x-responsive-nav-link>
+                    @if(auth()->user()->isPureSuperAdmin())
                     <x-responsive-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')" class="{{ $mobileClasses }}">
                         {{ __('Log Aktivitas') }}
                     </x-responsive-nav-link>
+                    @endif
                 @else
                     <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" class="{{ $mobileClasses }}">
                         {{ __('Dashboard') }}

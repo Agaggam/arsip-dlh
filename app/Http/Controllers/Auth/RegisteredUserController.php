@@ -3,12 +3,14 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OtpVerificationMail;
 use App\Models\User;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
@@ -35,26 +37,31 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
-            'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'department_id' => ['required', 'exists:departments,id'], // Tambahkan ini
+            'name'          => ['required', 'string', 'max:255'],
+            'email'         => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'password'      => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
+        // Generate OTP 6 digit
+        $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'role_id' => 3, // 3 adalah ID untuk role 'user'
-            'status' => 'pending', // Sekalian set status pending
-            'department_id' => $request->department_id, // Tambahkan ini
+            'name'                  => $request->name,
+            'email'                 => $request->email,
+            'password'              => Hash::make($request->password),
+            'role_id'               => 3,
+            'status'                => 'pending',
+            'department_id'         => null, // Set null by default
+            'email_otp_code'        => $otp,
+            'email_otp_expires_at'  => now()->addMinutes(10),
         ]);
 
         event(new Registered($user));
-
         Auth::login($user);
 
-        return redirect()->route('verification.notice');
-        // return redirect(route('dashboard', absolute: false));
+        // Kirim email OTP
+        Mail::to($user->email)->send(new OtpVerificationMail($otp, $user->name));
+
+        return redirect()->route('verification.otp');
     }
 }

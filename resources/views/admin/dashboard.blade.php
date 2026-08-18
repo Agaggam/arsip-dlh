@@ -1,17 +1,20 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard Super Admin') }}
-        </h2>
+        @if(Auth::user()->isPureSuperAdmin())
+            Dashboard Super Admin
+        @elseif(Auth::user()->isAdmin())
+            Dashboard — {{ Auth::user()->department->name ?? 'Admin' }}
+        @endif
     </x-slot>
 
     <!-- CDN Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
-
-            <!-- Stats Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <!-- Total Pengguna -->
+    <!-- Stats Cards -->
+    @php $isSuperAdmin = Auth::user()->isPureSuperAdmin(); @endphp
+    <div class="grid grid-cols-1 md:grid-cols-2 {{ $isSuperAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }} gap-6 mb-8">
+                <!-- Total Pengguna (Super Admin saja) -->
+                @if($isSuperAdmin)
                 <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
                     <div class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     <div class="p-6 relative z-10">
@@ -33,6 +36,7 @@
                         </div>
                     </div>
                 </div>
+                @endif
 
                 <!-- Total Arsip -->
                 <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
@@ -102,6 +106,97 @@
                         </div>
                     </div>
                 </div>
+
+                {{-- Total Pegawai --}}
+                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="p-6 relative z-10">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Pegawai</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalPegawai ?? 0) }}</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-orange-100 text-orange-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs">
+                            <svg class="w-3 h-3 mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                            <span class="text-orange-600 font-medium">Terdaftar</span>
+                            <span class="text-gray-400 ml-1">di semua unit kerja</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Usulan Harga --}}
+                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="p-6 relative z-10">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Usulan Harga</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalUsulan ?? 0) }}</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-amber-100 text-amber-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs">
+                            <svg class="w-3 h-3 mr-1 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="text-amber-600 font-medium">SSH & SBU</span>
+                            <span class="text-gray-400 ml-1">di departemen Anda</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Unit Kerja --}}
+                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-teal-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="p-6 relative z-10">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Unit Kerja</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalDepartments ?? 0) }}</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-teal-100 text-teal-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m3-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs">
+                            <span class="text-teal-600 font-medium">Struktur</span>
+                            <span class="text-gray-400 ml-1">Departemen & Bidang</span>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Total Kategori Arsip --}}
+                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-pink-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="p-6 relative z-10">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Kategori Arsip</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalCategories ?? 0) }}</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-pink-100 text-pink-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs">
+                            <span class="text-pink-600 font-medium">Klasifikasi</span>
+                            <span class="text-gray-400 ml-1">Penamaan Dokumen</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- Grafik (70%) dan Aktivitas (30%) - menggunakan grid 12 kolom -->
@@ -239,7 +334,8 @@
                     </div>
                 </div>
 
-                <!-- Pengguna Terbaru -->
+                <!-- Pengguna Terbaru (Super Admin saja) -->
+                @if($isSuperAdmin)
                 <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100">
                     <div class="px-6 py-4 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex justify-between items-center">
                         <h3 class="text-md font-bold text-gray-800">👥 Pengguna Terbaru</h3>
@@ -262,25 +358,39 @@
                                     <td class="px-6 py-3 text-sm text-gray-500">{{ $user->role->name ?? '-' }}</td>
                                 </tr>
                                 @empty
-    <tr>
-        <td colspan="3" class="px-6 py-12 text-center">
-            <div class="flex flex-col items-center justify-center">
-                <svg class="w-14 h-14 text-indigo-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                <p class="text-indigo-400 text-sm font-medium">Belum ada pengguna baru</p>
-                <p class="text-gray-400 text-xs mt-1">Pengguna yang mendaftar akan muncul di sini</p>
-            </div>
-        </td>
-    </tr>
-@endempty
+                                <tr><td colspan="3" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg class="w-14 h-14 text-indigo-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
+                                        <p class="text-indigo-400 text-sm font-medium">Belum ada pengguna baru</p>
+                                    </div>
+                                </td></tr>
+                                @endempty
                             </tbody>
                         </table>
                     </div>
                 </div>
+                @else
+                {{-- Admin Biasa: tampilkan ringkasan info departemennya --}}
+                <div class="bg-white rounded-2xl shadow-md overflow-hidden border border-gray-100 p-6 flex flex-col justify-center">
+                    <div class="flex items-center gap-4 mb-4">
+                        <div class="w-12 h-12 rounded-xl bg-teal-100 flex items-center justify-center">
+                            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m3-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        </div>
+                        <div>
+                            <p class="text-xs text-gray-400 uppercase tracking-wider font-bold">Unit Kerja Anda</p>
+                            <p class="text-lg font-bold text-gray-800">{{ Auth::user()->department->name ?? '-' }}</p>
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-500">Anda mengelola arsip dan data khusus untuk unit kerja ini. Gunakan menu navigasi di sebelah kiri untuk mengakses fitur yang tersedia.</p>
+                    <a href="{{ route('admin.archives.index') }}" class="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-indigo-600 hover:text-indigo-700">
+                        Lihat Data Arsip
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                    </a>
+                </div>
+                @endif
             </div>
 
-            <!-- Selamat Datang Card -->
+            <!-- Selamat Datang Card (Role-Aware) -->
             <div class="bg-gradient-to-r from-indigo-50 via-white to-emerald-50 rounded-2xl shadow-md border border-indigo-100 p-6">
                 <div class="flex flex-col sm:flex-row items-center gap-4">
                     <div class="h-16 w-16 rounded-full bg-gradient-to-br from-indigo-600 to-indigo-400 flex items-center justify-center text-white font-bold text-2xl shadow-lg ring-4 ring-white">
@@ -288,10 +398,19 @@
                     </div>
                     <div class="flex-1 text-center sm:text-left">
                         <h3 class="text-xl font-bold text-gray-800">Selamat Datang, {{ Auth::user()->name }}!</h3>
-                        <p class="text-gray-500 text-sm">Anda memiliki akses penuh sebagai Super Admin. Kelola pengguna, arsip, dan pantau aktivitas sistem di sini.</p>
+                        @if($isSuperAdmin)
+                            <p class="text-gray-500 text-sm">Anda memiliki akses penuh sebagai Super Admin. Kelola pengguna, arsip, data kepegawaian, dan pantau seluruh aktivitas sistem.</p>
+                        @else
+                            <p class="text-gray-500 text-sm">Anda login sebagai Admin Unit Kerja <strong>{{ Auth::user()->department->name ?? '' }}</strong>. Kelola arsip dan data kepegawaian di unit Anda.</p>
+                        @endif
                     </div>
-                    <div class="flex gap-2">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Super Admin</span>
+                    <div class="flex flex-wrap gap-2 justify-center sm:justify-end">
+                        @if($isSuperAdmin)
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-violet-100 text-violet-800">Super Admin</span>
+                        @else
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">Admin</span>
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800">{{ Auth::user()->department->name ?? '' }}</span>
+                        @endif
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Aktif</span>
                     </div>
                 </div>

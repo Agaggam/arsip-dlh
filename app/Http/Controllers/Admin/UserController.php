@@ -68,11 +68,11 @@ class UserController extends Controller
     // ============================================================
 
     /**
-     * Menampilkan daftar user sesuai hak akses.
+     * Menampilkan daftar user sesuai hak akses (hanya super admin).
      */
     public function index(Request $request)
     {
-        $authUser = $this->AllAdminAccess();  // ← langsung dapat user
+        $authUser = $this->SuperAdminAccess();
         
         $search = $request->get('search');
         $statusFilter = $request->get('status');
@@ -82,13 +82,9 @@ class UserController extends Controller
 
         $users = User::with(['role', 'department']);
 
-        // Filter dasar berdasarkan role user yang login
-        if (!$authUser->isPureSuperAdmin()) {
-            $users->where('department_id', $authUser->department_id);
-        } else {
-            if ($deptFilter) {
-                $users->where('department_id', $deptFilter);
-            }
+        // Filter departemen (karena ini super admin, bisa lihat semua atau filter tertentu)
+        if ($deptFilter) {
+            $users->where('department_id', $deptFilter);
         }
 
         // Filter status
@@ -118,25 +114,12 @@ class UserController extends Controller
 
         $users = $users->latest()->paginate(10);
 
-        // Role dropdown
-        if ($authUser->isPureSuperAdmin()) {
-            $roles = Role::all();
-        } else {
-            $roles = Role::where('name', '!=', 'super_admin')->get();
-        }
-
-        // Departemen untuk dropdown filter
-        if ($authUser->isPureSuperAdmin()) {
-            $departments = Department::all();
-        } else {
-            $departments = Department::where('id', $authUser->department_id)->get();
-        }
+        // Dropdown data
+        $roles = Role::all();
+        $departments = Department::all();
 
         // Statistik
         $statQuery = User::query();
-        if (!$authUser->isPureSuperAdmin()) {
-            $statQuery->where('department_id', $authUser->department_id);
-        }
         $pendingCount   = (clone $statQuery)->where('status', 'pending')->count();
         $approvedCount  = (clone $statQuery)->where('status', 'approved')->count();
         $rejectedCount  = (clone $statQuery)->where('status', 'rejected')->count();
@@ -224,24 +207,14 @@ class UserController extends Controller
 
     /**
      * Memperbarui status user (approved/rejected).
-     * Super admin bisa semua, admin hanya untuk user di departemennya sendiri.
+     * Hanya super admin yang diizinkan.
      */
     public function updateStatus(Request $request, User $user)
     {
-        $authUser = $this->AllAdminAccess();  // ← langsung dapat user
+        $authUser = $this->SuperAdminAccess();
 
         if ($this->isSelf($user)) {
             return back()->with('error', 'Anda tidak dapat mengubah status Anda sendiri.');
-        }
-
-        if (!$authUser->isPureSuperAdmin() && $user->isAdmin()) {
-            return back()->with('error', 'Anda tidak dapat mengubah status admin lain.');
-        }
-
-        if (!$authUser->isPureSuperAdmin()) {
-            if ($user->department_id !== $authUser->department_id) {
-                return back()->with('error', 'Anda tidak memiliki izin untuk mengubah status user dari departemen lain.');
-            }
         }
 
         $request->validate([
@@ -250,6 +223,13 @@ class UserController extends Controller
         
         $user->status = $request->status;
         $user->save();
+
+        // Kirim notifikasi email ke user
+        try {
+            $user->notify(new \App\Notifications\AccountStatusChangedNotification($request->status));
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error("Gagal mengirim email notifikasi status akun: " . $e->getMessage());
+        }
         
         log_activity($authUser, 'ubah_status_user', "Status user ({$user->name}) diubah menjadi ({$request->status})");
         
@@ -257,11 +237,42 @@ class UserController extends Controller
     }
 
     /**
+     * Update data user (nama, email, password) — hanya super admin.
+     */
+    public function update(Request $request, User $user)
+    {
+        $authUser = $this->SuperAdminAccess();
+
+        if ($this->isSelf($user)) {
+            return back()->with('error', 'Edit profil Anda sendiri melalui halaman Profil.');
+        }
+
+        $request->validate([
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|string|email|max:255|unique:users,email,' . $user->id,
+            'password' => 'nullable|min:8|confirmed',
+        ]);
+
+        $user->name  = $request->name;
+        $user->email = $request->email;
+
+        if ($request->filled('password')) {
+            $user->password = Hash::make($request->password);
+        }
+
+        $user->save();
+
+        log_activity($authUser, 'ubah_user', "Data user ({$user->name}) berhasil diperbarui oleh super admin.");
+
+        return back()->with('success', "Data user {$user->name} berhasil diperbarui!");
+    }
+
+    /**
      * Menghapus user dari database (dengan konfirmasi password).
      */
     public function destroy(Request $request, User $user)
     {
-        $authUser = $this->AllAdminAccess();
+        $authUser = $this->SuperAdminAccess();
 
         if ($this->isSelf($user)) {
             return back()->with('error', 'Anda tidak bisa menghapus akun sendiri!');
@@ -276,28 +287,11 @@ class UserController extends Controller
             return back()->with('error', 'Konfirmasi gagal. Password salah!');
         }
 
-        if ($authUser->isPureSuperAdmin()) {
-            $userName = $user->name;
-            $userEmail = $user->email;
-            $user->delete();
-            log_activity($authUser, 'hapus_user', "User ({$userName}) Dengan Email ({$userEmail}) dihapus oleh super admin.");
-            return back()->with('success', 'User berhasil dihapus!');
-        }
+        $userName = $user->name;
+        $userEmail = $user->email;
+        $user->delete();
         
-        if ($authUser->isAdmin()) {
-            if ($user->role->name !== 'user') {
-                return back()->with('error', 'Anda hanya dapat menghapus user dengan role "user".');
-            }
-            if ($user->department_id !== $authUser->department_id) {
-                return back()->with('error', 'Anda hanya dapat menghapus user dari departemen Anda sendiri.');
-            }
-            $userName = $user->name;
-            $userEmail = $user->email;
-            $user->delete();
-            log_activity($authUser, 'hapus_user', "User ({$userName}) Dengan Email ({$userEmail}) dihapus oleh admin departemen {$authUser->department->name}.");
-            return back()->with('success', 'User berhasil dihapus!');
-        }
-        
-        return back()->with('error', 'Anda tidak memiliki izin untuk menghapus user.');
+        log_activity($authUser, 'hapus_user', "User ({$userName}) Dengan Email ({$userEmail}) dihapus oleh super admin.");
+        return back()->with('success', 'User berhasil dihapus!');
     }
 }

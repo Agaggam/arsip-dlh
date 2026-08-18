@@ -7,8 +7,9 @@
 
         <title>{{ config('app.name', 'Laravel') }}</title>
 
-        <link rel="preconnect" href="https://fonts.bunny.net">
-        <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -23,9 +24,10 @@
             }
         </style>
     </head>
-    <body class="font-sans text-gray-900 antialiased selection:bg-indigo-100 selection:text-indigo-700 bg-slate-50">
+    <body class="font-sans text-gray-900 antialiased selection:bg-emerald-100 selection:text-emerald-700 bg-slate-50">
         
         <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+            <img src="{{ asset('images/1443.jpg') }}" alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-20" />
             <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-200/50 blur-[120px]"></div>
             <div class="absolute top-[20%] -right-[5%] w-[30%] h-[40%] rounded-full bg-purple-200/40 blur-[100px]"></div>
             <div class="absolute -bottom-[10%] left-[20%] w-[50%] h-[30%] rounded-full bg-blue-100/60 blur-[110px]"></div>

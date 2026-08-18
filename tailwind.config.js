@@ -14,7 +14,8 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Inter', ...defaultTheme.fontFamily.sans],
+                display: ['Plus Jakarta Sans', ...defaultTheme.fontFamily.sans],
             },
             // Kamu bisa menambahkan warna custom di sini jika ingin 
             // lebih mirip dengan branding Flowbite (biasanya biru Indigo)

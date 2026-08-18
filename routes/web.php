@@ -7,15 +7,39 @@ use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ActivityLogController;
 use App\Http\Controllers\Admin\ZipArchiveController;
-use App\Http\Controllers\Admin\ArchiveTrashController;
+use App\Http\Controllers\Admin\UniversalTrashController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\DashboardController as UserDashboardController;
 
-// 1. Halaman Utama
+// 1. Halaman Utama & Statis
 Route::get('/', function () {
-    return view('welcome');
-});
+    $totalArsip = \App\Models\Archive::count();
+    $totalDepartemen = \App\Models\Department::where('name', '!=', 'System')->count();
+    $totalKategori = \App\Models\Category::count();
+    $totalUser = \App\Models\User::where('status', 'active')->count();
+    $totalUsulan = \App\Models\SurveyHarga::count();
+
+    return view('welcome', compact('totalArsip', 'totalDepartemen', 'totalKategori', 'totalUser', 'totalUsulan'));
+})->name('home');
+
+Route::get('/about', function () {
+    return view('pages.about');
+})->name('about');
+
+Route::get('/panduan', function () {
+    return view('pages.panduan');
+})->name('panduan');
+
+Route::get('/bantuan', function () {
+    return view('pages.bantuan');
+})->name('bantuan');
+
+Route::get('/kebijakan-privasi', function () {
+    return view('pages.kebijakan-privasi');
+})->name('kebijakan-privasi');
+
+
 
 // 2. Group untuk Super Admin dan Admin Departemen Saja
 Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(function () {
@@ -33,6 +57,7 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
     // Route untuk simpan perubahan Departemen
     Route::patch('/users/{user}/department', [UserController::class, 'updateDepartment'])->name('users.update_department');
     // Route untuk simpan perubahan Role
+    Route::patch('/users/{user}', [UserController::class, 'update'])->name('users.update');
     Route::patch('/users/{user}/role', [UserController::class, 'updateRole'])->name('users.update_role');
     // Route untuk Approve/Reject Status
     Route::patch('/users/{user}/status', [UserController::class, 'updateStatus'])->name('users.update_status');
@@ -49,9 +74,15 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/download/{filename}', [ActivityLogController::class, 'downloadExport'])->name('activity-logs.download');
 
-    // Route Manage Archives (CRUD & Soft Delete)
+    // Route Backup & Restore Database
+    Route::get('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('admin.backup.index');
+    Route::post('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'create'])->name('admin.backup.create');
+    Route::get('/backup/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('admin.backup.download');
+    Route::delete('/backup/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('admin.backup.destroy');
+    Route::post('/backup/restore', [\App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('admin.backup.restore');
+
+        // Route Manage Archives (CRUD & Soft Delete)
     Route::prefix('archives')->name('admin.archives.')->group(function () {
-        Route::get('/trash', [ArchiveTrashController::class, 'trash'])->name('trash'); // Lihat Tong Sampah
         
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::post('/', [ArchiveController::class, 'store'])->name('store');
@@ -62,11 +93,42 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
         Route::get('/{archive}/download', [ArchiveController::class, 'download'])->name('download'); // Download
         Route::delete('/{archive}', [ArchiveController::class, 'destroy'])->name('destroy'); // Soft Delete (Pindah ke Trash)
 
-        // Fitur Pemulihan (Soft Delete Logic)
-        Route::post('/{id}/restore', [ArchiveTrashController::class, 'restore'])->name('restore'); // Pulihkan data
-        Route::delete('/{id}/force-delete', [ArchiveTrashController::class, 'forceDelete'])->name('force-delete'); // Hapus Permanen
     });
-});
+
+    // Universal Trash Bin
+    Route::prefix('trash')->name('admin.trash.')->group(function () {
+        Route::get('/', [UniversalTrashController::class, 'index'])->name('index');
+        Route::post('/{type}/{id}/restore', [UniversalTrashController::class, 'restore'])->name('restore');
+        Route::delete('/{type}/{id}/force-delete', [UniversalTrashController::class, 'forceDelete'])->name('force-delete');
+    });
+
+    // Route Modul Kepegawaian
+    Route::prefix('kepegawaian')->name('kepegawaian.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PegawaiController::class, 'index'])->name('index');
+        Route::post('/', [\App\Http\Controllers\Admin\PegawaiController::class, 'store'])->name('store');
+        Route::put('/{pegawai}', [\App\Http\Controllers\Admin\PegawaiController::class, 'update'])->name('update');
+        Route::delete('/{pegawai}', [\App\Http\Controllers\Admin\PegawaiController::class, 'destroy'])->name('destroy');
+        // Export dengan filter aktif
+        Route::get('/export/excel', [\App\Http\Controllers\Admin\PegawaiController::class, 'exportExcel'])->name('export.excel');
+        Route::get('/export/pdf', [\App\Http\Controllers\Admin\PegawaiController::class, 'exportPdf'])->name('export.pdf');
+        // Quick Export 1-click per kategori/status
+        Route::get('/quick-export/{type}/{format}', [\App\Http\Controllers\Admin\PegawaiController::class, 'quickExport'])->name('quick.export');
+    });
+
+    // Route Modul Usulan SSH/SBU
+    Route::prefix('survey-harga')->name('survey-harga.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'store'])->name('store');
+        Route::get('/{surveyHarga}/edit', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'edit'])->name('edit');
+        Route::put('/{surveyHarga}', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'update'])->name('update');
+        Route::delete('/{surveyHarga}', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'destroy'])->name('destroy');
+        Route::patch('/{surveyHarga}/status', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'updateStatus'])->name('update-status');
+        Route::get('/{surveyHarga}/pdf', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'exportPdf'])->name('export-pdf');
+    });
+
+}); // End admin middleware group
+
 
 // 3. Group untuk User Biasa (Hanya bisa diakses role 'user')
 Route::middleware(['auth', 'role:user', 'status', 'verified'])->group(function () {

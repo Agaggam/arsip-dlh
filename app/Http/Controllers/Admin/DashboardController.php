@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\Archive;
 use App\Models\ActivityLog;
+use App\Models\Pegawai;
+use App\Models\Department;
+use App\Models\Category;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -50,6 +53,11 @@ class DashboardController extends Controller
             });
         }
         $totalTrashed = $trashedQuery->count();
+
+        // Master Data Stats
+        $totalPegawai = Pegawai::count();
+        $totalDepartments = Department::count();
+        $totalCategories = Category::count();
 
         // Data bulan ini
         $archivesThisMonth = (clone $archivesQuery)->whereMonth('created_at', now()->month)->count();
@@ -96,11 +104,22 @@ class DashboardController extends Controller
 
         $recentActivities = $activityQuery->get();
 
+        // Ambil data Usulan Survey Harga
+        $surveysQuery = \App\Models\SurveyHarga::query();
+        if (!$isPureSuperAdmin && $user->isAdmin()) {
+            $surveysQuery->where('department_id', $user->department_id);
+        }
+        $totalUsulan = $surveysQuery->count();
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalArchives',
             'totalDownloads',
             'totalTrashed',
+            'totalPegawai',
+            'totalDepartments',
+            'totalCategories',
+            'totalUsulan',
             'archivesThisMonth',
             'usersThisMonth',
             'months',
