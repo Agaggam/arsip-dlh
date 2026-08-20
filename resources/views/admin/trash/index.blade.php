@@ -26,6 +26,10 @@
            class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $type === 'survey' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
            💰 Usulan Harga
         </a>
+        <a href="{{ route('admin.trash.index', ['type' => 'pengawasan']) }}" 
+           class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $type === 'pengawasan' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
+           🔍 Pengawasan
+        </a>
         @if($user->isPureSuperAdmin())
         <a href="{{ route('admin.trash.index', ['type' => 'user']) }}" 
            class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $type === 'user' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
@@ -67,6 +71,11 @@
                             <th class="px-6 py-4">SPESIFIKASI</th>
                             <th class="px-6 py-4">TANGGAL HAPUS</th>
                             <th class="px-6 py-4 text-right">AKSI</th>
+                        @elseif($type === 'pengawasan')
+                            <th class="px-6 py-4">NAMA USAHA</th>
+                            <th class="px-6 py-4">KECAMATAN / JENIS</th>
+                            <th class="px-6 py-4">TANGGAL HAPUS</th>
+                            <th class="px-6 py-4 text-right">AKSI</th>
                         @elseif($type === 'user')
                             <th class="px-6 py-4">NAMA PEGAWAI</th>
                             <th class="px-6 py-4">DEPARTEMEN</th>
@@ -83,8 +92,11 @@
                             <td class="px-6 py-4 font-medium text-slate-800">{{ $item->title }}</td>
                             <td class="px-6 py-4"><span class="px-2.5 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-xs font-semibold">{{ $item->category->name ?? '-' }}</span></td>
                         @elseif($type === 'survey')
-                            <td class="px-6 py-4 font-medium text-slate-800">{{ $item->nama_barang }}</td>
-                            <td class="px-6 py-4">{{ Str::limit($item->spesifikasi, 50) }}</td>
+                            <td class="px-6 py-4 font-medium text-slate-800">{{ $item->judul }}</td>
+                            <td class="px-6 py-4"><span class="px-2.5 py-0.5 rounded-lg text-xs font-bold bg-indigo-50 text-indigo-700 mr-2">{{ $item->kelompok }}</span> {{ Str::limit($item->spesifikasi_singkat, 40) }}</td>
+                        @elseif($type === 'pengawasan')
+                            <td class="px-6 py-4 font-medium text-slate-800">{{ $item->nama_usaha }}</td>
+                            <td class="px-6 py-4">{{ $item->kecamatan }} ({{ $item->jenis_label }})</td>
                         @elseif($type === 'user')
                             <td class="px-6 py-4 font-medium text-slate-800">{{ $item->name }}</td>
                             <td class="px-6 py-4">{{ $item->department->name ?? '-' }}</td>
@@ -106,9 +118,8 @@
                                 <form action="{{ route('admin.trash.force-delete', ['type' => $type, 'id' => $item->id]) }}" method="POST">
                                     @csrf
                                     @method('DELETE')
-                                    <!-- Jika butuh input password seperti sebelumnya, bisa ditambahkan pakai SweetAlert HTML input, tapi karena kita pakai confirm() bawaan (yang diganti sweetalert global), kita cukup sediakan hidden field atau ubah cara autentikasinya. -->
                                     <input type="hidden" name="password" value="skipped_for_simplicity_or_handled_differently">
-                                    <button type="button" onclick="confirmForceDelete(this, '{{ $item->title ?? $item->nama_barang ?? $item->name }}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg font-semibold transition-colors flex items-center gap-2">
+                                    <button type="button" onclick="confirmForceDelete(this, '{{ $item->title ?? $item->judul ?? $item->nama_usaha ?? $item->name }}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 rounded-lg font-semibold transition-colors flex items-center gap-2">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                         Hapus Permanen
                                     </button>

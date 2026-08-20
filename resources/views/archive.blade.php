@@ -89,28 +89,44 @@
                                     <td class="px-4 py-5 text-center text-xs font-medium text-slate-500">{{ $archive->file_size }}</td>
                                     <td class="px-6 py-5 text-center text-xs font-medium text-slate-400">{{ $archive->created_at->format('d/m/Y') }}</td>
                                     <td class="px-6 py-5 text-center text-sm">
-                                        <div class="flex justify-center items-center gap-3">
-                                                                    {{-- PRATINJAU --}}
-                        <button type="button" 
-                                x-data 
-                                x-on:click="$dispatch('open-modal', { 
-                                    id: 'preview-modal', 
-                                    title: 'Preview: {{ addslashes($archive->title) }}', 
-                                    fileUrl: '{{ route('arsip.preview', $archive->hash_token) }}', 
-                                    fileType: '{{ strtolower($archive->file_type) }}', 
-                                    downloadUrl: '{{ $downloadRoute }}' 
-                                })" 
-                                class="flex-1 md:flex-none flex items-center justify-center gap-1.5 px-3.5 py-2.5 md:py-2 bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 font-bold text-xs rounded-xl transition-all" 
-                                title="Pratinjau Berkas">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
-                            </svg>
-                            <span>Pratinjau</span>
-                        </button>
-                                            <span class="text-slate-200">|</span>
+                                        <div class="flex justify-center items-center gap-2">
+                                            {{-- CUTE BUTTON XLS --}}
+                                            <a href="{{ route('admin.archives.export-excel-single', $archive) }}" 
+                                               class="bg-emerald-100/80 hover:bg-emerald-200 text-emerald-800 font-extrabold text-[10px] px-2.5 py-1 rounded-lg transition-all shadow-2xs border border-emerald-300/40" 
+                                               title="Unduh Data Excel Arsip Ini">
+                                                XLS
+                                            </a>
+
+                                            {{-- CUTE BUTTON PDF --}}
+                                            <a href="{{ route('admin.archives.export-pdf-single', $archive) }}" 
+                                               class="bg-rose-100/80 hover:bg-rose-200 text-rose-800 font-extrabold text-[10px] px-2.5 py-1 rounded-lg transition-all shadow-2xs border border-rose-300/40" 
+                                               title="Unduh Lembar PDF Arsip Ini">
+                                                PDF
+                                            </a>
+
+                                            {{-- PRATINJAU --}}
+                                            <button type="button" 
+                                                    x-data 
+                                                    x-on:click="$dispatch('open-modal', { 
+                                                        id: 'preview-modal', 
+                                                        title: 'Preview: {{ addslashes($archive->title) }}', 
+                                                        fileUrl: '{{ route('arsip.preview', $archive->hash_token) }}', 
+                                                        fileType: '{{ strtolower($archive->file_type) }}', 
+                                                        downloadUrl: '{{ $downloadRoute }}' 
+                                                    })" 
+                                                    class="flex items-center justify-center gap-1 px-2.5 py-1 bg-slate-50 hover:bg-indigo-50 text-slate-600 hover:text-indigo-600 font-bold text-xs rounded-lg transition-all" 
+                                                    title="Pratinjau Berkas">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                                                </svg>
+                                                <span>Preview</span>
+                                            </button>
+
+                                            {{-- DOWNLOAD FILE ASLI --}}
                                             <a href="{{ $downloadRoute }}" 
-                                               class="text-[11px] font-black uppercase text-rose-500 hover:text-rose-700 underline decoration-rose-100 decoration-2 underline-offset-4 transition-all">
+                                               class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-600 font-bold text-xs rounded-lg transition-all"
+                                               title="Unduh File Asli">
                                                 Download
                                             </a>
                                         </div>

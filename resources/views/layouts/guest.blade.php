@@ -14,6 +14,9 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
+            body {
+                zoom: 0.75;
+            }
             .floating-animation {
                 animation: float 6s ease-in-out infinite;
             }

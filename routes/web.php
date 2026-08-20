@@ -19,8 +19,9 @@ Route::get('/', function () {
     $totalKategori = \App\Models\Category::count();
     $totalUser = \App\Models\User::where('status', 'active')->count();
     $totalUsulan = \App\Models\SurveyHarga::count();
+    $totalPengawasan = \App\Models\Pengawasan::count();
 
-    return view('welcome', compact('totalArsip', 'totalDepartemen', 'totalKategori', 'totalUser', 'totalUsulan'));
+    return view('welcome', compact('totalArsip', 'totalDepartemen', 'totalKategori', 'totalUser', 'totalUsulan', 'totalPengawasan'));
 })->name('home');
 
 Route::get('/about', function () {
@@ -87,6 +88,10 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::post('/', [ArchiveController::class, 'store'])->name('store');
         Route::post('/store-zip', [ZipArchiveController::class, 'storeZip'])->name('store-zip');
+        Route::get('/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/export/pdf', [ArchiveController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/{archive}/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel-single');
+        Route::get('/{archive}/export/pdf', [ArchiveController::class, 'exportPdf'])->name('export-pdf-single');
         
         Route::get('/preview/{token}', [ArchiveController::class, 'Preview'])->name('preview');
         Route::put('/{archive}', [ArchiveController::class, 'update'])->name('update'); // Update Data Arsip
@@ -120,11 +125,26 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
         Route::get('/', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'create'])->name('create');
         Route::post('/', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'store'])->name('store');
+        Route::get('/export/excel', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'exportExcel'])->name('export-excel');
         Route::get('/{surveyHarga}/edit', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'edit'])->name('edit');
         Route::put('/{surveyHarga}', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'update'])->name('update');
         Route::delete('/{surveyHarga}', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'destroy'])->name('destroy');
-        Route::patch('/{surveyHarga}/status', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'updateStatus'])->name('update-status');
         Route::get('/{surveyHarga}/pdf', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/{surveyHarga}/excel', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'exportExcel'])->name('export-excel-single');
+    });
+
+    // Route Modul Pengawasan Pelaku Usaha
+    Route::prefix('pengawasan')->name('pengawasan.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Admin\PengawasanController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Admin\PengawasanController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Admin\PengawasanController::class, 'store'])->name('store');
+        Route::get('/export/pdf', [\App\Http\Controllers\Admin\PengawasanController::class, 'exportPdf'])->name('export-pdf');
+        Route::get('/export/excel', [\App\Http\Controllers\Admin\PengawasanController::class, 'exportExcel'])->name('export-excel');
+        Route::get('/{pengawasan}/edit', [\App\Http\Controllers\Admin\PengawasanController::class, 'edit'])->name('edit');
+        Route::put('/{pengawasan}', [\App\Http\Controllers\Admin\PengawasanController::class, 'update'])->name('update');
+        Route::delete('/{pengawasan}', [\App\Http\Controllers\Admin\PengawasanController::class, 'destroy'])->name('destroy');
+        Route::get('/{pengawasan}/pdf', [\App\Http\Controllers\Admin\PengawasanController::class, 'exportPdf'])->name('export-pdf-single');
+        Route::get('/{pengawasan}/excel', [\App\Http\Controllers\Admin\PengawasanController::class, 'exportExcel'])->name('export-excel-single');
     });
 
 }); // End admin middleware group

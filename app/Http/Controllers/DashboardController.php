@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\Archive;
+use App\Models\SurveyHarga;
+use App\Models\Pengawasan;
+use App\Models\Pegawai;
 use Illuminate\Http\Request;
 
 class DashboardController extends Controller
@@ -25,6 +28,18 @@ class DashboardController extends Controller
 
         $archives = $query->get();
 
-        return view('dashboard', compact('archives'));
+        // Statistik ringkas untuk user
+        $totalArsip       = Archive::count();
+        $totalUsulan      = SurveyHarga::count();
+        $totalPengawasan  = Pengawasan::count();
+        $totalPegawai     = Pegawai::count();
+
+        return view('dashboard', compact(
+            'archives',
+            'totalArsip',
+            'totalUsulan',
+            'totalPengawasan',
+            'totalPegawai'
+        ));
     }
 }

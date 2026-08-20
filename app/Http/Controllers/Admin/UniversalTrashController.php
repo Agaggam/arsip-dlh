@@ -8,6 +8,7 @@ use App\Models\Category;
 use App\Models\Department;
 use App\Models\User;
 use App\Models\SurveyHarga;
+use App\Models\Pengawasan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -30,6 +31,7 @@ class UniversalTrashController extends Controller
         // Variabel default yang akan di-compact
         $archives = null;
         $surveys = null;
+        $pengawasans = null;
         $users = null;
 
         if ($type === 'archive') {
@@ -63,9 +65,16 @@ class UniversalTrashController extends Controller
                 $query->where('department_id', $user->department_id);
             }
             if ($request->search) {
-                $query->where('nama_barang', 'LIKE', "%{$request->search}%");
+                $query->where('judul', 'LIKE', "%{$request->search}%");
             }
             $surveys = $query->latest()->paginate(10)->appends($request->all());
+
+        } elseif ($type === 'pengawasan') {
+            $query = Pengawasan::onlyTrashed()->with('user');
+            if ($request->search) {
+                $query->where('nama_usaha', 'LIKE', "%{$request->search}%");
+            }
+            $pengawasans = $query->latest()->paginate(10)->appends($request->all());
 
         } elseif ($type === 'user') {
             if (!$user->isPureSuperAdmin()) abort(403);
@@ -83,11 +92,11 @@ class UniversalTrashController extends Controller
         $fileTypes = Archive::onlyTrashed()->distinct()->orderBy('file_type')->pluck('file_type');
 
         return view('admin.trash.index', compact(
-            'type', 'archives', 'surveys', 'users', 'categories', 'departments', 'fileTypes'
+            'type', 'archives', 'surveys', 'pengawasans', 'users', 'categories', 'departments', 'fileTypes'
         ));
     }
 
-    public function restore($type, int $id)
+    public function restore($type, $id)
     {
         if ($type === 'archive') {
             $model = Archive::withTrashed()->findOrFail($id);
@@ -98,7 +107,11 @@ class UniversalTrashController extends Controller
             $model = SurveyHarga::withTrashed()->findOrFail($id);
             if (!Auth::user()->isPureSuperAdmin() && $model->department_id !== Auth::user()->department_id) return back()->with('error', 'Akses ditolak.');
             $model->restore();
-            log_activity(Auth::user(), 'pulihkan_usulan', "Usulan Harga ({$model->nama_barang}) berhasil dipulihkan.");
+            log_activity(Auth::user(), 'pulihkan_usulan', "Usulan Harga ({$model->judul}) berhasil dipulihkan.");
+        } elseif ($type === 'pengawasan') {
+            $model = Pengawasan::withTrashed()->findOrFail($id);
+            $model->restore();
+            log_activity(Auth::user(), 'pulihkan_pengawasan', "Data Pengawasan ({$model->nama_usaha}) berhasil dipulihkan.");
         } elseif ($type === 'user') {
             if (!Auth::user()->isPureSuperAdmin()) return back()->with('error', 'Akses ditolak.');
             $model = User::withTrashed()->findOrFail($id);
@@ -109,7 +122,7 @@ class UniversalTrashController extends Controller
         return back()->with('success', 'Data berhasil dipulihkan.');
     }
 
-    public function forceDelete(Request $request, $type, int $id)
+    public function forceDelete(Request $request, $type, $id)
     {
         $request->validate(['password' => 'required']);
 
@@ -129,9 +142,14 @@ class UniversalTrashController extends Controller
         } elseif ($type === 'survey') {
             $model = SurveyHarga::withTrashed()->findOrFail($id);
             if (!Auth::user()->isPureSuperAdmin() && $model->department_id !== Auth::user()->department_id) return back()->with('error', 'Akses ditolak.');
-            $title = $model->nama_barang;
+            $title = $model->judul;
             $model->forceDelete();
             log_activity(Auth::user(), 'hapus_permanen_usulan', "Usulan Harga ({$title}) dihapus permanen.");
+        } elseif ($type === 'pengawasan') {
+            $model = Pengawasan::withTrashed()->findOrFail($id);
+            $title = $model->nama_usaha;
+            $model->forceDelete();
+            log_activity(Auth::user(), 'hapus_permanen_pengawasan', "Pengawasan ({$title}) dihapus permanen.");
         } elseif ($type === 'user') {
             if (!Auth::user()->isPureSuperAdmin()) return back()->with('error', 'Akses ditolak.');
             $model = User::withTrashed()->findOrFail($id);

@@ -17,7 +17,7 @@ class SurveyHargaController extends Controller
     {
         $user = Auth::user();
         if (!$user || (!$user->isAdmin() && !$user->isPureSuperAdmin())) {
-            abort(403, 'Akses ditolak.');
+            abort(403, 'Akses ditolak. Anda tidak memiliki izin untuk mengubah data usulan harga.');
         }
     }
 
@@ -27,15 +27,13 @@ class SurveyHargaController extends Controller
 
     public function index(Request $request)
     {
-        $this->requireAdminOrSuperAdmin();
-
         $user    = Auth::user();
-        $filters = $request->only(['search', 'kelompok', 'status', 'department_id']);
+        $filters = $request->only(['search', 'kelompok', 'department_id']);
 
         $query = SurveyHarga::with(['user', 'department'])->filter($filters);
 
-        // Admin biasa hanya bisa lihat departemen sendiri
-        if (!$user->isPureSuperAdmin()) {
+        // Admin biasa dibatasi ke departemen sendiri, Super Admin & User biasa bisa melihat semua
+        if ($user->isAdmin()) {
             $query->where('department_id', $user->department_id);
         }
 
@@ -43,18 +41,19 @@ class SurveyHargaController extends Controller
 
         // KPI Summary
         $baseQuery = SurveyHarga::query();
-        if (!$user->isPureSuperAdmin()) {
+        if ($user->isAdmin()) {
             $baseQuery->where('department_id', $user->department_id);
         }
 
         $summary = [
-            'total'      => (clone $baseQuery)->count(),
-            'diajukan'   => (clone $baseQuery)->where('status', 'diajukan')->count(),
-            'disetujui'  => (clone $baseQuery)->where('status', 'disetujui')->count(),
-            'ditolak'    => (clone $baseQuery)->where('status', 'ditolak')->count(),
+            'total'         => (clone $baseQuery)->count(),
+            'ssh'           => (clone $baseQuery)->where('kelompok', 'SSH')->count(),
+            'sbu'           => (clone $baseQuery)->where('kelompok', 'SBU')->count(),
+            'hspk'          => (clone $baseQuery)->whereIn('kelompok', ['HSPK', 'ASB'])->count(),
+            'total_nominal' => (clone $baseQuery)->sum('harga_usulan'),
         ];
 
-        $departments = $user->isPureSuperAdmin()
+        $departments = (!$user->isAdmin())
             ? Department::where('name', '!=', 'System')->orderBy('name')->get()
             : collect();
 
@@ -238,37 +237,18 @@ class SurveyHargaController extends Controller
     }
 
     // ===========================
-    // UPDATE STATUS (Super Admin)
-    // ===========================
-
-    public function updateStatus(Request $request, SurveyHarga $surveyHarga)
-    {
-        if (!Auth::user()->isPureSuperAdmin()) {
-            abort(403);
-        }
-
-        $validated = $request->validate([
-            'status'         => 'required|in:diajukan,disetujui,ditolak',
-            'catatan_admin'  => 'nullable|string|max:500',
-        ]);
-
-        $surveyHarga->update($validated);
-        log_activity(Auth::user(), 'ubah_status_survey_harga', "Mengubah status usulan \"{$surveyHarga->judul}\" menjadi {$validated['status']}");
-
-        return back()->with('success', "Status usulan berhasil diubah menjadi \"{$validated['status']}\".");
-    }
-
-    // ===========================
     // EXPORT PDF
     // ===========================
 
     public function exportPdf(SurveyHarga $surveyHarga)
     {
-        $this->requireAdminOrSuperAdmin();
         $user = Auth::user();
+        if (!$user) {
+            abort(401);
+        }
 
-        if (!$user->isPureSuperAdmin() && $surveyHarga->department_id !== $user->department_id) {
-            abort(403);
+        if ($user->isAdmin() && $surveyHarga->department_id !== $user->department_id) {
+            abort(403, 'Akses ditolak.');
         }
 
         $tanggal = Carbon::now()->translatedFormat('d F Y');
@@ -285,4 +265,33 @@ class SurveyHargaController extends Controller
         $filename = 'Survei_Harga_' . str_replace(' ', '_', $surveyHarga->judul) . '_' . Carbon::now()->format('Ymd') . '.pdf';
         return $pdf->download($filename);
     }
+
+    // ===========================
+    // EXPORT EXCEL
+    // ===========================
+
+    public function exportExcel(Request $request, ?SurveyHarga $surveyHarga = null)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(401);
+        }
+
+        if ($surveyHarga) {
+            if ($user->isAdmin() && $surveyHarga->department_id !== $user->department_id) {
+                abort(403, 'Akses ditolak.');
+            }
+            $filename = 'Survei_Harga_' . str_replace(' ', '_', $surveyHarga->judul) . '_' . Carbon::now()->format('Ymd') . '.xlsx';
+            return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\SurveyHargaExport([], $surveyHarga), $filename);
+        }
+
+        $filters = $request->only(['search', 'kelompok', 'department_id']);
+        if ($user->isAdmin()) {
+            $filters['department_id'] = $user->department_id;
+        }
+
+        $filename = 'Rekap_Survei_Harga_' . Carbon::now()->format('Ymd_His') . '.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\SurveyHargaExport($filters), $filename);
+    }
 }
+

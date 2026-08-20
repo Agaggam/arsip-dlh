@@ -7,6 +7,7 @@ use App\Models\User;
 use App\Models\Archive;
 use App\Models\ActivityLog;
 use App\Models\Pegawai;
+use App\Models\Pengawasan;
 use App\Models\Department;
 use App\Models\Category;
 use Illuminate\Http\Request;
@@ -111,6 +112,12 @@ class DashboardController extends Controller
         }
         $totalUsulan = $surveysQuery->count();
 
+        // Ambil data Pengawasan
+        $pengawasanQuery = Pengawasan::query();
+        $totalPengawasan = $pengawasanQuery->count();
+        $pengawasanDisetujui = Pengawasan::where('status', 'disetujui')->count();
+        $pengawasanDiajukan = Pengawasan::where('status', 'diajukan')->count();
+
         return view('admin.dashboard', compact(
             'totalUsers',
             'totalArchives',
@@ -120,6 +127,9 @@ class DashboardController extends Controller
             'totalDepartments',
             'totalCategories',
             'totalUsulan',
+            'totalPengawasan',
+            'pengawasanDisetujui',
+            'pengawasanDiajukan',
             'archivesThisMonth',
             'usersThisMonth',
             'months',

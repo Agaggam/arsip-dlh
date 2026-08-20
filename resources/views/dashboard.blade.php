@@ -7,7 +7,62 @@
         </div>
     </x-slot>
 
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-12">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mt-4 mb-12 space-y-6">
+        
+        {{-- Quick Access & Stats Cards --}}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {{-- Card 1: Data Arsip --}}
+            <a href="{{ route('arsip.user') }}" 
+               class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Lihat Arsip</span>
+                </div>
+                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalArsip ?? 0) }}</p>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">Daftar Arsip Digital</p>
+            </a>
+
+            {{-- Card 2: Usulan Harga --}}
+            <a href="{{ route('survey-harga.index') }}" 
+               class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">SSH/SBU</span>
+                </div>
+                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalUsulan ?? 0) }}</p>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">Usulan Harga</p>
+            </a>
+
+            {{-- Card 3: Data Pengawasan --}}
+            <a href="{{ route('pengawasan.index') }}" 
+               class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-50 text-cyan-600 flex items-center justify-center group-hover:bg-cyan-600 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded-full">Pengawasan</span>
+                </div>
+                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalPengawasan ?? 0) }}</p>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">Data Pengawasan</p>
+            </a>
+
+            {{-- Card 4: Data Kepegawaian --}}
+            <a href="{{ route('kepegawaian.index') }}" 
+               class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Kepegawaian</span>
+                </div>
+                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalPegawai ?? 0) }}</p>
+                <p class="text-xs font-semibold text-slate-500 mt-0.5">Data Pegawai</p>
+            </a>
+        </div>
         
         {{-- Form Pencarian Simpel (Responsif) --}}
         <div class="bg-white overflow-hidden shadow-sm border border-gray-100 rounded-[1.25rem] sm:rounded-[1.5rem] p-4 sm:p-6 mb-6">
@@ -83,6 +138,20 @@
 
                     {{-- Tombol Tindakan / Aksi (Sejajar horizontal di mobile, rapi di kanan saat tablet/laptop) --}}
                     <div class="flex items-center gap-2 w-full md:w-auto border-t md:border-t-0 pt-3 md:pt-0 justify-end shrink-0">
+                        {{-- CUTE BUTTON XLS --}}
+                        <a href="{{ route('admin.archives.export-excel-single', $archive) }}" 
+                           class="bg-emerald-100/80 hover:bg-emerald-200 text-emerald-800 font-extrabold text-[10px] px-2.5 py-2 md:py-1.5 rounded-xl transition-all shadow-2xs border border-emerald-300/40" 
+                           title="Unduh Data Excel">
+                            XLS
+                        </a>
+
+                        {{-- CUTE BUTTON PDF --}}
+                        <a href="{{ route('admin.archives.export-pdf-single', $archive) }}" 
+                           class="bg-rose-100/80 hover:bg-rose-200 text-rose-800 font-extrabold text-[10px] px-2.5 py-2 md:py-1.5 rounded-xl transition-all shadow-2xs border border-rose-300/40" 
+                           title="Unduh Lembar PDF">
+                            PDF
+                        </a>
+
                         {{-- PRATINJAU --}}
                         <button type="button" 
                                 x-data 

@@ -73,13 +73,13 @@
                                class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isDepartmentsActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
                                 {{ __('Departemen') }}
                             </a>
-
-                            @php $isKepegawaianActive = request()->routeIs('kepegawaian.*'); @endphp
-                            <a href="{{ route('kepegawaian.index') }}" 
-                               class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isKepegawaianActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
-                                {{ __('Data Kepegawaian') }}
-                            </a>
                         @endif
+
+                        @php $isKepegawaianActive = request()->routeIs('kepegawaian.*'); @endphp
+                        <a href="{{ route('kepegawaian.index') }}" 
+                           class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isKepegawaianActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
+                            {{ __('Data Kepegawaian') }}
+                        </a>
                     </div>
                 </div>
 
@@ -106,6 +106,16 @@
                     @else
                     <span class="ml-auto text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">SSH/SBU</span>
                     @endif
+                </a>
+
+                {{-- DATA PENGAWASAN --}}
+                @php $isPengawasanActive = request()->routeIs('pengawasan.*'); @endphp
+                <a href="{{ route('pengawasan.index') }}"
+                   class="{{ $baseClass }} {{ $isPengawasanActive ? $activeClass : $inactiveClass }}">
+                    <svg class="w-5 h-5 transition-colors {{ $isPengawasanActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+                    </svg>
+                    <span>{{ __('Pengawasan') }}</span>
                 </a>
 
                 {{-- GROUP: PENGATURAN SISTEM --}}
@@ -202,6 +212,37 @@
             @endforeach
         </div>
     </div>
+
+    {{-- USULAN HARGA (USER) --}}
+    @php $isSurveyActive = request()->routeIs('survey-harga.*'); @endphp
+    <a href="{{ route('survey-harga.index') }}"
+       class="{{ $baseClass }} {{ $isSurveyActive ? $activeClass : $inactiveClass }}">
+        <svg class="w-5 h-5 transition-colors {{ $isSurveyActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/>
+        </svg>
+        <span>{{ __('Usulan Harga') }}</span>
+        <span class="ml-auto text-[10px] font-semibold text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full">SSH/SBU</span>
+    </a>
+
+    {{-- DATA PENGAWASAN (USER) --}}
+    @php $isPengawasanActive = request()->routeIs('pengawasan.*'); @endphp
+    <a href="{{ route('pengawasan.index') }}"
+       class="{{ $baseClass }} {{ $isPengawasanActive ? $activeClass : $inactiveClass }}">
+        <svg class="w-5 h-5 transition-colors {{ $isPengawasanActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+        </svg>
+        <span>{{ __('Pengawasan') }}</span>
+    </a>
+
+    {{-- DATA KEPEGAWAIAN (USER) --}}
+    @php $isKepegawaianActive = request()->routeIs('kepegawaian.*'); @endphp
+    <a href="{{ route('kepegawaian.index') }}"
+       class="{{ $baseClass }} {{ $isKepegawaianActive ? $activeClass : $inactiveClass }}">
+        <svg class="w-5 h-5 transition-colors {{ $isKepegawaianActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+        </svg>
+        <span>{{ __('Kepegawaian') }}</span>
+    </a>
 @endif
         </div>
 
@@ -277,6 +318,9 @@
                     <x-responsive-nav-link :href="route('admin.archives.index')" :active="request()->routeIs('admin.archives.index')" class="{{ $mobileClasses }}">
                         {{ __('Data Arsip') }}
                     </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('pengawasan.index')" :active="request()->routeIs('pengawasan.*')" class="{{ $mobileClasses }}">
+                        {{ __('Pengawasan') }}
+                    </x-responsive-nav-link>
                     <x-responsive-nav-link :href="route('admin.trash.index')" :active="request()->routeIs('admin.trash.index')" class="{{ $mobileClasses }}">
                         {{ __('Tong Sampah') }}
                     </x-responsive-nav-link>
@@ -339,6 +383,16 @@
                             @endforeach
                         </div>
                     </div>
+
+                    <x-responsive-nav-link :href="route('survey-harga.index')" :active="request()->routeIs('survey-harga.*')" class="{{ $mobileClasses }}">
+                        {{ __('Usulan Harga') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('pengawasan.index')" :active="request()->routeIs('pengawasan.*')" class="{{ $mobileClasses }}">
+                        {{ __('Pengawasan') }}
+                    </x-responsive-nav-link>
+                    <x-responsive-nav-link :href="route('kepegawaian.index')" :active="request()->routeIs('kepegawaian.*')" class="{{ $mobileClasses }}">
+                        {{ __('Data Kepegawaian') }}
+                    </x-responsive-nav-link>
                 @endif
             </div>
 

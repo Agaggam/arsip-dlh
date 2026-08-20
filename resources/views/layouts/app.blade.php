@@ -27,6 +27,7 @@
         }
         body {
             letter-spacing: -0.01em;
+            zoom: 0.75;
         }
         ::-webkit-scrollbar {
             width: 6px;

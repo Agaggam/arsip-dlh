@@ -132,7 +132,7 @@
         }
     </style>
 </head>
-<body class="font-sans antialiased overflow-x-hidden bg-gradient-to-br from-gray-50 to-gray-100">
+<body class="font-sans antialiased overflow-x-hidden" style="background-image: url('{{ asset('images/1443.jpg') }}'); background-size: 400px 400px; background-repeat: repeat;">
 
     <!-- Navbar dengan mobile menu -->
     <nav class="fixed top-0 left-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-gray-100 shadow-sm">
@@ -256,10 +256,9 @@
     </section>
 
     <!-- Features Section -->
-    <section id="features" class="relative py-16 sm:py-24 bg-gray-50 overflow-hidden">
-        <!-- Batik Pattern Background -->
-        <div class="absolute inset-0 opacity-[0.04] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23065f46\' fill-opacity=\'1\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E');"></div>
-        <div class="absolute inset-0 opacity-[0.03] pointer-events-none" style="background-image: url('data:image/svg+xml,%3Csvg width=\'40\' height=\'40\' viewBox=\'0 0 40 40\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cpath d=\'M20 20.5V18H0v-2h20v-2.5l10 3.5-10 3.5zm-8 4h-2v-2H8v2H6v-2H4v2H2v-2H0v4h12v-2zm-8-14h2v2H8v-2H6v2H4v-2H2v2H0V8h12v2zm28 22h-2v-2h-2v2h-2v-2h-2v2h-2v-2h-2v2h-2v-2h-2v4h20v-2zm-18-26h2v2h2V6h2v2h2V6h2v2h2V6h2v2h2V6h2v4H14V6z\' fill=\'%23047857\' fill-rule=\'evenodd\'/%3E%3C/svg%3E');"></div>
+    <section id="features" class="relative py-16 sm:py-24 overflow-hidden" style="background-image: url('{{ asset('images/1443.jpg') }}'); background-size: 400px 400px; background-repeat: repeat;">
+        <!-- White overlay for readability -->
+        <div class="absolute inset-0 bg-white/80 pointer-events-none"></div>
         
         <!-- Abstract Background Shapes for Eco-Digital feel -->
         <div class="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 rounded-full bg-emerald-200/20 blur-3xl pointer-events-none"></div>
@@ -338,6 +337,15 @@
                     <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-amber-700 transition-colors">Usulan SSH & SBU</h3>
                     <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Kelola dan ajukan usulan Standar Satuan Harga (SSH) dan Standar Biaya Umum (SBU) secara digital lengkap dengan cetak PDF otomatis.</p>
                 </div>
+                <!-- Feature 8 -->
+                <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-6 sm:p-8 card-hover border border-cyan-50 shadow-sm hover:shadow-xl hover:shadow-cyan-900/5 group relative overflow-hidden transition-all duration-300">
+                    <div class="absolute top-0 right-0 w-32 h-32 bg-gradient-to-bl from-cyan-100/50 to-transparent rounded-bl-full opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-cyan-100 to-teal-50 rounded-xl flex items-center justify-center mb-5 sm:mb-6 shadow-sm group-hover:scale-110 transition-transform duration-300 border border-cyan-100/50">
+                        <i class="fas fa-clipboard-check text-cyan-600 text-xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-gray-800 relative z-10 group-hover:text-cyan-700 transition-colors">Pengawasan Usaha</h3>
+                    <p class="text-gray-500 mt-3 text-sm leading-relaxed relative z-10">Monitoring dan pengawasan pelaku usaha & kegiatan per kecamatan dengan ekspor laporan PDF & Excel otomatis.</p>
+                </div>
             </div>
         </div>
     </section>
@@ -350,26 +358,30 @@
         <div class="absolute -left-20 bottom-0 w-64 h-64 bg-teal-500/20 blur-[100px] rounded-full pointer-events-none"></div>
         
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-            <div class="grid grid-cols-2 md:grid-cols-5 gap-4 sm:gap-6 lg:gap-8 text-center">
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6 text-center">
                 <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ number_format($totalArsip, 0, ',', '.') }}</div>
-                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Arsip Digital</p>
+                    <div class="stat-number text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ number_format($totalArsip, 0, ',', '.') }}</div>
+                    <p class="text-emerald-100/80 mt-2 font-medium text-xs sm:text-sm tracking-wide uppercase">Arsip Digital</p>
                 </div>
                 <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 100ms;">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalDepartemen }}</div>
-                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Bidang DLH</p>
+                    <div class="stat-number text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalDepartemen }}</div>
+                    <p class="text-emerald-100/80 mt-2 font-medium text-xs sm:text-sm tracking-wide uppercase">Bidang DLH</p>
                 </div>
                 <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 200ms;">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalKategori }}</div>
-                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Kategori</p>
+                    <div class="stat-number text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalKategori }}</div>
+                    <p class="text-emerald-100/80 mt-2 font-medium text-xs sm:text-sm tracking-wide uppercase">Kategori</p>
                 </div>
                 <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 300ms;">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalUser }}</div>
-                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Pengguna Aktif</p>
+                    <div class="stat-number text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-emerald-300 to-teal-200 drop-shadow-sm">{{ $totalUser }}</div>
+                    <p class="text-emerald-100/80 mt-2 font-medium text-xs sm:text-sm tracking-wide uppercase">Pengguna</p>
                 </div>
                 <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 400ms;">
-                    <div class="stat-number text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-200 drop-shadow-sm">{{ number_format($totalUsulan, 0, ',', '.') }}</div>
-                    <p class="text-emerald-100/80 mt-3 font-medium text-sm sm:text-base tracking-wide uppercase">Usulan Harga</p>
+                    <div class="stat-number text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-amber-300 to-yellow-200 drop-shadow-sm">{{ number_format($totalUsulan, 0, ',', '.') }}</div>
+                    <p class="text-emerald-100/80 mt-2 font-medium text-xs sm:text-sm tracking-wide uppercase">Usulan Harga</p>
+                </div>
+                <div class="scroll-reveal p-4 sm:p-6 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-colors card-hover" style="transition-delay: 500ms;">
+                    <div class="stat-number text-2xl sm:text-3xl lg:text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-300 to-teal-200 drop-shadow-sm">{{ number_format($totalPengawasan ?? 0, 0, ',', '.') }}</div>
+                    <p class="text-emerald-100/80 mt-2 font-medium text-xs sm:text-sm tracking-wide uppercase">Pengawasan</p>
                 </div>
             </div>
         </div>
@@ -378,8 +390,11 @@
 
 
     <!-- Footer -->
-    <footer class="bg-gray-50 border-t border-gray-200 py-8 sm:py-12">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <footer class="border-t border-gray-200 py-8 sm:py-12" style="background-image: url('{{ asset('images/1443.jpg') }}'); background-size: 400px 400px; background-repeat: repeat;">
+        <div class="relative">
+        <!-- White overlay -->
+        <div class="absolute inset-0 bg-white/85"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="flex flex-col md:flex-row justify-between items-center gap-4 sm:gap-6">
                 <div class="flex items-center gap-2">
                     <img src="{{ asset('images/logo-dlh.png') }}" alt="Logo" class="w-7 h-7 object-contain grayscale opacity-80">
@@ -396,6 +411,7 @@
                 </div>
             </div>
         </div>
+        </div><!-- end relative wrapper -->
     </footer>
 
     <!-- Scroll reveal & mobile menu script -->

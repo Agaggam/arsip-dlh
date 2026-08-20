@@ -164,6 +164,8 @@ class ArchiveController extends Controller
             ->orderBy('year', 'desc')
             ->pluck('year');
 
+        $totalUnduhan = $allFilteredArchives->sum('download_count');
+
         return view('admin.archives.index', compact(
             'archives', 
             'categories', 
@@ -172,7 +174,8 @@ class ArchiveController extends Controller
             'months', 
             'years',  
             'totalAktif',
-            'totalHilang'
+            'totalHilang',
+            'totalUnduhan'
         ));
     }
 
@@ -535,6 +538,81 @@ public function preview($token)
 
         // 8. Kembalikan dengan feedback message
         return back()->with('success', "Arsip berhasil dipindahkan ke tempat sampah. Keterangan: {$displayText}.");
+    }
+
+    /**
+     * EXPORT EXCEL ARSIP
+     */
+    public function exportExcel(Request $request, ?Archive $archive = null)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(401);
+        }
+
+        if ($archive) {
+            $filename = 'Arsip_' . \Illuminate\Support\Str::slug($archive->title) . '_' . date('Ymd') . '.xlsx';
+            return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\ArchiveExport([], $archive), $filename);
+        }
+
+        $filters = $request->only(['search', 'category_id', 'department_id', 'file_type']);
+        if (!$user->isPureSuperAdmin() && $user->isAdmin()) {
+            $filters['department_id'] = $user->department_id;
+        }
+
+        $filename = 'Rekap_Arsip_Digital_' . date('Ymd_His') . '.xlsx';
+        return \Maatwebsite\Excel\Facades\Excel::download(new \App\Exports\ArchiveExport($filters), $filename);
+    }
+
+    /**
+     * EXPORT PDF ARSIP
+     */
+    public function exportPdf(Request $request, ?Archive $archive = null)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            abort(401);
+        }
+
+        if ($archive) {
+            $archives = collect([$archive]);
+            $filename = 'Arsip_' . \Illuminate\Support\Str::slug($archive->title) . '_' . date('Ymd') . '.pdf';
+        } else {
+            $filters = $request->only(['search', 'category_id', 'department_id', 'file_type']);
+            $query = Archive::with(['category.department', 'user']);
+
+            if (!$user->isPureSuperAdmin() && $user->isAdmin()) {
+                $query->whereHas('category', fn($q) => $q->where('department_id', $user->department_id));
+            }
+            if (!empty($filters['search'])) {
+                $query->where('title', 'LIKE', '%' . $filters['search'] . '%');
+            }
+            if (!empty($filters['category_id'])) {
+                $query->where('category_id', $filters['category_id']);
+            }
+            if (!empty($filters['department_id'])) {
+                $query->whereHas('category', fn($q) => $q->where('department_id', $filters['department_id']));
+            }
+            if (!empty($filters['file_type'])) {
+                $query->where('file_type', $filters['file_type']);
+            }
+
+            $archives = $query->latest('archive_date')->get();
+            $filename = 'Rekap_Arsip_Digital_' . date('Ymd_His') . '.pdf';
+        }
+
+        $tanggal = \Carbon\Carbon::now()->translatedFormat('d F Y');
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.archives.pdf', compact('archives', 'tanggal'))
+            ->setPaper('a4', 'landscape')
+            ->setOptions([
+                'dpi'                  => 150,
+                'defaultFont'          => 'helvetica',
+                'isHtml5ParserEnabled' => true,
+                'isRemoteEnabled'      => false,
+            ]);
+
+        return $pdf->download($filename);
     }
 
     /**

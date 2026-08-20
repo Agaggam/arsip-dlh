@@ -156,4 +156,24 @@ function previewImage(input, previewId) {
         reader.readAsDataURL(input.files[0]);
     }
 }
+
+// Live currency formatting and auto average suggestion
+document.addEventListener('DOMContentLoaded', () => {
+    const inputs = ['harga_usulan', 'harga_toko_1', 'harga_toko_2', 'harga_toko_3'];
+    
+    inputs.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.addEventListener('input', function(e) {
+                let val = this.value.replace(/\D/g, '');
+                if (val) {
+                    this.value = new Intl.NumberFormat('id-ID').format(val);
+                } else {
+                    this.value = '';
+                }
+            });
+        }
+    });
+});
 </script>
+

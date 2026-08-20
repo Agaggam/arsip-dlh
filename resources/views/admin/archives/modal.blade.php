@@ -119,99 +119,6 @@
     </form>
 </x-modal>
 
-{{-- MODAL TAMBAH ARSIP VIA ZIP --}}
-<x-modal name="modal-tambah-zip" focusable>
-    <form method="post" action="{{ route('admin.archives.store-zip') }}" class="p-6" enctype="multipart/form-data" id="uploadZipForm">
-        @csrf
-        <h2 class="text-lg font-bold text-slate-800 mb-2">Unggah Masal via ZIP</h2>
-        <p class="text-xs text-slate-500 mb-4">Ekstrak otomatis file dokumen di dalam berkas ZIP menjadi arsip individu sesuai kategori pilihan.</p>
-        
-        <div class="space-y-4">
-            <div>
-                <x-input-label for="zip_category_id" value="Kategori Target" class="text-xs font-bold uppercase text-slate-500" />
-                <select name="category_id" id="zip_category_id" class="mt-1 block w-full border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-xl shadow-sm text-sm">
-                    <option value="">-- Otomatis: Belum Dikategorikan --</option>
-                    @foreach($categories as $cat)
-                        <option value="{{ $cat->id }}">
-                            @if(Auth::user()->isPureSuperAdmin())
-                                {{ $cat->name }} ({{ $cat->department->name ?? 'System' }})
-                            @else
-                                {{ $cat->name }}
-                            @endif
-                        </option>
-                    @endforeach
-                </select>
-                <p class="text-xs text-slate-400 mt-1">Pilih kategori target, atau <strong>biarkan default</strong> untuk otomatis memasukkannya ke kategori "Belum Dikategorikan" milik departemen Anda.</p>
-            </div>
-
-            {{-- Upload file ZIP drag & drop --}}
-            <div>
-                <x-input-label for="zip_file" value="Pilih Berkas ZIP" class="text-xs font-bold uppercase text-slate-500" />
-                <div class="mt-1 flex justify-center rounded-lg border border-dashed border-gray-300 bg-gray-50 px-6 py-5 transition hover:bg-gray-100 cursor-pointer" 
-                     x-data="{ zipName: '' }"
-                     @click="$refs.zipInput.click()">
-                    <div class="text-center w-full">
-                        <template x-if="!zipName">
-                            <div>
-                                <svg class="mx-auto h-12 w-12 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 19V4a1 1 0 011-1h5l2 2h6a1 1 0 011 1v13a1 1 0 01-1 1H6a1 1 0 01-1-1z" />
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m-3-3h6" />
-                                </svg>
-                                <div class="mt-2 flex text-sm leading-6 text-gray-600 justify-center">
-                                    <span class="rounded-md bg-gray-50 font-semibold text-indigo-600 hover:text-indigo-500">Unggah berkas ZIP</span>
-                                    <span class="pl-1">atau seret ke sini</span>
-                                </div>
-                                <p class="text-xs text-gray-500">Hanya menerima format berkas kompresi .ZIP (Max 50MB)</p>
-                            </div>
-                        </template>
-                        <template x-if="zipName">
-                            <div>
-                                <svg class="mx-auto h-12 w-12 text-indigo-600 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                </svg>
-                                <p class="mt-2 text-sm font-medium text-emerald-600 break-all" x-text="zipName"></p>
-                                <p class="text-xs text-gray-400 mt-1">Klik area untuk mengganti berkas ZIP</p>
-                            </div>
-                        </template>
-                    </div>
-                    <input id="zip_file" name="zip_file" type="file" class="hidden" x-ref="zipInput" accept=".zip"
-                           @change="
-                               const file = $event.target.files[0];
-                               zipName = file ? file.name : '';
-                           " required>
-                </div>
-            </div>
-        </div>
-
-        {{-- Zip Progress Bar --}}
-        <div id="zipProgressContainer" class="mt-6 hidden">
-            <div class="flex justify-between mb-1">
-                <span class="text-sm font-medium text-slate-700 flex items-center gap-1.5">
-                    <svg class="w-4 h-4 animate-spin text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                    </svg>
-                    Mengekstrak & Mengunggah...
-                </span>
-                <span class="text-sm font-medium text-slate-700" id="zipProgressPercent">0%</span>
-            </div>
-            <div class="w-full bg-slate-200 rounded-full h-2">
-                <div id="zipProgressBar" class="bg-indigo-600 h-2 rounded-full" style="width: 0%"></div>
-            </div>
-            <p class="text-xs text-slate-400 mt-2">Sistem sedang mendekompresi arsip. Jangan menutup tab halaman ini.</p>
-        </div>
-
-        <div class="mt-6 flex justify-end gap-3">
-            <x-secondary-button x-on:click="$dispatch('close')" class="rounded-xl">Batal</x-secondary-button>
-            <button type="submit" id="zipSubmitBtn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-5 rounded-xl shadow-md transition-all active:scale-95 flex items-center gap-2 text-sm">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M8 4H6a2 2 0 00-2 2v12a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-2m-4-1v8m0 0l3-3m-3 3L9 8m-5 5h2.586a1 1 0 01.707.293l2.414 2.414a1 1 0 00.707.293h3.172a1 1 0 00.707-.293l2.414-2.414a1 1 0 01.707-.293H20" />
-                </svg>
-                Ekstrak & Simpan
-            </button>
-        </div>
-    </form>
-</x-modal>
-
 {{-- MODAL EDIT / UBAH DATA ARSIP (SEKARANG SAMA DENGAN FORM TAMBAH ARSIP) --}}
 <x-modal name="modal-edit-arsip" focusable>
     <form method="post" action="" class="p-6" enctype="multipart/form-data" id="editForm"
@@ -472,34 +379,6 @@
             if (submitBtn) {
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Mengunggah...';
-            }
-        });
-    })();
-
-    // Progress bar form tambah ZIP masal
-    (function() {
-        const zipForm = document.getElementById('uploadZipForm');
-        if (!zipForm) return;
-        zipForm.addEventListener('submit', function(e) {
-            const zipProgressContainer = document.getElementById('zipProgressContainer');
-            const zipProgressBar = document.getElementById('zipProgressBar');
-            const zipProgressPercent = document.getElementById('zipProgressPercent');
-            const zipSubmitBtn = document.getElementById('zipSubmitBtn');
-            if (zipProgressContainer) {
-                zipProgressContainer.classList.remove('hidden');
-                let width = 0;
-                const interval = setInterval(() => {
-                    if (width >= 95) clearInterval(interval);
-                    else {
-                        width += 5;
-                        zipProgressBar.style.width = width + '%';
-                        zipProgressPercent.innerText = width + '%';
-                    }
-                }, 200);
-            }
-            if (zipSubmitBtn) {
-                zipSubmitBtn.disabled = true;
-                zipSubmitBtn.innerHTML = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Memproses ZIP...';
             }
         });
     })();

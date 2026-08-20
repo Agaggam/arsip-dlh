@@ -153,6 +153,30 @@
                     </div>
                 </div>
 
+                {{-- Total Pengawasan --}}
+                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
+                    <div class="absolute inset-0 bg-gradient-to-r from-cyan-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                    <div class="p-6 relative z-10">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Pengawasan</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalPengawasan ?? 0) }}</p>
+                            </div>
+                            <div class="p-3 rounded-xl bg-cyan-100 text-cyan-600">
+                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                                </svg>
+                            </div>
+                        </div>
+                        <div class="mt-4 flex items-center text-xs">
+                            <svg class="w-3 h-3 mr-1 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="text-cyan-600 font-medium">Ketaatan Lingkungan</span>
+                            <span class="text-gray-400 ml-1">Pelaku Usaha Kota Batu</span>
+                        </div>
+                    </div>
+                </div>
+
+
                 {{-- Total Unit Kerja --}}
                 <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
                     <div class="absolute inset-0 bg-gradient-to-r from-teal-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>

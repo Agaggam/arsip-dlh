@@ -14,13 +14,13 @@ use Carbon\Carbon;
 class PegawaiController extends Controller
 {
     /**
-     * Pastikan hanya super admin murni yang bisa akses.
+     * Pastikan hanya super admin murni yang bisa create, update, delete.
      */
     private function requireAdmin(): void
     {
         $user = Auth::user();
         if (!$user || !$user->isPureSuperAdmin()) {
-            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengakses modul ini.');
+            abort(403, 'Akses ditolak. Hanya Super Admin yang dapat mengubah data kepegawaian.');
         }
     }
 
@@ -30,8 +30,6 @@ class PegawaiController extends Controller
 
     public function index(Request $request)
     {
-        $this->requireAdmin();
-
         $filters = $request->only([
             'search', 'kategori', 'unit_kerja', 'status', 'tmt_dari', 'tmt_sampai',
         ]);
@@ -152,8 +150,6 @@ class PegawaiController extends Controller
 
     public function exportExcel(Request $request)
     {
-        $this->requireAdmin();
-
         $filters  = $request->only(['search', 'kategori', 'unit_kerja', 'status', 'tmt_dari', 'tmt_sampai']);
         $filename = 'Data_Pegawai_' . Carbon::now()->format('Ymd_His') . '.xlsx';
 
@@ -166,8 +162,6 @@ class PegawaiController extends Controller
 
     public function exportPdf(Request $request)
     {
-        $this->requireAdmin();
-
         $filters  = $request->only(['search', 'kategori', 'unit_kerja', 'status', 'tmt_dari', 'tmt_sampai']);
         $pegawais = Pegawai::filter($filters)->orderBy('nama_lengkap')->get();
         $tanggal  = Carbon::now()->translatedFormat('d F Y');
@@ -195,8 +189,6 @@ class PegawaiController extends Controller
 
     public function quickExport(Request $request, string $type, string $format)
     {
-        $this->requireAdmin();
-
         $allowedTypes = [
             'semua'      => [],
             'asn'        => ['kategori' => 'ASN (PNS)'],
