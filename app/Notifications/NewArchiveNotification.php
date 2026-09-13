@@ -40,6 +40,10 @@ class NewArchiveNotification extends Notification
         $categoryName = $this->archive->category ? $this->archive->category->name : 'Umum';
         $uploaderName = $this->archive->user ? $this->archive->user->name : 'Sistem';
 
+        $previewUrl = (isset($notifiable->role) && $notifiable->role->name === 'user')
+            ? route('arsip.preview', $this->archive->hash_token)
+            : route('admin.archives.preview', $this->archive->hash_token);
+
         return (new MailMessage)
             ->subject("Arsip Baru Diunggah: {$this->archive->title}")
             ->greeting("Halo, {$notifiable->name}!")
@@ -47,7 +51,7 @@ class NewArchiveNotification extends Notification
             ->line("**Judul Arsip:** {$this->archive->title}")
             ->line("**Kategori:** {$categoryName}")
             ->line("**Tanggal Arsip:** " . ($this->archive->archive_date ?? date('Y-m-d')))
-            ->action('Lihat Arsip', route('admin.archives.preview', $this->archive->hash_token))
+            ->action('Lihat Arsip', $previewUrl)
             ->line('Terima kasih telah menggunakan sistem Arsip DLH!');
     }
 

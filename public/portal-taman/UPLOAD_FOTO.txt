@@ -1,0 +1,23 @@
+FITUR UPLOAD FOTO TAMAN
+
+Admin sekarang dapat:
+- memilih foto langsung dari komputer;
+- melihat preview sebelum menyimpan;
+- upload JPG, PNG, WEBP maksimal 5 MB;
+- mengganti foto saat edit;
+- otomatis menghapus foto lama saat diganti;
+- otomatis menghapus foto saat data taman dihapus.
+
+Folder foto:
+uploads/parks/
+
+Jika upload ditolak oleh PHP karena ukuran file, buka php.ini dan pastikan:
+upload_max_filesize = 8M
+post_max_size = 10M
+
+Kemudian restart Apache.
+
+FITUR TAMBAHAN:
+- Setelah memilih foto, admin dapat menekan "✕ Hapus foto pilihan".
+- Foto yang dipilih akan dibatalkan tanpa menghapus foto lama saat mode edit.
+- Jika admin memilih foto lain, preview akan otomatis berubah.

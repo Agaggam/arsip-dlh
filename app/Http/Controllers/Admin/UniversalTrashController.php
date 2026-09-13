@@ -71,10 +71,14 @@ class UniversalTrashController extends Controller
 
         } elseif ($type === 'pengawasan') {
             $query = Pengawasan::onlyTrashed()->with('user');
+            if (!$user->isPureSuperAdmin() && $user->isAdmin() && $user->department_id) {
+                $query->where('department_id', $user->department_id);
+            }
             if ($request->search) {
                 $query->where('nama_usaha', 'LIKE', "%{$request->search}%");
             }
             $pengawasans = $query->latest()->paginate(10)->appends($request->all());
+
 
         } elseif ($type === 'user') {
             if (!$user->isPureSuperAdmin()) abort(403);
@@ -110,6 +114,10 @@ class UniversalTrashController extends Controller
             log_activity(Auth::user(), 'pulihkan_usulan', "Usulan Harga ({$model->judul}) berhasil dipulihkan.");
         } elseif ($type === 'pengawasan') {
             $model = Pengawasan::withTrashed()->findOrFail($id);
+            $user  = Auth::user();
+            if (!$user->isPureSuperAdmin() && $user->isAdmin() && isset($model->department_id) && $model->department_id !== $user->department_id) {
+                return back()->with('error', 'Akses ditolak.');
+            }
             $model->restore();
             log_activity(Auth::user(), 'pulihkan_pengawasan', "Data Pengawasan ({$model->nama_usaha}) berhasil dipulihkan.");
         } elseif ($type === 'user') {
@@ -147,6 +155,10 @@ class UniversalTrashController extends Controller
             log_activity(Auth::user(), 'hapus_permanen_usulan', "Usulan Harga ({$title}) dihapus permanen.");
         } elseif ($type === 'pengawasan') {
             $model = Pengawasan::withTrashed()->findOrFail($id);
+            $authUser = Auth::user();
+            if (!$authUser->isPureSuperAdmin() && $authUser->isAdmin() && isset($model->department_id) && $model->department_id !== $authUser->department_id) {
+                return back()->with('error', 'Akses ditolak.');
+            }
             $title = $model->nama_usaha;
             $model->forceDelete();
             log_activity(Auth::user(), 'hapus_permanen_pengawasan', "Pengawasan ({$title}) dihapus permanen.");

@@ -15,9 +15,9 @@ use App\Http\Controllers\DashboardController as UserDashboardController;
 // 1. Halaman Utama & Statis
 Route::get('/', function () {
     $totalArsip = \App\Models\Archive::count();
-    $totalDepartemen = \App\Models\Department::where('name', '!=', 'System')->count();
+    $totalDepartemen = \App\Models\Department::where('is_system', false)->where('name', '!=', 'System')->count();
     $totalKategori = \App\Models\Category::count();
-    $totalUser = \App\Models\User::where('status', 'active')->count();
+    $totalUser = \App\Models\User::where('status', 'approved')->count();
     $totalUsulan = \App\Models\SurveyHarga::count();
     $totalPengawasan = \App\Models\Pengawasan::count();
 
@@ -45,6 +45,7 @@ Route::get('/kebijakan-privasi', function () {
 // 2. Group untuk Super Admin dan Admin Departemen Saja
 Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('admin.dashboard.stats')->middleware('throttle:120,1');
 
     // Route Manage departements
     Route::get('/departments', [DepartmentController::class, 'index'])->name('admin.departments.index');
@@ -111,6 +112,9 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
     Route::prefix('kepegawaian')->name('kepegawaian.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\PegawaiController::class, 'index'])->name('index');
         Route::post('/', [\App\Http\Controllers\Admin\PegawaiController::class, 'store'])->name('store');
+        Route::post('/bulk', [\App\Http\Controllers\Admin\PegawaiController::class, 'storeBulk'])->name('storeBulk');
+        Route::post('/import', [\App\Http\Controllers\Admin\PegawaiController::class, 'import'])->name('import');
+        Route::get('/template', [\App\Http\Controllers\Admin\PegawaiController::class, 'downloadTemplate'])->name('template');
         Route::put('/{pegawai}', [\App\Http\Controllers\Admin\PegawaiController::class, 'update'])->name('update');
         Route::delete('/{pegawai}', [\App\Http\Controllers\Admin\PegawaiController::class, 'destroy'])->name('destroy');
         // Export dengan filter aktif
@@ -154,6 +158,7 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
 Route::middleware(['auth', 'role:user', 'status', 'verified'])->group(function () {
 
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard/stats', [UserDashboardController::class, 'stats'])->name('dashboard.stats')->middleware('throttle:120,1');
 
     // Route arsip untuk user biasa
     Route::get('/arsip', [ArchiveController::class, 'userIndex'])->name('arsip.user');

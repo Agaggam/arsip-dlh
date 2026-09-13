@@ -61,9 +61,9 @@
         .detail-table .col-colon { width: 3%; text-align: center; color: #94a3b8; }
 
         /* SURVEI TOKO */
-        .toko-grid { width: 100%; border-collapse: collapse; margin-bottom: 16px; }
+        .toko-grid { width: 100%; border-collapse: collapse; margin-bottom: 16px; table-layout: fixed; }
         .toko-grid td { border: 1px solid #cbd5e1; padding: 0; vertical-align: top; width: 33.33%; }
-        .toko-inner { padding: 8px; }
+        .toko-inner { padding: 8px; text-align: left; }
         .toko-num {
             display: inline-block;
             width: 18px; height: 18px;
@@ -77,8 +77,20 @@
             margin-bottom: 6px;
         }
         .toko-label { font-size: 7.5pt; color: #64748b; margin-bottom: 1px; }
-        .toko-value { font-size: 9pt; font-weight: bold; color: #1e293b; margin-bottom: 5px; }
-        .toko-img { width: 100%; max-height: 90px; object-fit: contain; border: 1px solid #e2e8f0; border-radius: 4px; margin-top: 4px; }
+        .toko-value { font-size: 9pt; font-weight: bold; color: #1e293b; margin-bottom: 4px; }
+        .toko-img-container {
+            text-align: center;
+            margin: 6px auto 4px auto;
+            width: 100%;
+        }
+        .toko-img {
+            width: 110px;
+            height: 110px;
+            border: 1px solid #cbd5e1;
+            border-radius: 4px;
+            display: inline-block;
+            vertical-align: middle;
+        }
         .toko-link { font-size: 7pt; color: #3b82f6; word-break: break-all; margin-top: 3px; }
         .no-data { color: #94a3b8; font-style: italic; font-size: 8pt; }
 
@@ -244,6 +256,64 @@
 </div>
 
 {{-- SECTION B: DATA SURVEI TOKO --}}
+@php
+    $makeSquareImage = function($imageRelPath, $targetSize = 260) {
+        if (!$imageRelPath) return null;
+        
+        $fullPath = file_exists(public_path("storage/{$imageRelPath}"))
+            ? public_path("storage/{$imageRelPath}")
+            : (file_exists(storage_path("app/public/{$imageRelPath}")) ? storage_path("app/public/{$imageRelPath}") : null);
+            
+        if (!$fullPath || !file_exists($fullPath)) return null;
+
+        $info = @getimagesize($fullPath);
+        if (!$info) return null;
+
+        $srcImg = null;
+        switch ($info[2]) {
+            case IMAGETYPE_JPEG:
+                $srcImg = @imagecreatefromjpeg($fullPath);
+                break;
+            case IMAGETYPE_PNG:
+                $srcImg = @imagecreatefrompng($fullPath);
+                break;
+            case IMAGETYPE_WEBP:
+                $srcImg = @imagecreatefromwebp($fullPath);
+                break;
+            case IMAGETYPE_GIF:
+                $srcImg = @imagecreatefromgif($fullPath);
+                break;
+            default:
+                return 'data:' . $info['mime'] . ';base64,' . base64_encode(file_get_contents($fullPath));
+        }
+
+        if (!$srcImg) {
+            return 'data:' . $info['mime'] . ';base64,' . base64_encode(file_get_contents($fullPath));
+        }
+
+        $w = imagesx($srcImg);
+        $h = imagesy($srcImg);
+        $min = min($w, $h);
+        $x = (int)(($w - $min) / 2);
+        $y = (int)(($h - $min) / 2);
+
+        $dstImg = imagecreatetruecolor($targetSize, $targetSize);
+
+        $white = imagecolorallocate($dstImg, 255, 255, 255);
+        imagefilledrectangle($dstImg, 0, 0, $targetSize, $targetSize, $white);
+
+        imagecopyresampled($dstImg, $srcImg, 0, 0, $x, $y, $targetSize, $targetSize, $min, $min);
+
+        ob_start();
+        imagejpeg($dstImg, null, 90);
+        $raw = ob_get_clean();
+
+        imagedestroy($srcImg);
+        imagedestroy($dstImg);
+
+        return 'data:image/jpeg;base64,' . base64_encode($raw);
+    };
+@endphp
 <div class="section-title">B. DATA SURVEI TOKO PEMBANDING</div>
 <table class="toko-grid">
     <tr>
@@ -253,10 +323,7 @@
             $hargaToko = $surveyHarga->{"harga_toko_{$i}"};
             $gambar    = $surveyHarga->{"gambar_toko_{$i}"};
             $link      = $surveyHarga->{"link_belanja_{$i}"};
-            $imgPath   = $gambar ? public_path("storage/{$gambar}") : null;
-            $imgBase64 = ($imgPath && file_exists($imgPath))
-                ? 'data:image/' . pathinfo($imgPath, PATHINFO_EXTENSION) . ';base64,' . base64_encode(file_get_contents($imgPath))
-                : null;
+            $imgBase64 = $makeSquareImage($gambar, 260);
         @endphp
         <td>
             <div class="toko-inner">
@@ -267,7 +334,9 @@
                     <div class="toko-label">Harga</div>
                     <div class="toko-value" style="color:#059669;">Rp {{ number_format($hargaToko ?? 0, 0, ',', '.') }}</div>
                     @if($imgBase64)
-                    <img src="{{ $imgBase64 }}" alt="Gambar Toko {{ $i }}" class="toko-img">
+                    <div class="toko-img-container">
+                        <img src="{{ $imgBase64 }}" alt="Gambar Toko {{ $i }}" class="toko-img">
+                    </div>
                     @endif
                     @if($link)
                     <div class="toko-label" style="margin-top:4px;">Link Belanja</div>

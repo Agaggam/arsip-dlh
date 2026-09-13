@@ -343,7 +343,17 @@
 
                 removeRow(index) {
                     if (this.items.length <= 1) {
-                        alert('Minimal harus ada 1 baris usaha!');
+                        Swal.fire({
+                            icon: 'info',
+                            title: 'Batas Minimum',
+                            text: 'Minimal harus ada 1 baris usaha dalam form!',
+                            confirmButtonColor: '#4f46e5',
+                            confirmButtonText: 'Mengerti',
+                            customClass: {
+                                popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                                confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md'
+                            }
+                        });
                         return;
                     }
                     this.items.splice(index, 1);
@@ -363,7 +373,17 @@
                     const filled = this.items.filter(i => i.nama_usaha && i.nama_usaha.trim() !== '');
                     if (filled.length === 0) {
                         e.preventDefault();
-                        alert('Harap isi Nama Usaha setidaknya pada 1 baris sebelum menyimpan!');
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Form Belum Lengkap',
+                            text: 'Harap isi Nama Usaha setidaknya pada 1 baris sebelum menyimpan data!',
+                            confirmButtonColor: '#4f46e5',
+                            confirmButtonText: 'Mengerti',
+                            customClass: {
+                                popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                                confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md'
+                            }
+                        });
                     }
                 }
             };

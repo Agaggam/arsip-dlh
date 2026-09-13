@@ -118,10 +118,37 @@
                     <span>{{ __('Pengawasan') }}</span>
                 </a>
 
+                {{-- PORTAL TAMAN KOTA LINK --}}
+                @php $isPortalTamanActive = request()->is('portal-taman*'); @endphp
+                <a href="/portal-taman/" target="_blank" rel="noopener noreferrer"
+                   class="{{ $baseClass }} {{ $isPortalTamanActive ? $activeClass : $inactiveClass }} group">
+                    <svg class="w-5 h-5 transition-colors {{ $isPortalTamanActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    <span>{{ __('Portal Taman Kota') }}</span>
+                    <span class="ml-auto flex items-center gap-1">
+                        <svg class="w-3 h-3 text-slate-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </span>
+                </a>
+
+                {{-- BANK SAMPAH EXTERNAL LINK --}}
+                <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer"
+                   class="{{ $baseClass }} text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 border-l-4 border-transparent hover:border-emerald-500 group">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                    </svg>
+                    <span>{{ __('Bank Sampah') }}</span>
+                    <span class="ml-auto flex items-center gap-1">
+                        <svg class="w-3 h-3 text-slate-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </span>
+                </a>
+
                 {{-- GROUP: PENGATURAN SISTEM --}}
                 @php 
                     $isSuperAdmin = auth()->user()->isPureSuperAdmin();
-                    $isSettingsActive = ($isSuperAdmin && (request()->routeIs('users.*') || request()->routeIs('activity-logs.*') || request()->routeIs('admin.backup.*'))) || request()->routeIs('admin.trash.*');
+                    $isAdmin = auth()->user()->isAdmin();
+                    $isSettingsActive = (($isSuperAdmin || $isAdmin) && request()->routeIs('users.*')) || ($isSuperAdmin && (request()->routeIs('activity-logs.*') || request()->routeIs('admin.backup.*'))) || request()->routeIs('admin.trash.*');
                 @endphp
                 <div x-data="{ open: {{ $isSettingsActive ? 'true' : 'false' }} }" class="space-y-1 mt-1">
                     <button @click="open = !open" 
@@ -143,13 +170,15 @@
                             {{ __('Tong Sampah') }}
                         </a>
 
-                        @if($isSuperAdmin)
+                        @if($isSuperAdmin || $isAdmin)
                         @php $isUsersActive = request()->routeIs('users.*'); @endphp
                         <a href="{{ route('users.index') }}" 
                            class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isUsersActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
                             {{ __('Manajemen User') }}
                         </a>
+                        @endif
 
+                        @if($isSuperAdmin)
                         @php $isLogsActive = request()->routeIs('activity-logs.index'); @endphp
                         <a href="{{ route('activity-logs.index') }}" 
                            class="block px-3 py-2 text-[13px] font-semibold rounded-lg transition-all {{ $isLogsActive ? 'text-indigo-600 bg-indigo-50/50' : 'text-slate-500 hover:text-indigo-600 hover:bg-slate-50' }}">
@@ -243,6 +272,19 @@
         </svg>
         <span>{{ __('Kepegawaian') }}</span>
     </a>
+    {{-- PORTAL TAMAN KOTA (USER) --}}
+    @php $isPortalTamanActive = request()->is('portal-taman*'); @endphp
+    <a href="/portal-taman/" target="_blank" rel="noopener noreferrer"
+       class="{{ $baseClass }} {{ $isPortalTamanActive ? $activeClass : $inactiveClass }} group">
+        <svg class="w-5 h-5 transition-colors {{ $isPortalTamanActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-emerald-600' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+        </svg>
+        <span>{{ __('Portal Taman Kota') }}</span>
+        <span class="ml-auto flex items-center gap-1">
+            <svg class="w-3 h-3 text-slate-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </span>
+    </a>
 @endif
         </div>
 
@@ -321,9 +363,31 @@
                     <x-responsive-nav-link :href="route('pengawasan.index')" :active="request()->routeIs('pengawasan.*')" class="{{ $mobileClasses }}">
                         {{ __('Pengawasan') }}
                     </x-responsive-nav-link>
+                    <a href="/portal-taman/" target="_blank" rel="noopener noreferrer"
+                       class="{{ $mobileClasses }} text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        </svg>
+                        {{ __('Portal Taman Kota') }}
+                        <svg class="w-3 h-3 ml-auto opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                    <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer"
+                       class="{{ $mobileClasses }} text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        {{ __('Bank Sampah') }}
+                        <svg class="w-3 h-3 ml-auto opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
                     <x-responsive-nav-link :href="route('admin.trash.index')" :active="request()->routeIs('admin.trash.index')" class="{{ $mobileClasses }}">
                         {{ __('Tong Sampah') }}
                     </x-responsive-nav-link>
+                    @if(auth()->user()->isPureSuperAdmin() || auth()->user()->isAdmin())
+                    <x-responsive-nav-link :href="route('users.index')" :active="request()->routeIs('users.*')" class="{{ $mobileClasses }}">
+                        {{ __('Manajemen User') }}
+                    </x-responsive-nav-link>
+                    @endif
                     @if(auth()->user()->isPureSuperAdmin())
                     <x-responsive-nav-link :href="route('activity-logs.index')" :active="request()->routeIs('activity-logs.*')" class="{{ $mobileClasses }}">
                         {{ __('Log Aktivitas') }}

@@ -472,7 +472,7 @@ class UserControllerTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('success', 'User berhasil dihapus!');
 
-        $this->assertDatabaseMissing('users', [
+        $this->assertSoftDeleted('users', [
             'id' => $this->regularUser->id
         ]);
     }
@@ -531,7 +531,7 @@ class UserControllerTest extends TestCase
         $response->assertRedirect();
         $response->assertSessionHas('success', 'User berhasil dihapus!');
 
-        $this->assertDatabaseMissing('users', [
+        $this->assertSoftDeleted('users', [
             'id' => $this->regularUser->id
         ]);
     }

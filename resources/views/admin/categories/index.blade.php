@@ -57,11 +57,35 @@
                         <button type="button"
                             @click="
                                 if(!sourceCat || !targetCat) {
-                                    alert('Pilih kategori sumber dan tujuan terlebih dahulu!');
+                                    Swal.fire({
+                                        icon: 'warning',
+                                        title: 'Pilihan Belum Lengkap',
+                                        text: 'Silakan pilih kategori sumber dan kategori tujuan terlebih dahulu!',
+                                        confirmButtonColor: '#4f46e5',
+                                        confirmButtonText: 'Mengerti',
+                                        customClass: {
+                                            popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                                            title: 'text-base font-bold text-slate-800',
+                                            htmlContainer: 'text-xs text-slate-600',
+                                            confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md'
+                                        }
+                                    });
                                     return;
                                 }
                                 if(sourceCat === targetCat) {
-                                    alert('Kategori sumber dan tujuan tidak boleh sama!');
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Kategori Sama',
+                                        text: 'Kategori sumber dan tujuan tidak boleh sama!',
+                                        confirmButtonColor: '#4f46e5',
+                                        confirmButtonText: 'Mengerti',
+                                        customClass: {
+                                            popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                                            title: 'text-base font-bold text-slate-800',
+                                            htmlContainer: 'text-xs text-slate-600',
+                                            confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md'
+                                        }
+                                    });
                                     return;
                                 }
 

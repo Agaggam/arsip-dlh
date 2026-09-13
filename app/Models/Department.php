@@ -8,7 +8,12 @@ use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 
 class Department extends Model
 {
-    protected $fillable = ['name', 'slug', 'description'];
+    protected $fillable = ['name', 'slug', 'description', 'is_system'];
+
+    protected $casts = [
+        'is_system' => 'boolean',
+    ];
+
 
     /**
      * Relasi: Satu departemen punya banyak user.

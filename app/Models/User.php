@@ -73,19 +73,43 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * FUNGSI CEK HAK AKSES (CUSTOM METHODS)
      */
-    public function isPureSuperAdmin()
+    public function isPureSuperAdmin(): bool
     {
-        return $this->role->name === 'super_admin' && $this->department->name === 'System';
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
+
+        if (!$this->role || $this->role->name !== 'super_admin') {
+            return false;
+        }
+
+        if (!$this->relationLoaded('department')) {
+            $this->load('department');
+        }
+
+        if (!$this->department) {
+            return false;
+        }
+
+        return (bool) ($this->department->is_system || $this->department->name === 'System' || $this->department->slug === 'system');
     }
 
-    public function isAdmin()
+    public function isAdmin(): bool
     {
-        return $this->role->name === 'admin';
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
+
+        return (bool) ($this->role && $this->role->name === 'admin');
     }
 
-    public function isUser()
+    public function isUser(): bool
     {
-        return $this->role->name === 'user';
+        if (!$this->relationLoaded('role')) {
+            $this->load('role');
+        }
+
+        return (bool) ($this->role && $this->role->name === 'user');
     }
 
     public function isFromDepartment(int $department_id): bool

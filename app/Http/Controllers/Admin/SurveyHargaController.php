@@ -78,6 +78,19 @@ class SurveyHargaController extends Controller
     {
         $this->requireAdminOrSuperAdmin();
 
+        // Strip thousand separators before validation so numeric rule succeeds
+        $currencyFields = ['harga_usulan', 'harga_toko_1', 'harga_toko_2', 'harga_toko_3'];
+        $sanitized = [];
+        foreach ($currencyFields as $field) {
+            $val = $request->input($field);
+            if ($val !== null && $val !== '') {
+                $sanitized[$field] = str_replace(['.', ','], ['', ''], (string) $val);
+            }
+        }
+        if (!empty($sanitized)) {
+            $request->merge($sanitized);
+        }
+
         $validated = $request->validate([
             'kelompok'            => 'required|in:SSH,SBU,HSPK,ASB',
             'judul'               => 'required|string|max:255',
@@ -114,11 +127,11 @@ class SurveyHargaController extends Controller
 
         $validated['user_id']       = Auth::id();
         $validated['department_id'] = Auth::user()->department_id;
-        $validated['harga_usulan']  = (int) str_replace(['.', ','], ['', ''], $validated['harga_usulan']);
+        $validated['harga_usulan']  = (int) $validated['harga_usulan'];
         foreach ([1, 2, 3] as $i) {
             $key = "harga_toko_{$i}";
-            if (isset($validated[$key])) {
-                $validated[$key] = (int) str_replace(['.', ','], ['', ''], $validated[$key]);
+            if (isset($validated[$key]) && $validated[$key] !== null) {
+                $validated[$key] = (int) $validated[$key];
             }
         }
 
@@ -155,6 +168,19 @@ class SurveyHargaController extends Controller
 
         if (!$user->isPureSuperAdmin() && $surveyHarga->department_id !== $user->department_id) {
             abort(403);
+        }
+
+        // Strip thousand separators before validation so numeric rule succeeds
+        $currencyFields = ['harga_usulan', 'harga_toko_1', 'harga_toko_2', 'harga_toko_3'];
+        $sanitized = [];
+        foreach ($currencyFields as $field) {
+            $val = $request->input($field);
+            if ($val !== null && $val !== '') {
+                $sanitized[$field] = str_replace(['.', ','], ['', ''], (string) $val);
+            }
+        }
+        if (!empty($sanitized)) {
+            $request->merge($sanitized);
         }
 
         $validated = $request->validate([
@@ -194,11 +220,11 @@ class SurveyHargaController extends Controller
             }
         }
 
-        $validated['harga_usulan'] = (int) str_replace(['.', ','], ['', ''], $validated['harga_usulan']);
+        $validated['harga_usulan'] = (int) $validated['harga_usulan'];
         foreach ([1, 2, 3] as $i) {
             $key = "harga_toko_{$i}";
-            if (isset($validated[$key])) {
-                $validated[$key] = (int) str_replace(['.', ','], ['', ''], $validated[$key]);
+            if (isset($validated[$key]) && $validated[$key] !== null) {
+                $validated[$key] = (int) $validated[$key];
             }
         }
 

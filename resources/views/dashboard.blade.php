@@ -20,22 +20,21 @@
                     </div>
                     <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">Lihat Arsip</span>
                 </div>
-                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalArsip ?? 0) }}</p>
+                <p class="text-2xl font-extrabold text-slate-800" data-stat-user="totalArsip">{{ number_format($totalArsip ?? 0) }}</p>
                 <p class="text-xs font-semibold text-slate-500 mt-0.5">Daftar Arsip Digital</p>
             </a>
 
             {{-- Card 2: Usulan Harga --}}
-            <a href="{{ route('survey-harga.index') }}" 
-               class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
+            <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm cursor-default">
                 <div class="flex items-center justify-between mb-3">
-                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:bg-amber-600 group-hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 14l6-6m-5.5.5h.01m4.99 5h.01M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16l3.5-2 3.5 2 3.5-2 3.5 2z"/></svg>
                     </div>
                     <span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">SSH/SBU</span>
                 </div>
-                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalUsulan ?? 0) }}</p>
+                <p class="text-2xl font-extrabold text-slate-800" data-stat-user="totalUsulan">{{ number_format($totalUsulan ?? 0) }}</p>
                 <p class="text-xs font-semibold text-slate-500 mt-0.5">Usulan Harga</p>
-            </a>
+            </div>
 
             {{-- Card 3: Data Pengawasan --}}
             <a href="{{ route('pengawasan.index') }}" 
@@ -46,22 +45,75 @@
                     </div>
                     <span class="text-xs font-bold text-cyan-600 bg-cyan-50 px-2 py-0.5 rounded-full">Pengawasan</span>
                 </div>
-                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalPengawasan ?? 0) }}</p>
+                <p class="text-2xl font-extrabold text-slate-800" data-stat-user="totalPengawasan">{{ number_format($totalPengawasan ?? 0) }}</p>
                 <p class="text-xs font-semibold text-slate-500 mt-0.5">Data Pengawasan</p>
             </a>
 
             {{-- Card 4: Data Kepegawaian --}}
-            <a href="{{ route('kepegawaian.index') }}" 
-               class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all group">
+            <div class="bg-white rounded-2xl border border-slate-100 p-5 shadow-sm cursor-default">
                 <div class="flex items-center justify-between mb-3">
-                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                     </div>
                     <span class="text-xs font-bold text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Kepegawaian</span>
                 </div>
-                <p class="text-2xl font-extrabold text-slate-800">{{ number_format($totalPegawai ?? 0) }}</p>
+                <p class="text-2xl font-extrabold text-slate-800" data-stat-user="totalPegawai">{{ number_format($totalPegawai ?? 0) }}</p>
                 <p class="text-xs font-semibold text-slate-500 mt-0.5">Data Pegawai</p>
-            </a>
+            </div>
+        </div>
+
+
+        {{-- PORTAL & SISTEM TERINTEGRASI DLH --}}
+        <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl shadow-xl p-6 text-white mb-6 border border-indigo-900/50">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base font-bold flex items-center gap-2 text-white">
+                        <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Portal & Aplikasi Terintegrasi DLH
+                    </h3>
+                    <p class="text-xs text-slate-300 mt-0.5">Akses cepat ke sistem eksternal dan portal layanan Dinas Lingkungan Hidup</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {{-- Card 1: Portal Taman Kota --}}
+                <a href="/portal-taman/" target="_blank" rel="noopener noreferrer" 
+                   class="bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 transition-all duration-200 flex items-center justify-between group backdrop-blur-md">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Portal Taman Kota</h4>
+                            <p class="text-xs text-slate-300 mt-0.5">Sistem Informasi Pengelolaan & Peta Informasi Taman Kota</p>
+                        </div>
+                    </div>
+                    <span class="p-2 text-slate-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </span>
+                </a>
+
+                {{-- Card 2: Bank Sampah --}}
+                <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer" 
+                   class="bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 transition-all duration-200 flex items-center justify-between group backdrop-blur-md">
+                    <div class="flex items-center gap-3">
+                        <div class="p-3 bg-teal-500/20 text-teal-400 rounded-xl group-hover:bg-teal-500 group-hover:text-white transition-colors">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="text-sm font-bold text-white group-hover:text-teal-300 transition-colors">Bank Sampah Kota</h4>
+                            <p class="text-xs text-slate-300 mt-0.5">Sistem Informasi & Manajemen Bank Sampah DLH</p>
+                        </div>
+                    </div>
+                    <span class="p-2 text-slate-400 group-hover:text-white transition-colors">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </span>
+                </a>
+            </div>
         </div>
         
         {{-- Form Pencarian Simpel (Responsif) --}}
@@ -199,5 +251,41 @@
 
 {{-- MODAL PREVIEW DOKUMEN --}}
 @include('admin.archives.preview')
+
+{{-- Real-time stats polling --}}
+<script>
+    (function() {
+        const STATS_URL = '{{ route('dashboard.stats') }}';
+        const INTERVAL_MS = 30000;
+
+        function animateCounter(el, newVal) {
+            const current = parseInt(el.textContent.replace(/[^0-9]/g, '')) || 0;
+            const target  = parseInt(newVal) || 0;
+            if (current === target) return;
+            const duration = 500, start = performance.now(), diff = target - current;
+            function step(now) {
+                const p = Math.min((now - start) / duration, 1);
+                el.textContent = Math.round(current + diff * (1 - Math.pow(1 - p, 3))).toLocaleString('id-ID');
+                if (p < 1) requestAnimationFrame(step);
+            }
+            requestAnimationFrame(step);
+        }
+
+        async function fetchStats() {
+            try {
+                const resp = await fetch(STATS_URL, { headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' } });
+                if (!resp.ok) return;
+                const data = await resp.json();
+                document.querySelectorAll('[data-stat-user]').forEach(el => {
+                    const key = el.dataset.statUser;
+                    if (data.stats && data.stats[key] !== undefined) animateCounter(el, data.stats[key]);
+                });
+            } catch (e) { /* offline */ }
+        }
+
+        setTimeout(fetchStats, 5000);
+        setInterval(fetchStats, INTERVAL_MS);
+    })();
+</script>
 
 </x-app-layout>

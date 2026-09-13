@@ -42,4 +42,20 @@ class DashboardController extends Controller
             'totalPegawai'
         ));
     }
+
+    // ============================================================
+    // STATS — Real-time JSON endpoint untuk AJAX polling (User)
+    // ============================================================
+    public function stats()
+    {
+        return response()->json([
+            'stats' => [
+                'totalArsip'      => Archive::count(),
+                'totalUsulan'     => SurveyHarga::count(),
+                'totalPengawasan' => Pengawasan::count(),
+                'totalPegawai'    => Pegawai::count(),
+            ],
+            'updatedAt' => now()->format('H:i:s'),
+        ]);
+    }
 }

@@ -18,6 +18,9 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
 
+    <!-- SweetAlert2 (Loaded early) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
     <style>
@@ -397,62 +400,129 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 });
-// ===== GLOBAL SWEETALERT CONFIRMATION =====
+// ===== GLOBAL SWEETALERT CONFIRMATION & ALERT OVERRIDE =====
+window.alert = function(message, type = 'warning', title = 'Pemberitahuan') {
+    return Swal.fire({
+        title: title,
+        text: message,
+        icon: type,
+        confirmButtonColor: '#4f46e5',
+        confirmButtonText: 'Mengerti',
+        customClass: {
+            popup: 'rounded-2xl shadow-2xl border border-slate-100',
+            title: 'text-base font-bold text-slate-800',
+            htmlContainer: 'text-xs text-slate-600',
+            confirmButton: 'rounded-xl px-5 py-2.5 font-bold text-xs shadow-md'
+        }
+    });
+};
+
+window.showToast = function(message, type = 'success') {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3500,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.onmouseenter = Swal.stopTimer;
+            toast.onmouseleave = Swal.resumeTimer;
+        }
+    });
+    Toast.fire({
+        icon: type,
+        title: message
+    });
+};
+
 document.addEventListener('DOMContentLoaded', () => {
-    // Cari semua elemen (tombol/link) yang memiliki atribut onclick="return confirm(...)"
-    const confirmElements = document.querySelectorAll('[onclick^="return confirm"]');
-    
+    // 1. Intercept all elements with onclick="return confirm(...)"
+    const confirmElements = document.querySelectorAll('[onclick*="confirm("]');
     confirmElements.forEach(el => {
-        // Ekstrak pesan dari confirm('Pesan...')
-        const match = el.getAttribute('onclick').match(/confirm\(['"]([^'"]+)['"]\)/);
+        const attr = el.getAttribute('onclick') || '';
+        const match = attr.match(/confirm\(['"]([^'"]+)['"]\)/);
         const msg = match ? match[1] : 'Apakah Anda yakin ingin melanjutkan tindakan ini?';
         
-        // Hapus onclick bawaan browser
         el.removeAttribute('onclick');
         
-        // Tambahkan event listener baru menggunakan SweetAlert2
         el.addEventListener('click', function(e) {
             e.preventDefault();
+            e.stopPropagation();
             
-            // Deteksi apakah ini aksi hapus (warna merah) atau aksi lain
             const isDelete = el.innerText.toLowerCase().includes('hapus') || 
-                             (el.closest('form') && el.closest('form').querySelector('input[name="_method"][value="DELETE"]'));
+                             (el.closest('form') && el.closest('form').querySelector('input[name="_method"][value="DELETE"]')) ||
+                             (el.href && (el.href.includes('destroy') || el.href.includes('delete')));
             
             Swal.fire({
                 title: 'Konfirmasi',
                 text: msg,
                 icon: isDelete ? 'warning' : 'question',
                 showCancelButton: true,
-                confirmButtonColor: isDelete ? '#ef4444' : '#10b981', // red-500 / emerald-500
-                cancelButtonColor: '#64748b', // slate-500
+                confirmButtonColor: isDelete ? '#ef4444' : '#10b981',
+                cancelButtonColor: '#64748b',
                 confirmButtonText: isDelete ? 'Ya, Hapus!' : 'Ya, Lanjutkan',
                 cancelButtonText: 'Batal',
                 reverseButtons: true,
                 customClass: {
-                    popup: 'rounded-2xl',
+                    popup: 'rounded-2xl shadow-2xl border border-slate-100',
                     confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm',
                     cancelButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
                     if (el.tagName === 'BUTTON' && el.type === 'submit' && el.closest('form')) {
-                        // Tambahkan efek loading ke tombol
                         el.innerHTML = `<svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-white inline" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> Memproses...`;
                         el.classList.add('opacity-80', 'cursor-not-allowed');
                         el.closest('form').submit();
-                    } else if (el.tagName === 'A') {
+                    } else if (el.tagName === 'A' && el.href) {
                         window.location.href = el.href;
+                    } else if (el.closest('form')) {
+                        el.closest('form').submit();
                     }
+                }
+            });
+        });
+    });
+
+    // 2. Intercept all forms with onsubmit="return confirm(...)"
+    const confirmForms = document.querySelectorAll('form[onsubmit*="confirm("]');
+    confirmForms.forEach(form => {
+        const attr = form.getAttribute('onsubmit') || '';
+        const match = attr.match(/confirm\(['"]([^'"]+)['"]\)/);
+        const msg = match ? match[1] : 'Apakah Anda yakin ingin melanjutkan tindakan ini?';
+        
+        form.removeAttribute('onsubmit');
+        
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const isDelete = form.querySelector('input[name="_method"][value="DELETE"]') ||
+                             form.action.includes('destroy') || form.action.includes('delete');
+            
+            Swal.fire({
+                title: 'Konfirmasi',
+                text: msg,
+                icon: isDelete ? 'warning' : 'question',
+                showCancelButton: true,
+                confirmButtonColor: isDelete ? '#ef4444' : '#10b981',
+                cancelButtonColor: '#64748b',
+                confirmButtonText: isDelete ? 'Ya, Hapus!' : 'Ya, Lanjutkan',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl shadow-2xl border border-slate-100',
+                    confirmButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm',
+                    cancelButton: 'rounded-xl px-5 py-2.5 font-semibold text-sm'
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit();
                 }
             });
         });
     });
 });
 </script>
-
-<!-- SweetAlert2 -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
 
 </body>
 </html>

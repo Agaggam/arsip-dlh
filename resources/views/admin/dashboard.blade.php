@@ -1,10 +1,20 @@
 <x-app-layout>
     <x-slot name="header">
-        @if(Auth::user()->isPureSuperAdmin())
-            Dashboard Super Admin
-        @elseif(Auth::user()->isAdmin())
-            Dashboard — {{ Auth::user()->department->name ?? 'Admin' }}
-        @endif
+        <div class="flex items-center justify-between">
+            <span>
+                @if(Auth::user()->isPureSuperAdmin())
+                    Dashboard Super Admin
+                @elseif(Auth::user()->isAdmin())
+                    Dashboard — {{ Auth::user()->department->name ?? 'Admin' }}
+                @endif
+            </span>
+            {{-- LIVE Indicator --}}
+            <span id="liveIndicator" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 opacity-0 transition-opacity duration-500">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                LIVE
+                <span id="lastUpdatedTime" class="font-normal text-emerald-600 ml-1"></span>
+            </span>
+        </div>
     </x-slot>
 
     <!-- CDN Chart.js -->
@@ -21,7 +31,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Pengguna</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalUsers) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalUsers">{{ number_format($totalUsers) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-indigo-100 text-indigo-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,7 +41,7 @@
                         </div>
                         <div class="mt-4 flex items-center text-xs">
                             <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                            <span class="text-green-600 font-medium">{{ $usersThisMonth }} baru</span>
+                            <span class="text-green-600 font-medium" data-stat="usersThisMonth">{{ $usersThisMonth }} baru</span>
                             <span class="text-gray-400 ml-1">bulan ini</span>
                         </div>
                     </div>
@@ -45,7 +55,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Arsip</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalArchives) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalArchives">{{ number_format($totalArchives) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-emerald-100 text-emerald-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,7 +65,7 @@
                         </div>
                         <div class="mt-4 flex items-center text-xs">
                             <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                            <span class="text-green-600 font-medium">{{ $archivesThisMonth }} baru</span>
+                            <span class="text-green-600 font-medium" data-stat="archivesThisMonth">{{ $archivesThisMonth }} baru</span>
                             <span class="text-gray-400 ml-1">bulan ini</span>
                         </div>
                     </div>
@@ -68,7 +78,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Download</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalDownloads) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalDownloads">{{ number_format($totalDownloads) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-blue-100 text-blue-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,7 +101,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Tempat Sampah</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalTrashed ?? 0) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalTrashed">{{ number_format($totalTrashed ?? 0) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-rose-100 text-rose-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -114,7 +124,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Pegawai</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalPegawai ?? 0) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalPegawai">{{ number_format($totalPegawai ?? 0) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-orange-100 text-orange-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +147,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Usulan Harga</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalUsulan ?? 0) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalUsulan">{{ number_format($totalUsulan ?? 0) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-amber-100 text-amber-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,7 +157,7 @@
                         </div>
                         <div class="mt-4 flex items-center text-xs">
                             <svg class="w-3 h-3 mr-1 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span class="text-amber-600 font-medium">SSH & SBU</span>
+                            <span class="text-amber-600 font-medium">SSH &amp; SBU</span>
                             <span class="text-gray-400 ml-1">di departemen Anda</span>
                         </div>
                     </div>
@@ -160,7 +170,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Pengawasan</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalPengawasan ?? 0) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalPengawasan">{{ number_format($totalPengawasan ?? 0) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-cyan-100 text-cyan-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -184,7 +194,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Unit Kerja</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalDepartments ?? 0) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalDepartments">{{ number_format($totalDepartments ?? 0) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-teal-100 text-teal-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -194,7 +204,7 @@
                         </div>
                         <div class="mt-4 flex items-center text-xs">
                             <span class="text-teal-600 font-medium">Struktur</span>
-                            <span class="text-gray-400 ml-1">Departemen & Bidang</span>
+                            <span class="text-gray-400 ml-1">Departemen &amp; Bidang</span>
                         </div>
                     </div>
                 </div>
@@ -206,7 +216,7 @@
                         <div class="flex items-center justify-between">
                             <div>
                                 <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Kategori Arsip</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2">{{ number_format($totalCategories ?? 0) }}</p>
+                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalCategories">{{ number_format($totalCategories ?? 0) }}</p>
                             </div>
                             <div class="p-3 rounded-xl bg-pink-100 text-pink-600">
                                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -221,6 +231,63 @@
                     </div>
                 </div>
 
+            </div>
+
+            {{-- PORTAL & SISTEM TERINTEGRASI DLH --}}
+            <div class="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl shadow-xl p-6 text-white mb-8 border border-indigo-900/50">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <h3 class="text-base font-bold flex items-center gap-2 text-white">
+                            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            Portal & Aplikasi Terintegrasi DLH
+                        </h3>
+                        <p class="text-xs text-slate-300 mt-0.5">Akses cepat ke sistem eksternal dan portal layanan Dinas Lingkungan Hidup</p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {{-- Card 1: Portal Taman Kota --}}
+                    <a href="/portal-taman/" target="_blank" rel="noopener noreferrer" 
+                       class="bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 transition-all duration-200 flex items-center justify-between group backdrop-blur-md">
+                        <div class="flex items-center gap-3">
+                            <div class="p-3 bg-emerald-500/20 text-emerald-400 rounded-xl group-hover:bg-emerald-500 group-hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Portal Taman Kota</h4>
+                                <p class="text-xs text-slate-300 mt-0.5">Sistem Informasi Pengelolaan, Rekapitulasi RTH & Peta Taman</p>
+                                <div class="flex items-center gap-1.5 mt-2">
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/25 text-emerald-200 border border-emerald-500/30">Rekapitulasi RTH</span>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-white/80">Excel & PDF</span>
+                                </div>
+                            </div>
+                        </div>
+                        <span class="p-2 text-slate-400 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </span>
+                    </a>
+
+                    {{-- Card 2: Bank Sampah --}}
+                    <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer" 
+                       class="bg-white/10 hover:bg-white/20 border border-white/10 rounded-xl p-4 transition-all duration-200 flex items-center justify-between group backdrop-blur-md">
+                        <div class="flex items-center gap-3">
+                            <div class="p-3 bg-teal-500/20 text-teal-400 rounded-xl group-hover:bg-teal-500 group-hover:text-white transition-colors">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-bold text-white group-hover:text-teal-300 transition-colors">Bank Sampah Kota</h4>
+                                <p class="text-xs text-slate-300 mt-0.5">Sistem Informasi & Manajemen Bank Sampah DLH</p>
+                            </div>
+                        </div>
+                        <span class="p-2 text-slate-400 group-hover:text-white transition-colors">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                        </span>
+                    </a>
+                </div>
             </div>
 
             <!-- Grafik (70%) dan Aktivitas (30%) - menggunakan grid 12 kolom -->
@@ -250,7 +317,7 @@
             @endif
         </h3>
         
-        <div class="space-y-4">
+        <div id="activityFeed" class="space-y-4">
             @forelse($recentActivities ?? [] as $activity)
                 @php
                     $activityType = $activity->activity ?? '';
@@ -325,36 +392,40 @@
                         <a href="{{ route('admin.archives.index') }}" class="text-xs font-medium text-indigo-600 hover:underline flex items-center gap-1">Lihat semua <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg></a>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="min-w-full divide-y divide-gray-100">
-                            <thead class="bg-gray-50">
-                                <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Judul</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @forelse($recentArchives ?? [] as $archive)
-                                <tr class="hover:bg-gray-50 transition">
-                                    <td class="px-6 py-3 text-sm font-medium text-gray-800">{{ $archive->title }}</td>
-                                    <td class="px-6 py-3 text-sm text-gray-500">{{ $archive->category->name ?? '-' }}</td>
-                                    <td class="px-6 py-3 text-sm text-gray-500">{{ $archive->created_at->format('d M Y') }}</td>
-                                </tr>
-                                @empty
-                                    <tr>
-                                        <td colspan="8" class="px-6 py-12 text-center">
-                                            <div class="flex flex-col items-center justify-center">
-                                                <svg class="w-14 h-14 text-indigo-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                                </svg>
-                                                <p class="text-indigo-400 text-sm font-medium mt-1">Belum ada arsip yang diunggah</p>
-                                                <p class="text-gray-400 text-xs mt-1">Silakan klik tombol "Unggah Arsip" untuk menambah dokumen</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                @endempty
-                            </tbody>
-                        </table>
+        <div id="recentArchivesTable">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-100">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Judul</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Kategori</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Tanggal</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recentArchivesTbody">
+                        @forelse($recentArchives ?? [] as $archive)
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-3 text-sm font-medium text-gray-800">{{ $archive->title }}</td>
+                            <td class="px-6 py-3 text-sm text-gray-500">{{ $archive->category->name ?? '-' }}</td>
+                            <td class="px-6 py-3 text-sm text-gray-500">{{ $archive->created_at->format('d M Y') }}</td>
+                        </tr>
+                        @empty
+                            <tr>
+                                <td colspan="8" class="px-6 py-12 text-center">
+                                    <div class="flex flex-col items-center justify-center">
+                                        <svg class="w-14 h-14 text-indigo-300 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
+                                        <p class="text-indigo-400 text-sm font-medium mt-1">Belum ada arsip yang diunggah</p>
+                                        <p class="text-gray-400 text-xs mt-1">Silakan klik tombol "Unggah Arsip" untuk menambah dokumen</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endempty
+                    </tbody>
+                </table>
+            </div>
+        </div>
                     </div>
                 </div>
 
@@ -439,15 +510,22 @@
                     </div>
                 </div>
             </div>
-
+        </div>
+    </div>
 
     <script>
+
+        // ═══════════════════════════════════════════════════════════
+        // CHART.JS — Grafik Tren Arsip (inisialisasi awal)
+        // ═══════════════════════════════════════════════════════════
+        let archiveChartInstance = null;
+
         document.addEventListener('DOMContentLoaded', function() {
             const ctx = document.getElementById('archiveChart').getContext('2d');
-            // Pastikan data 12 bulan dari controller
             const months = @json($months ?? []);
             const archiveData = @json($archiveTrend ?? []);
-            new Chart(ctx, {
+
+            archiveChartInstance = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: months,
@@ -478,6 +556,147 @@
                     }
                 }
             });
+
+            // ═══════════════════════════════════════════════════════
+            // REAL-TIME POLLING — setiap 30 detik
+            // ═══════════════════════════════════════════════════════
+            const STATS_URL = '{{ route('admin.dashboard.stats') }}';
+            const INTERVAL_MS = 30000; // 30 detik
+
+            // Fungsi animasi counter (smooth angka berubah)
+            function animateCounter(el, newVal) {
+                const currentText = el.textContent.replace(/[^0-9]/g, '');
+                const currentVal  = parseInt(currentText) || 0;
+                const target      = parseInt(newVal) || 0;
+                if (currentVal === target) return;
+
+                const duration = 600;
+                const start    = performance.now();
+                const diff     = target - currentVal;
+
+                function step(now) {
+                    const elapsed  = now - start;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const eased    = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+                    el.textContent = Math.round(currentVal + diff * eased).toLocaleString('id-ID');
+                    if (progress < 1) requestAnimationFrame(step);
+                }
+                requestAnimationFrame(step);
+            }
+
+            // Render activity feed dari JSON
+            function renderActivities(activities) {
+                const feed = document.getElementById('activityFeed');
+                if (!feed) return;
+
+                if (!activities || activities.length === 0) {
+                    feed.innerHTML = `
+                        <div class="flex flex-col items-center justify-center py-12 text-center" style="min-height: 300px;">
+                            <svg class="w-16 h-16 text-gray-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <p class="text-gray-500 text-sm">Belum ada aktivitas</p>
+                            <p class="text-gray-400 text-xs mt-1">Aktivitas akan muncul saat ada interaksi</p>
+                        </div>`;
+                    return;
+                }
+
+                feed.innerHTML = activities.map(a => `
+                    <div class="flex items-start gap-3 group hover:bg-gray-50 p-2 rounded-xl transition-colors duration-150">
+                        <div class="flex-shrink-0">
+                            <div class="w-9 h-9 rounded-full ${a.colors.avatar} flex items-center justify-center font-bold text-sm">${a.initial}</div>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center flex-wrap gap-2 mb-0.5">
+                                <p class="text-sm font-semibold text-gray-800 truncate max-w-[150px]">${a.name}</p>
+                                <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-medium whitespace-nowrap ${a.colors.badge}">${a.type}</span>
+                            </div>
+                            <p class="text-xs text-gray-600 mt-0.5 break-words">${a.desc}</p>
+                            <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-1">
+                                <svg class="w-3 h-3 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                <span class="whitespace-nowrap">${a.time}</span>
+                            </p>
+                        </div>
+                    </div>`).join('');
+            }
+
+            // Render tabel arsip terbaru dari JSON
+            function renderRecentArchives(archives) {
+                const tbody = document.getElementById('recentArchivesTbody');
+                if (!tbody) return;
+
+                if (!archives || archives.length === 0) {
+                    tbody.innerHTML = `<tr><td colspan="3" class="px-6 py-8 text-center text-sm text-gray-400">Belum ada arsip</td></tr>`;
+                    return;
+                }
+
+                tbody.innerHTML = archives.map(a => `
+                    <tr class="hover:bg-gray-50 transition">
+                        <td class="px-6 py-3 text-sm font-medium text-gray-800">${a.title}</td>
+                        <td class="px-6 py-3 text-sm text-gray-500">${a.category}</td>
+                        <td class="px-6 py-3 text-sm text-gray-500">${a.date}</td>
+                    </tr>`).join('');
+            }
+
+            // Update chart
+            function updateChart(chartData) {
+                if (!archiveChartInstance || !chartData) return;
+                archiveChartInstance.data.labels   = chartData.months;
+                archiveChartInstance.data.datasets[0].data = chartData.archiveTrend;
+                archiveChartInstance.update('none'); // no animation for smoothness
+            }
+
+            // Fungsi utama fetch stats
+            async function fetchStats() {
+                try {
+                    const resp = await fetch(STATS_URL, {
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+                    });
+                    if (!resp.ok) return;
+
+                    const data = await resp.json();
+
+                    // Update KPI cards
+                    document.querySelectorAll('[data-stat]').forEach(el => {
+                        const key = el.dataset.stat;
+                        if (data.stats && data.stats[key] !== undefined) {
+                            // Sub-stat (e.g. "X baru" untuk bulan ini)
+                            if (key === 'archivesThisMonth') {
+                                el.textContent = data.stats[key] + ' baru';
+                            } else if (key === 'usersThisMonth') {
+                                el.textContent = data.stats[key] + ' baru';
+                            } else {
+                                animateCounter(el, data.stats[key]);
+                            }
+                        }
+                    });
+
+                    // Update feed & tabel
+                    renderActivities(data.recentActivities);
+                    renderRecentArchives(data.recentArchives);
+                    updateChart(data.chart);
+
+                    // Tampilkan LIVE indicator
+                    const liveEl   = document.getElementById('liveIndicator');
+                    const timeEl   = document.getElementById('lastUpdatedTime');
+                    if (liveEl) {
+                        liveEl.style.opacity = '1';
+                        if (timeEl) timeEl.textContent = data.updatedAt;
+                        // flash efek
+                        liveEl.classList.add('scale-105');
+                        setTimeout(() => liveEl.classList.remove('scale-105'), 400);
+                    }
+
+                } catch (e) {
+                    // Gagal fetch — abaikan (user mungkin sedang offline)
+                    console.warn('[Dashboard] Stats fetch failed:', e.message);
+                }
+            }
+
+            // Jalankan pertama kali setelah 3 detik, lalu polling tiap 30 detik
+            setTimeout(fetchStats, 3000);
+            setInterval(fetchStats, INTERVAL_MS);
         });
     </script>
+
 </x-app-layout>

@@ -128,13 +128,13 @@
                            onchange="previewImage(this, 'preview_toko_{{ $i }}')">
                     {{-- Preview gambar baru --}}
                     <div id="preview_toko_{{ $i }}" class="mt-2 hidden">
-                        <img src="" alt="Preview" class="max-h-32 rounded-lg border border-slate-200 object-contain">
+                        <img src="" alt="Preview" class="w-28 h-28 rounded-xl border border-slate-200 object-cover shadow-xs">
                     </div>
                     {{-- Preview gambar lama (edit mode) --}}
                     @if($s && $s->{"gambar_toko_{$i}"})
                     <div class="mt-2">
                         <p class="text-xs text-slate-400 mb-1">Foto saat ini:</p>
-                        <img src="{{ asset('storage/' . $s->{"gambar_toko_{$i}"}) }}" alt="Gambar Toko {{ $i }}" class="max-h-32 rounded-lg border border-slate-200 object-contain">
+                        <img src="{{ asset('storage/' . $s->{"gambar_toko_{$i}"}) }}" alt="Gambar Toko {{ $i }}" class="w-28 h-28 rounded-xl border border-slate-200 object-cover shadow-xs">
                     </div>
                     @endif
                 </div>
@@ -157,13 +157,20 @@ function previewImage(input, previewId) {
     }
 }
 
-// Live currency formatting and auto average suggestion
+// Live currency formatting
 document.addEventListener('DOMContentLoaded', () => {
     const inputs = ['harga_usulan', 'harga_toko_1', 'harga_toko_2', 'harga_toko_3'];
     
     inputs.forEach(id => {
         const el = document.getElementById(id);
         if (el) {
+            if (el.value) {
+                let val = el.value.replace(/\D/g, '');
+                if (val) {
+                    el.value = new Intl.NumberFormat('id-ID').format(val);
+                }
+            }
+
             el.addEventListener('input', function(e) {
                 let val = this.value.replace(/\D/g, '');
                 if (val) {

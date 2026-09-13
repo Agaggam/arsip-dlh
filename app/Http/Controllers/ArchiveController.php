@@ -323,17 +323,20 @@ class ArchiveController extends Controller
             // LOG AKTIVITAS
             log_activity($user, 'tambah_arsip', "Arsip ({$archive->title}) Dengan (ID: {$archive->id}) berhasil diunggah ke kategori ({$category->name}).");
 
-            // Kirim Notifikasi Email ke Super Admin dan Admin Departemen
+            // Kirim Notifikasi Email ke Super Admin, Admin, dan User di Bidang yang Sama
             try {
-                $admins = \App\Models\User::whereHas('role', function($q) {
-                    $q->whereIn('name', ['super_admin', 'admin']);
-                })->get();
+                $recipients = \App\Models\User::where('status', 'approved')
+                    ->where(function($q) use ($category) {
+                        $q->where('department_id', $category->department_id)
+                          ->orWhereHas('role', function($rq) {
+                              $rq->where('name', 'super_admin');
+                          });
+                    })
+                    ->where('id', '!=', $user->id)
+                    ->get();
 
-                foreach ($admins as $adminUser) {
-                    // Jika super_admin atau admin dengan departemen yang sama
-                    if ($adminUser->isPureSuperAdmin() || $adminUser->department_id === $category->department_id) {
-                        $adminUser->notify(new \App\Notifications\NewArchiveNotification($archive));
-                    }
+                foreach ($recipients as $recipient) {
+                    $recipient->notify(new \App\Notifications\NewArchiveNotification($archive));
                 }
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error("Gagal mengirim email notifikasi arsip baru: " . $e->getMessage());

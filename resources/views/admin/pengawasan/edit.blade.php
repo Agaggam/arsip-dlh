@@ -15,6 +15,20 @@
         $hasilCols = \App\Models\Pengawasan::HASIL_COLUMNS;
         $kecamatans = \App\Models\Pengawasan::KECAMATAN_OPTIONS;
         $skalas = \App\Models\Pengawasan::SKALA_USAHA_OPTIONS;
+
+        $initialItems = $items->map(function($it) use ($hasilCols) {
+            $row = [
+                'id' => $it->id,
+                'nama_usaha' => $it->nama_usaha,
+                'skala_usaha' => $it->skala_usaha,
+                'waktu_pengawasan' => $it->waktu_pengawasan ? $it->waktu_pengawasan->format('Y-m-d') : date('Y-m-d'),
+                'keterangan' => $it->keterangan ?? '',
+            ];
+            foreach(array_keys($hasilCols) as $col) {
+                $row[$col] = $it->$col ?? '-';
+            }
+            return $row;
+        })->values()->all();
     @endphp
 
     <style>
@@ -309,19 +323,7 @@
     <script>
         function pengawasanSessionEditSpreadsheet() {
             return {
-                items: @json($items->map(function($it) use ($hasilCols) {
-                    $row = [
-                        'id' => $it->id,
-                        'nama_usaha' => $it->nama_usaha,
-                        'skala_usaha' => $it->skala_usaha,
-                        'waktu_pengawasan' => $it->waktu_pengawasan ? $it->waktu_pengawasan->format('Y-m-d') : date('Y-m-d'),
-                        'keterangan' => $it->keterangan ?? '',
-                    ];
-                    foreach(array_keys($hasilCols) as $col) {
-                        $row[$col] = $it->$col ?? '-';
-                    }
-                    return $row;
-                })),
+                items: @json($initialItems),
 
                 createEmptyRow() {
                     return {

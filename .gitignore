@@ -21,3 +21,10 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+/*.xlsx
+/PNS LENGKAP 2026.xlsx
+_ide_helper.php
+_ide_helper_models.php
+.phpstorm.meta.php
+*.test.php
+*dummy*.php

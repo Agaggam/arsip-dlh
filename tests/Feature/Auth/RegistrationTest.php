@@ -37,48 +37,39 @@ class RegistrationTest extends TestCase
 
     public function test_new_users_can_register(): void
     {
-        // 1. Buat department dummy untuk dipilih saat register
-        $department = Department::create([
-            'name' => 'Sekretariat',
-            'slug' => 'sekretariat'
-        ]);
+        \Illuminate\Support\Facades\Mail::fake();
 
-        // 2. Kirim payload registrasi termasuk department_id
+        // Kirim payload registrasi
         $response = $this->post('/register', [
             'name'                  => 'Test User',
             'email'                 => 'test@example.com',
             'password'              => 'password',
             'password_confirmation' => 'password',
-            'department_id'         => $department->id,
         ]);
 
-        // 3. Pastikan user berhasil login otomatis setelah register (walau belum verifikasi)
+        // Pastikan user berhasil login otomatis setelah register (walau belum verifikasi)
         $this->assertAuthenticated();
         
-        // 4. PERBAIKAN: Pastikan dialihkan ke halaman verifikasi email, bukan langsung dashboard
-        $response->assertRedirect('/verify-email');
+        // Pastikan dialihkan ke halaman verifikasi OTP
+        $response->assertRedirect(route('verification.otp'));
 
-        // 5. SELEKSI KETAT: Pastikan data tersimpan di database dengan status 'pending' dan role_id '3' (user)
+        // Pastikan data tersimpan di database dengan status 'pending' dan role_id '3' (user)
         $this->assertDatabaseHas('users', [
-            'email'         => 'test@example.com',
-            'department_id' => $department->id,
-            'status'        => 'pending',
-            'role_id'       => 3,
+            'email'             => 'test@example.com',
+            'status'            => 'pending',
+            'role_id'           => 3,
             'email_verified_at' => null,
         ]);
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\OtpVerificationMail::class);
     }
 
-    public function test_registration_fails_without_department(): void
+    public function test_registration_fails_without_required_fields(): void
     {
-        // Test validasi: memastikan registrasi gagal jika department tidak diisi
-        $response = $this->post('/register', [
-            'name'                  => 'Test User',
-            'email'                 => 'test2@example.com',
-            'password'              => 'password',
-            'password_confirmation' => 'password',
-        ]);
+        // Test validasi: memastikan registrasi gagal jika field wajib tidak diisi
+        $response = $this->post('/register', []);
 
-        $response->assertSessionHasErrors('department_id');
+        $response->assertSessionHasErrors(['name', 'email', 'password']);
         $this->assertGuest();
     }
 }
