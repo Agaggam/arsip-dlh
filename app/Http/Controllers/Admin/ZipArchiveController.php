@@ -86,62 +86,81 @@ class ZipArchiveController extends Controller
 
             foreach ($files as $fileInfo) {
                 if ($fileInfo->isFile()) {
-                    $fullPath = $fileInfo->getRealPath();
+                    $fullPath        = $fileInfo->getRealPath();
                     $fileNameWithExt = $fileInfo->getFilename();
-                    
+
                     if (str_starts_with($fileNameWithExt, '.')) {
+                        continue;
+                    }
+
+                    // [HIGH-04] Zip Slip Protection: pastikan file benar-benar di dalam folder temp
+                    $realTemp = realpath($tempPath);
+                    if (!$fullPath || !str_starts_with($fullPath, $realTemp)) {
+                        \Illuminate\Support\Facades\Log::warning('Zip Slip attempt detected: ' . $fileNameWithExt);
                         continue;
                     }
 
                     $extension = strtolower(pathinfo($fileNameWithExt, PATHINFO_EXTENSION));
 
-                    // 5. Filter Ekstensi Valid
-                    if (in_array($extension, ['pdf', 'jpg', 'jpeg', 'png', 'docx', 'xlsx'])) {
-                        
-                        $titleWithoutExt = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
-                        
-                        // Proteksi Duplikasi Judul
-                        $duplicate = Archive::where('title', $titleWithoutExt)
-                            ->where('category_id', $category->id)
-                            ->withTrashed()
-                            ->exists();
-
-                        if ($duplicate) {
-                            $duplicateCount++; 
-                            continue;
-                        }
-
-                        // === IMPLEMENTASI HIRARKI FOLDER BARU (DEPARTEMEN/TAHUN/BULAN) ===
-                        // Buat nama file unik
-                        $newFileName = Str::slug($titleWithoutExt) . '-' . time() . '.' . $extension;
-                        
-                        // Rangkai folder dinamis berbasis slug departemen + waktu saat ini
-                        $folderPath = "archives/{$deptSlug}/" . now()->format('Y/m');
-                        
-                        // Kombinasikan menjadi path lengkap database
-                        $storagePath = $folderPath . '/' . $newFileName;
-
-                        // Ambil konten file temp dan simpan ke disk public dengan path hirarki baru
-                        $fileContent = file_get_contents($fullPath);
-                        Storage::disk('public')->put($storagePath, $fileContent);
-                        // ==============================================================
-
-                        // 6. Tulis data ke tabel archives
-                        Archive::create([
-                            'hash_token'     => Str::random(16), 
-                            'title'          => $titleWithoutExt,
-                            'file_path'      => $storagePath, 
-                            'file_type'      => strtoupper($extension),
-                            'file_size'      => $this->formatBytes($fileInfo->getSize()),
-                            'category_id'    => $category->id, 
-                            'user_id'        => $user->id,
-                            'description'    => 'Hasil ekstrak otomatis bulk-upload ZIP.',
-                            'download_count' => 0,
-                            'archive_date'   => now(),
-                        ]);
-
-                        $uploadedCount++;
+                    // Whitelist ekstensi yang diizinkan
+                    $allowedExtensions = ['pdf', 'jpg', 'jpeg', 'png', 'docx', 'xlsx'];
+                    if (!in_array($extension, $allowedExtensions)) {
+                        continue;
                     }
+
+                    // [HIGH-04] Validasi MIME type dari konten file (bukan hanya ekstensi)
+                    $allowedMimes = [
+                        'pdf'  => 'application/pdf',
+                        'jpg'  => 'image/jpeg',
+                        'jpeg' => 'image/jpeg',
+                        'png'  => 'image/png',
+                        'docx' => 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    ];
+                    $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($fullPath);
+                    if ($mimeType !== ($allowedMimes[$extension] ?? null)) {
+                        \Illuminate\Support\Facades\Log::warning("MIME mismatch in ZIP: {$fileNameWithExt} detected as {$mimeType}");
+                        continue;
+                    }
+
+                    $titleWithoutExt = pathinfo($fileNameWithExt, PATHINFO_FILENAME);
+
+                    // Proteksi Duplikasi Judul
+                    $duplicate = Archive::where('title', $titleWithoutExt)
+                        ->where('category_id', $category->id)
+                        ->withTrashed()
+                        ->exists();
+
+                    if ($duplicate) {
+                        $duplicateCount++;
+                        continue;
+                    }
+
+                    // Buat nama file unik
+                    $newFileName  = Str::slug($titleWithoutExt) . '-' . time() . '.' . $extension;
+                    $folderPath   = "archives/{$deptSlug}/" . now()->format('Y/m');
+                    $storagePath  = $folderPath . '/' . $newFileName;
+
+                    // [CRITICAL-01] Simpan ke private disk (local), bukan public
+                    $fileContent = file_get_contents($fullPath);
+                    Storage::disk('local')->put($storagePath, $fileContent);
+
+                    // Tulis data ke tabel archives
+                    Archive::create([
+                        'hash_token'     => Str::random(16),
+                        'title'          => $titleWithoutExt,
+                        'file_path'      => $storagePath,
+                        'file_type'      => strtoupper($extension),
+                        'file_size'      => $this->formatBytes($fileInfo->getSize()),
+                        'category_id'    => $category->id,
+                        'user_id'        => $user->id,
+                        'description'    => 'Hasil ekstrak otomatis bulk-upload ZIP.',
+                        'download_count' => 0,
+                        'archive_date'   => now(),
+                    ]);
+
+                    $uploadedCount++;
                 }
             }
 

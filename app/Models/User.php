@@ -25,8 +25,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'role_id',
         'status',
         'department_id',
-        'email_otp_code',
-        'email_otp_expires_at',
+        // [LOW-02] email_otp_code dan email_otp_expires_at dihapus dari fillable
+        // Gunakan direct assignment: $user->email_otp_code = ...; $user->save();
     ];
 
     /**
@@ -37,6 +37,8 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'email_otp_code',       // [LOW-02] Jangan ekspos OTP code
+        'email_otp_expires_at', // [LOW-02] Jangan ekspos expiry OTP
     ];
 
     /**

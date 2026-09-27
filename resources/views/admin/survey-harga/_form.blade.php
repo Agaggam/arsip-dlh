@@ -99,7 +99,7 @@
         <div class="p-5 bg-slate-50/70 rounded-xl border border-slate-200 space-y-4">
             <h4 class="text-sm font-bold text-slate-600 flex items-center gap-2">
                 <span class="flex items-center justify-center w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-extrabold">{{ $i }}</span>
-                Survey {{ $i }}{!! $i < 3 ? ' <span class="text-red-500 text-xs ml-1">*</span>' : ' <span class="text-slate-400 text-xs font-normal ml-1">(Opsional)</span>' !!}
+                Survey {{ $i }}@if($i < 3)<span class="text-red-500 text-xs ml-1">*</span>@else<span class="text-slate-400 text-xs font-normal ml-1">(Opsional)</span>@endif
             </h4>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>

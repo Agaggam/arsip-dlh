@@ -141,8 +141,9 @@ class UniversalTrashController extends Controller
         if ($type === 'archive') {
             $model = Archive::withTrashed()->findOrFail($id);
             if (!$this->hasArchiveAccess($model)) return back()->with('error', 'Akses ditolak.');
-            if ($model->file_path && Storage::disk('public')->exists($model->file_path)) {
-                Storage::disk('public')->delete($model->file_path);
+            // [CRITICAL-01] Hapus file fisik dari private storage
+            if ($model->file_path && Storage::disk('local')->exists($model->file_path)) {
+                Storage::disk('local')->delete($model->file_path);
             }
             $title = $model->title;
             $model->forceDelete();

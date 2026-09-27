@@ -104,7 +104,7 @@ class ArchiveController extends Controller
         $totalHilang = 0;
 
         foreach ($allFilteredArchives as $arch) {
-            $exists = $arch->file_path && Storage::disk('public')->exists($arch->file_path);
+            $exists = $arch->file_path && Storage::disk('local')->exists($arch->file_path);
             if ($exists) {
                 $totalAktif++;
             } else {
@@ -116,7 +116,7 @@ class ArchiveController extends Controller
         if ($statusFile === 'tersedia' || $statusFile === 'hilang') {
             // Karena status file dicek fisik di storage, kita ambil id yang valid/tidak valid terlebih dahulu
             $matchingIds = $allFilteredArchives->filter(function ($arch) use ($statusFile) {
-                $exists = $arch->file_path && Storage::disk('public')->exists($arch->file_path);
+                $exists = $arch->file_path && Storage::disk('local')->exists($arch->file_path);
                 return $statusFile === 'tersedia' ? $exists : !$exists;
             })->pluck('id');
 
@@ -265,8 +265,27 @@ class ArchiveController extends Controller
         $request->validate([
             'title'        => 'required|string|max:255',
             'category_id'  => 'required|exists:categories,id',
-            'file'         => 'required|file|mimes:pdf,jpg,jpeg,png,docx,xlsx|max:10240',
-            'description'  => 'nullable|string',
+            'file'         => [
+                'required',
+                'file',
+                'max:10240',
+                // [MEDIUM-03] Validasi MIME type dari konten file, bukan hanya ekstensi
+                function ($attribute, $value, $fail) {
+                    $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($value->getRealPath());
+                    $allowed  = [
+                        'application/pdf',
+                        'image/jpeg',
+                        'image/png',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    ];
+                    if (!in_array($mimeType, $allowed)) {
+                        $fail("Format file tidak diizinkan. Tipe terdeteksi: {$mimeType}");
+                    }
+                },
+            ],
+            'description'  => 'nullable|string|max:5000',
             'archive_date' => 'nullable|date',
         ]);
 
@@ -300,8 +319,8 @@ class ArchiveController extends Controller
             // 3. Susun folder berhirarki rapi: archives/slug-bidang/YYYY/MM
             $folderPath = "archives/{$deptSlug}/" . now()->format('Y/m'); 
             
-            // 4. Simpan ke storage public
-            $path = $file->storeAs($folderPath, $fileName, 'public');
+            // 4. Simpan ke private storage (tidak dapat diakses langsung via URL)
+            $path = $file->storeAs($folderPath, $fileName, 'local');
 
             $ArchiveDate = $request->filled('archive_date')
                 ? \Carbon\Carbon::parse($request->archive_date)
@@ -368,8 +387,32 @@ class ArchiveController extends Controller
         $request->validate([
             'title'        => 'required|string|max:255',
             'category_id'  => 'required|exists:categories,id',
-            'file'         => 'nullable|file|mimes:pdf,jpg,jpeg,png,docx,xlsx,doc,xls,csv,webp|max:20480',
-            'description'  => 'nullable|string',
+            'file'         => [
+                'nullable',
+                'file',
+                'max:20480',
+                // [MEDIUM-03] Validasi MIME type dari konten file
+                function ($attribute, $value, $fail) {
+                    if (!$value) return;
+                    $finfo    = new \finfo(FILEINFO_MIME_TYPE);
+                    $mimeType = $finfo->file($value->getRealPath());
+                    $allowed  = [
+                        'application/pdf',
+                        'image/jpeg',
+                        'image/png',
+                        'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                        'application/msword',
+                        'application/vnd.ms-excel',
+                        'text/csv',
+                        'image/webp',
+                    ];
+                    if (!in_array($mimeType, $allowed)) {
+                        $fail("Format file tidak diizinkan. Tipe terdeteksi: {$mimeType}");
+                    }
+                },
+            ],
+            'description'  => 'nullable|string|max:5000',
             'archive_date' => 'nullable|date',
         ]);
 
@@ -398,12 +441,12 @@ class ArchiveController extends Controller
 
         // 5. Pengolahan Penggantian File Fisik (Jika mengunggah file baru)
         if ($request->hasFile('file')) {
-            // Hapus file fisik lama di dalam storage jika tercatat & ada berkasnya
-            if ($archive->file_path && Storage::disk('public')->exists($archive->file_path)) {
-                Storage::disk('public')->delete($archive->file_path);
+            // Hapus file fisik lama di dalam private storage jika tercatat & ada berkasnya
+            if ($archive->file_path && Storage::disk('local')->exists($archive->file_path)) {
+                Storage::disk('local')->delete($archive->file_path);
             }
 
-            // Simpan file baru dengan format penamaan dan folder dinamis berdasarkan kategori baru/lama yang dipilih
+            // Simpan file baru ke private storage
             $file = $request->file('file');
             $fileName = Str::slug($request->title) . '-' . time() . '.' . $file->getClientOriginalExtension();
             
@@ -411,7 +454,7 @@ class ArchiveController extends Controller
             $deptSlug = $category->department->slug ?? 'default-dept';
             $folderPath = "archives/{$deptSlug}/" . now()->format('Y/m');
             
-            $path = $file->storeAs($folderPath, $fileName, 'public');
+            $path = $file->storeAs($folderPath, $fileName, 'local');
 
             // Update informasi berkas fisik di database
             $archive->file_path = $path;
@@ -449,7 +492,7 @@ public function preview($token)
 {
     // Ambil data arsip berdasarkan hash_token unik
     $archive = Archive::where('hash_token', $token)->firstOrFail();
-    
+
     $user = Auth::user();
 
     // Jika pembuka dokumen adalah Admin/Super Admin, pastikan dia berhak melihat departemen tersebut
@@ -459,18 +502,23 @@ public function preview($token)
         }
     }
 
-    // PERBAIKAN: Jika file fisik hilang di storage, kirimkan status abort 404 agar bisa ditangkap oleh JavaScript modal
-    if (!Storage::disk('public')->exists($archive->file_path)) {
+    // Gunakan private disk (local) — file tidak dapat diakses langsung via URL
+    if (!Storage::disk('local')->exists($archive->file_path)) {
         abort(404, 'File fisik dokumen tidak ditemukan atau telah dihapus dari server storage.');
     }
 
-    $filePath = Storage::disk('public')->path($archive->file_path);
-    $mimeType = Storage::disk('public')->mimeType($archive->file_path);
+    $filePath = Storage::disk('local')->path($archive->file_path);
+    $mimeType = Storage::disk('local')->mimeType($archive->file_path);
 
-    // Stream file secara langsung
+    // Gunakan basename untuk menghindari path injection di header
+    $safeFilename = basename($archive->file_path);
+
+    // Stream file secara langsung dengan security headers
     return response()->file($filePath, [
-        'Content-Type' => $mimeType,
-        'Content-Disposition' => 'inline; filename="' . $archive->title . '"'
+        'Content-Type'           => $mimeType,
+        'Content-Disposition'    => 'inline; filename="' . $safeFilename . '"',
+        'X-Content-Type-Options' => 'nosniff',
+        'Cache-Control'          => 'no-store, no-cache, must-revalidate',
     ]);
 }
 
@@ -479,28 +527,34 @@ public function preview($token)
      */
     public function download(Archive $archive)
     {
-        if (!Storage::disk('public')->exists($archive->file_path)) {
+        $user = Auth::user();
+
+        // [HIGH-01] Cek otorisasi: Admin hanya bisa download arsip departemennya sendiri
+        if (!$user->isUser()) {
+            if (!$this->hasArchiveAccess($archive)) {
+                abort(403, 'Akses Ditolak: Anda tidak berhak mengunduh arsip dari departemen lain.');
+            }
+        }
+
+        // Gunakan private disk (local)
+        if (!Storage::disk('local')->exists($archive->file_path)) {
             return back()->with('error', 'File fisik tidak ditemukan di server.');
         }
 
-        // 1. Increment hits download
+        // Increment hits download
         $archive->increment('download_count');
 
-        // 2. Ambil nama user yang sedang login, berikan fallback jika tidak ada session
-        $userName = Auth::user()->name ?? 'Sistem/Guest';
-
-        // 3. Catat ke log dengan nama user yang dinamis
+        // Catat ke log
         log_activity(
-            Auth::user(), 
-            'unduh_arsip', 
-            "User ({$userName}) mengunduh arsip: ({$archive->title}) (ID: {$archive->id})"
+            $user,
+            'unduh_arsip',
+            "User ({$user->name}) mengunduh arsip: ({$archive->title}) (ID: {$archive->id})"
         );
 
-        // 4. Proses download file
-        return Storage::disk('public')->download(
-            $archive->file_path, 
-            $archive->title . '.' . strtolower($archive->file_type)
-        );
+        // Nama file aman: slug judul + ekstensi
+        $safeFilename = Str::slug($archive->title) . '.' . strtolower($archive->file_type);
+
+        return Storage::disk('local')->download($archive->file_path, $safeFilename);
     }
 
 /**

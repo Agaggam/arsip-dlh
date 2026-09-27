@@ -43,7 +43,8 @@ Route::get('/kebijakan-privasi', function () {
 
 
 // 2. Group untuk Super Admin dan Admin Departemen Saja
-Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(function () {
+// [MEDIUM-05] Tambahkan role middleware di level group agar user biasa tidak bisa akses area admin
+Route::middleware(['auth', 'role:super_admin,admin', 'status', 'verified'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('admin.dashboard.stats')->middleware('throttle:120,1');
 
@@ -78,17 +79,19 @@ Route::middleware(['auth', 'status', 'verified'])->prefix('admin')->group(functi
 
     // Route Backup & Restore Database
     Route::get('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('admin.backup.index');
-    Route::post('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'create'])->name('admin.backup.create');
-    Route::get('/backup/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('admin.backup.download');
-    Route::delete('/backup/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('admin.backup.destroy');
-    Route::post('/backup/restore', [\App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('admin.backup.restore');
+    // [MEDIUM-04] Rate limiting: max 3 backup per 5 menit, max 1 restore per 10 menit
+    Route::post('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'create'])->name('admin.backup.create')->middleware('throttle:3,5');
+    Route::get('/backup/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('admin.backup.download')->where('filename', '[a-zA-Z0-9_\-\.]+');
+    Route::delete('/backup/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('admin.backup.destroy')->where('filename', '[a-zA-Z0-9_\-\.]+');
+    Route::post('/backup/restore', [\App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('admin.backup.restore')->middleware('throttle:1,10');
 
         // Route Manage Archives (CRUD & Soft Delete)
     Route::prefix('archives')->name('admin.archives.')->group(function () {
         
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
-        Route::post('/', [ArchiveController::class, 'store'])->name('store');
-        Route::post('/store-zip', [ZipArchiveController::class, 'storeZip'])->name('store-zip');
+        // [MEDIUM-04] Rate limiting: max 10 upload per menit, 5 bulk ZIP per menit
+        Route::post('/', [ArchiveController::class, 'store'])->name('store')->middleware('throttle:10,1');
+        Route::post('/store-zip', [ZipArchiveController::class, 'storeZip'])->name('store-zip')->middleware('throttle:5,1');
         Route::get('/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel');
         Route::get('/export/pdf', [ArchiveController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/{archive}/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel-single');

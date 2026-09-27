@@ -46,15 +46,18 @@ class RegisteredUserController extends Controller
         $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
         $user = User::create([
-            'name'                  => $request->name,
-            'email'                 => $request->email,
-            'password'              => Hash::make($request->password),
-            'role_id'               => 3,
-            'status'                => 'pending',
-            'department_id'         => null, // Set null by default
-            'email_otp_code'        => $otp,
-            'email_otp_expires_at'  => now()->addMinutes(10),
+            'name'      => $request->name,
+            'email'     => $request->email,
+            'password'  => Hash::make($request->password),
+            'role_id'   => 3,
+            'status'    => 'pending',
+            'department_id' => null,
         ]);
+
+        // [LOW-02] Set OTP fields via direct assignment (bukan mass-assignment)
+        $user->email_otp_code       = $otp;
+        $user->email_otp_expires_at = now()->addMinutes(10);
+        $user->save();
 
         event(new Registered($user));
         Auth::login($user);

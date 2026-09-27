@@ -76,19 +76,27 @@ class ActivityLogController extends Controller
     }
 
     /**
-     * Download file export Excel
+     * [HIGH-03] Download file export Excel — aman dari path traversal
      */
     public function downloadExport(string $filename)
     {
         $this->secureAccess();
 
-        // PERBAIKAN PATH DOWNLOAD: Mengikuti root disk local yang sudah berada di folder private
-        $path = 'exports/' . $filename;
-        
+        // Sanitasi: ambil hanya basename (hapus path traversal seperti ../../)
+        $safeFilename = basename($filename);
+
+        // Validasi ekstensi: hanya izinkan .xlsx dan .xls
+        $ext = strtolower(pathinfo($safeFilename, PATHINFO_EXTENSION));
+        if (!in_array($ext, ['xlsx', 'xls'])) {
+            abort(404, 'File tidak ditemukan.');
+        }
+
+        $path = 'exports/' . $safeFilename;
+
         if (!Storage::disk('local')->exists($path)) {
             abort(404, 'File tidak ditemukan.');
         }
-        
-        return Storage::disk('local')->download($path, $filename);
+
+        return Storage::disk('local')->download($path, $safeFilename);
     }
 }
