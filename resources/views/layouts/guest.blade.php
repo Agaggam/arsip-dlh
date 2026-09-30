@@ -14,9 +14,6 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>
-            body {
-                zoom: 0.75;
-            }
             .floating-animation {
                 animation: float 6s ease-in-out infinite;
             }
@@ -40,9 +37,9 @@
 
         <div class="relative z-10 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
             
-            <div class="w-full max-w-5xl bg-white/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row min-h-[600px] border border-white/20">
+            <div class="w-full max-w-4xl bg-white/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row border border-white/20">
                 
-                <div class="hidden md:flex md:w-1/2 bg-slate-50/40 flex-col items-center justify-center p-12 relative border-r border-gray-100/50">
+                <div class="hidden md:flex md:w-1/2 bg-slate-50/40 flex-col items-center justify-center p-8 relative border-r border-gray-100/50">
                     
                     <div class="absolute top-10 left-10">
                         <a href="/" class="flex items-center gap-4 group">
@@ -64,16 +61,16 @@
                     <div class="text-center mt-12">
                         <img src="{{ asset('images/auth-vector.png') }}" 
                              alt="Authentication" 
-                             class="w-full max-w-[320px] h-auto mx-auto mb-5 drop-shadow-2xl floating-animation">
+                             class="w-full max-w-[260px] h-auto mx-auto mb-4 drop-shadow-2xl floating-animation">
                         
-                        <h2 class="text-3xl font-bold text-slate-800 mb-3 tracking-tight">Selamat Datang!</h2>
+                        <h2 class="text-2xl font-bold text-slate-800 mb-2 tracking-tight">Selamat Datang!</h2>
                         <p class="text-slate-500 leading-relaxed max-w-xs mx-auto text-balance">
                             Kelola data Anda dengan lebih mudah dan cepat dalam satu dashboard terintegrasi.
                         </p>
                     </div>
                 </div>
 
-                <div class="w-full md:w-1/2 px-8 py-12 flex flex-col justify-center items-center relative">
+                <div class="w-full md:w-1/2 px-8 py-10 flex flex-col justify-center items-center relative">
                     
                     <div class="md:hidden mb-10 text-center">
                         <div class="flex flex-col items-center gap-3">

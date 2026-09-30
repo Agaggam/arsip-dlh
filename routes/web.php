@@ -6,11 +6,11 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\DepartmentController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\ActivityLogController;
-use App\Http\Controllers\Admin\ZipArchiveController;
 use App\Http\Controllers\Admin\UniversalTrashController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ArchiveController;
 use App\Http\Controllers\DashboardController as UserDashboardController;
+use App\Http\Controllers\Auth\PortalTamanSsoController;
 
 // 1. Halaman Utama & Statis
 Route::get('/', function () {
@@ -44,9 +44,12 @@ Route::get('/kebijakan-privasi', function () {
 
 // 2. Group untuk Super Admin dan Admin Departemen Saja
 // [MEDIUM-05] Tambahkan role middleware di level group agar user biasa tidak bisa akses area admin
-Route::middleware(['auth', 'role:super_admin,admin', 'status', 'verified'])->prefix('admin')->group(function () {
+Route::middleware(['auth', 'role:super_admin,admin', 'status'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
     Route::get('/dashboard/stats', [DashboardController::class, 'stats'])->name('admin.dashboard.stats')->middleware('throttle:120,1');
+
+    // SSO Portal Taman — hanya super admin
+    Route::get('/portal-taman/sso', [PortalTamanSsoController::class, 'redirect'])->name('portal-taman.sso');
 
     // Route Manage departements
     Route::get('/departments', [DepartmentController::class, 'index'])->name('admin.departments.index');
@@ -89,9 +92,7 @@ Route::middleware(['auth', 'role:super_admin,admin', 'status', 'verified'])->pre
     Route::prefix('archives')->name('admin.archives.')->group(function () {
         
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
-        // [MEDIUM-04] Rate limiting: max 10 upload per menit, 5 bulk ZIP per menit
         Route::post('/', [ArchiveController::class, 'store'])->name('store')->middleware('throttle:10,1');
-        Route::post('/store-zip', [ZipArchiveController::class, 'storeZip'])->name('store-zip')->middleware('throttle:5,1');
         Route::get('/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel');
         Route::get('/export/pdf', [ArchiveController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/{archive}/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel-single');
@@ -127,7 +128,11 @@ Route::middleware(['auth', 'role:super_admin,admin', 'status', 'verified'])->pre
         Route::get('/quick-export/{type}/{format}', [\App\Http\Controllers\Admin\PegawaiController::class, 'quickExport'])->name('quick.export');
     });
 
-    // Route Modul Usulan SSH/SBU
+
+}); // End admin middleware group
+
+// Route Modul Usulan SSH/SBU — diakses semua role (admin & user)
+Route::middleware(['auth', 'status'])->prefix('admin')->group(function () {
     Route::prefix('survey-harga')->name('survey-harga.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'create'])->name('create');
@@ -140,7 +145,7 @@ Route::middleware(['auth', 'role:super_admin,admin', 'status', 'verified'])->pre
         Route::get('/{surveyHarga}/excel', [\App\Http\Controllers\Admin\SurveyHargaController::class, 'exportExcel'])->name('export-excel-single');
     });
 
-    // Route Modul Pengawasan Pelaku Usaha
+    // Route Modul Pengawasan Pelaku Usaha — diakses semua role (admin & user)
     Route::prefix('pengawasan')->name('pengawasan.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Admin\PengawasanController::class, 'index'])->name('index');
         Route::get('/create', [\App\Http\Controllers\Admin\PengawasanController::class, 'create'])->name('create');
@@ -153,12 +158,11 @@ Route::middleware(['auth', 'role:super_admin,admin', 'status', 'verified'])->pre
         Route::get('/{pengawasan}/pdf', [\App\Http\Controllers\Admin\PengawasanController::class, 'exportPdf'])->name('export-pdf-single');
         Route::get('/{pengawasan}/excel', [\App\Http\Controllers\Admin\PengawasanController::class, 'exportExcel'])->name('export-excel-single');
     });
-
-}); // End admin middleware group
+});
 
 
 // 3. Group untuk User Biasa (Hanya bisa diakses role 'user')
-Route::middleware(['auth', 'role:user', 'status', 'verified'])->group(function () {
+Route::middleware(['auth', 'role:user', 'status'])->group(function () {
 
     Route::get('/dashboard', [UserDashboardController::class, 'index'])->name('dashboard');
     Route::get('/dashboard/stats', [UserDashboardController::class, 'stats'])->name('dashboard.stats')->middleware('throttle:120,1');
@@ -173,6 +177,9 @@ Route::middleware(['auth', 'role:user', 'status', 'verified'])->group(function (
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::post('/profile/email/verify', [ProfileController::class, 'verifyEmailChange'])->name('profile.email.verify');
+    Route::post('/profile/email/resend', [ProfileController::class, 'resendEmailChangeOtp'])->name('profile.email.resend');
+    Route::post('/profile/email/cancel', [ProfileController::class, 'cancelEmailChange'])->name('profile.email.cancel');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 

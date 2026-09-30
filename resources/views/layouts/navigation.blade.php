@@ -132,6 +132,20 @@
                     </span>
                 </a>
 
+                @if(auth()->user()->isPureSuperAdmin() || (auth()->user()->role && auth()->user()->role->name === 'super_admin'))
+                {{-- ADMIN PORTAL TAMAN (SSO) --}}
+                <a href="{{ route('portal-taman.sso') }}" target="_blank" rel="noopener noreferrer"
+                   class="{{ $baseClass }} text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 border-l-4 border-transparent hover:border-emerald-500 group">
+                    <svg class="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013 3v1"/>
+                    </svg>
+                    <span>{{ __('Admin Taman (SSO)') }}</span>
+                    <span class="ml-auto flex items-center gap-1">
+                        <span class="text-[9px] font-bold tracking-wider px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">SSO</span>
+                    </span>
+                </a>
+                @endif
+
                 {{-- BANK SAMPAH EXTERNAL LINK --}}
                 <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer"
                    class="{{ $baseClass }} text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 border-l-4 border-transparent hover:border-emerald-500 group">
@@ -263,15 +277,6 @@
         <span>{{ __('Pengawasan') }}</span>
     </a>
 
-    {{-- DATA KEPEGAWAIAN (USER) --}}
-    @php $isKepegawaianActive = request()->routeIs('kepegawaian.*'); @endphp
-    <a href="{{ route('kepegawaian.index') }}"
-       class="{{ $baseClass }} {{ $isKepegawaianActive ? $activeClass : $inactiveClass }}">
-        <svg class="w-5 h-5 transition-colors {{ $isKepegawaianActive ? 'text-indigo-600' : 'text-slate-400 group-hover:text-indigo-500' }}" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
-        </svg>
-        <span>{{ __('Kepegawaian') }}</span>
-    </a>
     {{-- PORTAL TAMAN KOTA (USER) --}}
     @php $isPortalTamanActive = request()->is('portal-taman*'); @endphp
     <a href="/portal-taman/" target="_blank" rel="noopener noreferrer"
@@ -281,6 +286,18 @@
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
         </svg>
         <span>{{ __('Portal Taman Kota') }}</span>
+        <span class="ml-auto flex items-center gap-1">
+            <svg class="w-3 h-3 text-slate-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+        </span>
+    </a>
+
+    {{-- BANK SAMPAH (USER) --}}
+    <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer"
+       class="{{ $baseClass }} text-slate-500 hover:bg-emerald-50 hover:text-emerald-700 border-l-4 border-transparent hover:border-emerald-500 group">
+        <svg class="w-5 h-5 text-slate-400 group-hover:text-emerald-600 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+        </svg>
+        <span>{{ __('Bank Sampah') }}</span>
         <span class="ml-auto flex items-center gap-1">
             <svg class="w-3 h-3 text-slate-400 group-hover:text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
         </span>
@@ -372,6 +389,16 @@
                         {{ __('Portal Taman Kota') }}
                         <svg class="w-3 h-3 ml-auto opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
                     </a>
+                    @if(auth()->user()->isPureSuperAdmin() || (auth()->user()->role && auth()->user()->role->name === 'super_admin'))
+                    <a href="{{ route('portal-taman.sso') }}" target="_blank" rel="noopener noreferrer"
+                       class="{{ $mobileClasses }} text-emerald-700 hover:bg-emerald-50 font-semibold">
+                        <svg class="w-5 h-5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/>
+                        </svg>
+                        {{ __('Admin Taman (SSO)') }}
+                        <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800 ml-auto">SSO</span>
+                    </a>
+                    @endif
                     <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer"
                        class="{{ $mobileClasses }} text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700">
                         <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -454,9 +481,14 @@
                     <x-responsive-nav-link :href="route('pengawasan.index')" :active="request()->routeIs('pengawasan.*')" class="{{ $mobileClasses }}">
                         {{ __('Pengawasan') }}
                     </x-responsive-nav-link>
-                    <x-responsive-nav-link :href="route('kepegawaian.index')" :active="request()->routeIs('kepegawaian.*')" class="{{ $mobileClasses }}">
-                        {{ __('Data Kepegawaian') }}
-                    </x-responsive-nav-link>
+                    <a href="https://mybanksampah.netlify.app/" target="_blank" rel="noopener noreferrer"
+                       class="{{ $mobileClasses }} text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700">
+                        <svg class="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        {{ __('Bank Sampah') }}
+                        <svg class="w-3 h-3 ml-auto opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
                 @endif
             </div>
 

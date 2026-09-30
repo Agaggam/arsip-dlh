@@ -57,14 +57,26 @@ class OtpVerificationController extends Controller
 
         // Tandai email sudah terverifikasi
         $user->markEmailAsVerified();
-        $user->update([
-            'email_otp_code'       => null,
-            'email_otp_expires_at' => null,
-            'status'               => 'active', // Otomatis aktifkan user setelah verifikasi email
-        ]);
+        $user->email_otp_code       = null;
+        $user->email_otp_expires_at = null;
+
+        if ($user->status !== 'approved') {
+            $user->status = 'pending';
+            $user->save();
+
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return redirect()->route('login')
+                ->with('success', 'Email berhasil diverifikasi! Akun Anda sedang menunggu persetujuan administrator.');
+        }
+
+        $user->save();
+        $request->session()->regenerate();
 
         return redirect()->intended($this->redirectTo())
-            ->with('success', 'Email berhasil diverifikasi! Selamat datang di E-Arsip DLH.');
+            ->with('success', 'Email berhasil diverifikasi! Selamat datang.');
     }
 
     /**

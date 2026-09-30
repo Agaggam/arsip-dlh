@@ -72,8 +72,10 @@ class ProfileTest extends TestCase
         $response->assertOk();
     }
 
-    public function test_profile_information_can_be_updated(): void
+    public function test_changing_email_sends_otp_and_does_not_update_email_immediately(): void
     {
+        \Illuminate\Support\Facades\Mail::fake();
+
         $user = $this->createValidUser();
 
         $response = $this
@@ -85,14 +87,41 @@ class ProfileTest extends TestCase
 
         $response
             ->assertSessionHasNoErrors()
+            ->assertSessionHas('status', 'email-otp-sent')
+            ->assertSessionHas('pending_email_change')
             ->assertRedirect('/profile');
 
         $user->refresh();
 
+        // Nama diperbarui, tetapi email lama tetap aktif sebelum verifikasi OTP
         $this->assertSame('New Profile Name', $user->name);
-        $this->assertSame('newemail@example.com', $user->email);
-        
-        $this->assertNull($user->email_verified_at);
+        $this->assertSame('original@example.com', $user->email);
+
+        \Illuminate\Support\Facades\Mail::assertSent(\App\Mail\OtpVerificationMail::class, function ($mail) {
+            return $mail->hasTo('newemail@example.com');
+        });
+    }
+
+    public function test_verifying_otp_successfully_updates_email(): void
+    {
+        $user = $this->createValidUser();
+
+        $this->actingAs($user)->withSession([
+            'pending_email_change' => [
+                'new_email'  => 'verifiednew@example.com',
+                'otp'        => '123456',
+                'expires_at' => now()->addMinutes(15),
+            ]
+        ])->post('/profile/email/verify', [
+            'otp' => '123456',
+        ])
+        ->assertSessionHasNoErrors()
+        ->assertRedirect('/profile');
+
+        $user->refresh();
+        $this->assertSame('verifiednew@example.com', $user->email);
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertNull(session('pending_email_change'));
     }
 
     public function test_email_verification_status_is_unchanged_when_the_email_address_is_unchanged(): void
@@ -111,41 +140,24 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->refresh()->email_verified_at);
+        $this->assertSame('Just Change Name', $user->name);
     }
 
-    public function test_user_can_delete_their_account(): void
+    public function test_user_can_delete_their_account_without_password(): void
     {
         $user = $this->createValidUser();
 
         $response = $this
             ->actingAs($user)
-            ->delete('/profile', [
-                'password' => 'password',
-            ]);
+            ->delete('/profile');
 
         $response
             ->assertSessionHasNoErrors()
             ->assertRedirect('/');
 
         $this->assertGuest();
-        $this->assertSoftDeleted($user);
-    }
-
-    public function test_correct_password_must_be_provided_to_delete_account(): void
-    {
-        $user = $this->createValidUser();
-
-        $response = $this
-            ->actingAs($user)
-            ->from('/profile')
-            ->delete('/profile', [
-                'password' => 'wrong-password',
-            ]);
-
-        $response
-            ->assertSessionHasErrorsIn('userDeletion', 'password')
-            ->assertRedirect('/profile');
-
-        $this->assertNotNull($user->fresh());
+        $this->assertDatabaseMissing('users', [
+            'id' => $user->id,
+        ]);
     }
 }

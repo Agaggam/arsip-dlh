@@ -23,8 +23,8 @@
                 title: 'Konfirmasi Penghapusan Akun',
                 action: '{{ route('profile.destroy') }}',
                 method: 'DELETE',
-                withPassword: true,
-                warning: 'Tindakan ini sangat berbahaya. Seluruh data profil, pengaturan, dan riwayat Anda akan dihapus selamanya dari server kami.'
+                withPassword: false,
+                warning: 'Tindakan ini permanen. Seluruh data profil dan akses Anda akan dihapus dari sistem.'
             })"
             class="rounded-2xl px-8 py-3.5 shadow-xl shadow-red-200 hover:shadow-red-300 transition-all active:scale-95 flex items-center gap-2 group"
         >

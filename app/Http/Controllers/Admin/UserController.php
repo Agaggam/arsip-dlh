@@ -80,7 +80,8 @@ class UserController extends Controller
         $verifiedFilter = $request->get('verified');
         $deptFilter = $request->get('department_id');
 
-        $users = User::with(['role', 'department']);
+        // Hanya tampilkan user yang sudah verifikasi OTP (email_verified_at tidak null)
+        $users = User::with(['role', 'department'])->whereNotNull('email_verified_at');
 
         // Filter dasar berdasarkan role user yang login
         if (!$authUser->isPureSuperAdmin()) {
@@ -128,8 +129,8 @@ class UserController extends Controller
             $departments = Department::where('id', $authUser->department_id)->get();
         }
 
-        // Statistik
-        $statQuery = User::query();
+        // Statistik (hanya user yang sudah OTP verified)
+        $statQuery = User::whereNotNull('email_verified_at');
         if (!$authUser->isPureSuperAdmin()) {
             $statQuery->where('department_id', $authUser->department_id);
         }
@@ -292,7 +293,7 @@ class UserController extends Controller
     }
 
     /**
-     * Menghapus user dari database (dengan konfirmasi password).
+     * Menghapus user dari database.
      */
     public function destroy(Request $request, User $user)
     {
@@ -300,15 +301,6 @@ class UserController extends Controller
 
         if ($this->isSelf($user)) {
             return back()->with('error', 'Anda tidak bisa menghapus akun sendiri!');
-        }
-
-        // Validasi password konfirmasi
-        $request->validate([
-            'password' => 'required'
-        ]);
-
-        if (!Hash::check($request->password, $authUser->password)) {
-            return back()->with('error', 'Konfirmasi gagal. Password salah!');
         }
 
         if ($authUser->isPureSuperAdmin()) {

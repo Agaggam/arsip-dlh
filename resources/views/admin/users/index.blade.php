@@ -267,8 +267,7 @@
                                         id: 'confirm-user-delete',
                                         action: '{{ route('users.destroy', $user) }}',
                                         title: 'Hapus user {{ $user->name }} secara permanen?',
-                                        warning: 'Seluruh data terkait user ini akan dihapus secara permanen!',
-                                        withPassword: true
+                                        warning: 'Seluruh data terkait user ini akan dihapus secara permanen!'
                                     })"
                                     class="text-rose-500 hover:text-rose-700 p-1.5 hover:bg-rose-50 rounded-xl transition-all"
                                     title="Hapus User">

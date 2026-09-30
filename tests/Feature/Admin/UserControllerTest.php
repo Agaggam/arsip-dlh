@@ -111,7 +111,7 @@ class UserControllerTest extends TestCase
     {
         $response = $this->actingAs($this->regularUser)
             ->get(route('users.index'));
-        $response->assertStatus(403);
+        $response->assertRedirect(route('dashboard'));
     }
 
     // ============================================================
@@ -131,7 +131,7 @@ class UserControllerTest extends TestCase
             ]);
 
         $response->assertRedirect();
-        $response->assertSessionHas('success', 'User baru berhasil ditambahkan!');
+        $response->assertSessionHas('success', 'User baru berhasil ditambahkan dan langsung aktif!');
 
         $this->assertDatabaseHas('users', [
             'email' => 'newuser@test.com'
@@ -462,33 +462,15 @@ class UserControllerTest extends TestCase
     // ============================================================
     
     #[Test]
-    public function super_admin_can_delete_user_with_correct_password()
+    public function super_admin_can_delete_user()
     {
         $response = $this->actingAs($this->superAdmin)
-            ->delete(route('users.destroy', $this->regularUser->id), [
-                'password' => 'password'
-            ]);
+            ->delete(route('users.destroy', $this->regularUser->id));
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'User berhasil dihapus!');
 
-        $this->assertSoftDeleted('users', [
-            'id' => $this->regularUser->id
-        ]);
-    }
-
-    #[Test]
-    public function super_admin_cannot_delete_user_with_wrong_password()
-    {
-        $response = $this->actingAs($this->superAdmin)
-            ->delete(route('users.destroy', $this->regularUser->id), [
-                'password' => 'wrongpassword'
-            ]);
-
-        $response->assertRedirect();
-        $response->assertSessionHas('error', 'Konfirmasi gagal. Password salah!');
-
-        $this->assertDatabaseHas('users', [
+        $this->assertDatabaseMissing('users', [
             'id' => $this->regularUser->id
         ]);
     }
@@ -497,9 +479,7 @@ class UserControllerTest extends TestCase
     public function super_admin_cannot_delete_own_account()
     {
         $response = $this->actingAs($this->superAdmin)
-            ->delete(route('users.destroy', $this->superAdmin->id), [
-                'password' => 'password'
-            ]);
+            ->delete(route('users.destroy', $this->superAdmin->id));
 
         $response->assertRedirect();
         $response->assertSessionHas('error', 'Anda tidak bisa menghapus akun sendiri!');
@@ -513,9 +493,7 @@ class UserControllerTest extends TestCase
     public function super_admin_cannot_delete_nonexistent_user()
     {
         $response = $this->actingAs($this->superAdmin)
-            ->delete(route('users.destroy', 99999), [
-                'password' => 'password'
-            ]);
+            ->delete(route('users.destroy', 99999));
 
         $response->assertStatus(404);
     }
@@ -524,14 +502,12 @@ class UserControllerTest extends TestCase
     public function admin_can_only_delete_user_with_role_user_in_their_department()
     {
         $response = $this->actingAs($this->admin)
-            ->delete(route('users.destroy', $this->regularUser->id), [
-                'password' => 'password'
-            ]);
+            ->delete(route('users.destroy', $this->regularUser->id));
 
         $response->assertRedirect();
         $response->assertSessionHas('success', 'User berhasil dihapus!');
 
-        $this->assertSoftDeleted('users', [
+        $this->assertDatabaseMissing('users', [
             'id' => $this->regularUser->id
         ]);
     }
@@ -606,43 +582,12 @@ class UserControllerTest extends TestCase
     }
 
     #[Test]
-    public function admin_cannot_delete_user_without_password_confirmation()
-    {
-        $response = $this->actingAs($this->admin)
-            ->delete(route('users.destroy', $this->regularUser->id), []);
-
-        $response->assertSessionHasErrors('password');
-        
-        $this->assertDatabaseHas('users', [
-            'id' => $this->regularUser->id
-        ]);
-    }
-
-    #[Test]
-    public function admin_cannot_delete_user_with_wrong_password()
-    {
-        $response = $this->actingAs($this->admin)
-            ->delete(route('users.destroy', $this->regularUser->id), [
-                'password' => 'wrongpassword'
-            ]);
-
-        $response->assertRedirect();
-        $response->assertSessionHas('error', 'Konfirmasi gagal. Password salah!');
-
-        $this->assertDatabaseHas('users', [
-            'id' => $this->regularUser->id
-        ]);
-    }
-
-    #[Test]
     public function regular_user_cannot_delete_any_user()
     {
         $response = $this->actingAs($this->regularUser)
-            ->delete(route('users.destroy', $this->admin->id), [
-                'password' => 'password'
-            ]);
+            ->delete(route('users.destroy', $this->admin->id));
 
-        $response->assertStatus(403);
+        $response->assertRedirect(route('dashboard'));
     }
 
     // ============================================================

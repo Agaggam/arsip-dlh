@@ -7,7 +7,6 @@ use App\Http\Requests\Auth\LoginRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\View\View;
 
 class AuthenticatedSessionController extends Controller
@@ -25,31 +24,38 @@ class AuthenticatedSessionController extends Controller
      */
     public function store(LoginRequest $request): RedirectResponse
     {
-        $email = $request->input('email');
-        $key = 'login|' . $email . '|' . $request->ip();
-
-        // Cek batas percobaan (max 5 kali per 60 detik)
-        if (RateLimiter::tooManyAttempts($key, 5)) {
-            $seconds = RateLimiter::availableIn($key);
-            return back()->withErrors([
-                'email' => "Terlalu banyak percobaan login. Silakan coba lagi dalam {$seconds} detik.",
-            ])->onlyInput('email');
-        }
-
-        try {
-            $request->authenticate();
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            // Catat percobaan gagal
-            RateLimiter::hit($key, 60);
-            throw $e;
-        }
-
-        // Hapus hit jika login berhasil
-        RateLimiter::clear($key);
+        // RateLimiting sudah dihandle di LoginRequest::authenticate()
+        $request->authenticate();
 
         $request->session()->regenerate();
 
-        return redirect()->intended(route('dashboard', absolute: false));
+        $user = Auth::user();
+
+        // Jika email belum terverifikasi (OTP belum dikonfirmasi) → arahkan ke halaman OTP
+        if (!$user->hasVerifiedEmail()) {
+            if (!$user->email_otp_code || ($user->email_otp_expires_at && now()->isAfter($user->email_otp_expires_at))) {
+                $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+                $user->email_otp_code = $otp;
+                $user->email_otp_expires_at = now()->addMinutes(10);
+                $user->save();
+
+                try {
+                    \Illuminate\Support\Facades\Mail::to($user->email)->send(new \App\Mail\OtpVerificationMail($otp, $user->name));
+                } catch (\Exception $e) {
+                    \Illuminate\Support\Facades\Log::error('Gagal kirim OTP saat login: ' . $e->getMessage());
+                }
+            }
+
+            return redirect()->route('verification.otp')
+                ->with('warning', 'Akun Anda belum diverifikasi. Silakan masukkan kode OTP yang dikirim ke email Anda.');
+        }
+
+        // Redirect langsung berdasarkan role (tanpa intended() untuk hindari loop dari URL lama)
+        if ($user->role && in_array($user->role->name, ['super_admin', 'admin'])) {
+            return redirect()->route('admin.dashboard');
+        }
+
+        return redirect()->route('dashboard');
     }
 
     /**

@@ -41,7 +41,7 @@ function requireAdmin()
     header("Expires: 0");
 
     if (empty($_SESSION['admin'])) {
-        header("Location: login.php");
+        header("Location: ../index.php");
         exit;
     }
 }

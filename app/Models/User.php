@@ -4,14 +4,13 @@ namespace App\Models;
 
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, SoftDeletes;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -25,6 +24,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'role_id',
         'status',
         'department_id',
+        'email_verified_at',
         // [LOW-02] email_otp_code dan email_otp_expires_at dihapus dari fillable
         // Gunakan direct assignment: $user->email_otp_code = ...; $user->save();
     ];

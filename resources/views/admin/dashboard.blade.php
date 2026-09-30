@@ -258,9 +258,16 @@
                             <div>
                                 <h4 class="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">Portal Taman Kota</h4>
                                 <p class="text-xs text-slate-300 mt-0.5">Sistem Informasi Pengelolaan, Rekapitulasi RTH & Peta Taman</p>
-                                <div class="flex items-center gap-1.5 mt-2">
+                                <div class="flex flex-wrap items-center gap-1.5 mt-2">
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-emerald-500/25 text-emerald-200 border border-emerald-500/30">Rekapitulasi RTH</span>
                                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-semibold bg-white/10 text-white/80">Excel & PDF</span>
+                                    @if($isSuperAdmin)
+                                    <span onclick="event.preventDefault(); window.open('{{ route('portal-taman.sso') }}', '_blank');" 
+                                          class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-[10px] font-bold bg-emerald-500 text-white hover:bg-emerald-400 cursor-pointer shadow transition-all">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1"/></svg>
+                                        Panel Admin (SSO)
+                                    </span>
+                                    @endif
                                 </div>
                             </div>
                         </div>

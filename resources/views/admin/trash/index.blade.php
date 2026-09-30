@@ -16,6 +16,22 @@
         </div>
     </div>
 
+    <!-- BANNER KEBIJAKAN RETENSI 30 HARI -->
+    <div class="bg-amber-50/90 border border-amber-200/90 rounded-2xl p-4 flex items-start gap-3.5 text-amber-900 shadow-sm">
+        <div class="p-2 bg-amber-100 rounded-xl text-amber-700 shrink-0">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        </div>
+        <div class="text-sm space-y-1">
+            <p class="font-semibold text-amber-900">Kebijakan Pembersihan Otomatis 30 Hari</p>
+            <p class="text-amber-800/90 leading-relaxed text-xs">
+                Data di tong sampah disimpan sementara selama <strong>30 hari</strong> sejak tanggal penghapusan. 
+                Setelah lewat 30 hari, sistem akan menghapus data dan berkas fisik terkait secara <strong>permanen</strong> otomatis agar tidak membebani ruang penyimpanan basis data.
+            </p>
+        </div>
+    </div>
+
     <!-- TABS -->
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-2 flex flex-wrap gap-2">
         <a href="{{ route('admin.trash.index', ['type' => 'archive']) }}" 
@@ -30,12 +46,6 @@
            class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $type === 'pengawasan' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
            🔍 Pengawasan
         </a>
-        @if($user->isPureSuperAdmin())
-        <a href="{{ route('admin.trash.index', ['type' => 'user']) }}" 
-           class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all {{ $type === 'user' ? 'bg-indigo-600 text-white shadow-md' : 'text-slate-600 hover:bg-slate-50' }}">
-           👥 Pegawai / User
-        </a>
-        @endif
     </div>
 
     <!-- CONTENT -->
@@ -65,21 +75,19 @@
                             <th class="px-6 py-4">JUDUL ARSIP</th>
                             <th class="px-6 py-4">KATEGORI</th>
                             <th class="px-6 py-4">TANGGAL HAPUS</th>
+                            <th class="px-6 py-4">SISA WAKTU</th>
                             <th class="px-6 py-4 text-right">AKSI</th>
                         @elseif($type === 'survey')
                             <th class="px-6 py-4">NAMA BARANG</th>
                             <th class="px-6 py-4">SPESIFIKASI</th>
                             <th class="px-6 py-4">TANGGAL HAPUS</th>
+                            <th class="px-6 py-4">SISA WAKTU</th>
                             <th class="px-6 py-4 text-right">AKSI</th>
                         @elseif($type === 'pengawasan')
                             <th class="px-6 py-4">NAMA USAHA</th>
                             <th class="px-6 py-4">KECAMATAN / JENIS</th>
                             <th class="px-6 py-4">TANGGAL HAPUS</th>
-                            <th class="px-6 py-4 text-right">AKSI</th>
-                        @elseif($type === 'user')
-                            <th class="px-6 py-4">NAMA PEGAWAI</th>
-                            <th class="px-6 py-4">DEPARTEMEN</th>
-                            <th class="px-6 py-4">TANGGAL HAPUS</th>
+                            <th class="px-6 py-4">SISA WAKTU</th>
                             <th class="px-6 py-4 text-right">AKSI</th>
                         @endif
                     </tr>
@@ -97,12 +105,33 @@
                         @elseif($type === 'pengawasan')
                             <td class="px-6 py-4 font-medium text-slate-800">{{ $item->nama_usaha }}</td>
                             <td class="px-6 py-4">{{ $item->kecamatan }} ({{ $item->jenis_label }})</td>
-                        @elseif($type === 'user')
-                            <td class="px-6 py-4 font-medium text-slate-800">{{ $item->name }}</td>
-                            <td class="px-6 py-4">{{ $item->department->name ?? '-' }}</td>
                         @endif
                         
-                        <td class="px-6 py-4">{{ $item->deleted_at->format('d M Y, H:i') }}</td>
+                        <td class="px-6 py-4 text-slate-600">{{ $item->deleted_at->translatedFormat('d M Y, H:i') }}</td>
+                        
+                        {{-- Kolom Sisa Waktu Retensi --}}
+                        <td class="px-6 py-4">
+                            @php
+                                $daysLeft = max(0, 30 - (int) $item->deleted_at->diffInDays(now()));
+                            @endphp
+                            @if($daysLeft <= 3)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-bold bg-rose-50 text-rose-700 border border-rose-200" title="Akan dihapus permanen pada {{ $item->deleted_at->addDays(30)->translatedFormat('d M Y') }}">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-rose-500 animate-pulse"></span>
+                                    Sisa {{ $daysLeft }} hari
+                                </span>
+                            @elseif($daysLeft <= 10)
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200" title="Akan dihapus permanen pada {{ $item->deleted_at->addDays(30)->translatedFormat('d M Y') }}">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
+                                    Sisa {{ $daysLeft }} hari
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 text-slate-700" title="Akan dihapus permanen pada {{ $item->deleted_at->addDays(30)->translatedFormat('d M Y') }}">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
+                                    Sisa {{ $daysLeft }} hari
+                                </span>
+                            @endif
+                        </td>
+
                         <td class="px-6 py-4 text-right">
                             <div class="flex items-center justify-end gap-2">
                                 <!-- Tombol Restore -->
@@ -129,7 +158,7 @@
                     </tr>
                     @empty
                     <tr>
-                        <td colspan="4" class="px-6 py-12 text-center text-slate-500">
+                        <td colspan="5" class="px-6 py-12 text-center text-slate-500">
                             <div class="flex flex-col items-center justify-center">
                                 <svg class="w-12 h-12 text-slate-300 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                                 <p class="text-lg font-medium text-slate-600">Tong Sampah Kosong</p>

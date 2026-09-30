@@ -30,9 +30,16 @@ class PasswordResetLinkController extends Controller
             'email' => ['required', 'email'],
         ]);
 
-        // We will send the password reset link to this user. Once we have attempted
-        // to send the link, we will examine the response then see the message we
-        // need to show to the user. Finally, we'll send out a proper response.
+        // Blokir jika email belum verifikasi OTP (akun belum aktif)
+        $user = \App\Models\User::where('email', $request->email)
+            ->whereNull('email_verified_at')
+            ->first();
+
+        if ($user) {
+            return back()->withInput($request->only('email'))
+                ->withErrors(['email' => 'Akun ini belum diverifikasi. Silakan selesaikan verifikasi OTP terlebih dahulu atau hubungi admin.']);
+        }
+
         $status = Password::sendResetLink(
             $request->only('email')
         );

@@ -23,8 +23,8 @@ if (ini_get("session.use_cookies")) {
 // Hancurkan session
 session_destroy();
 
-// Kembali ke login
-header("Location: login.php");
+// Kembali ke beranda portal taman
+header("Location: ../index.php");
 exit;
 
 

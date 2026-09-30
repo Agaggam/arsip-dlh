@@ -146,15 +146,6 @@ $isAdminLoggedIn = !empty($_SESSION['admin']);
                 <a href="#taman">Daftar Taman</a>
                 <a href="#tentang">Tentang</a>
                 <a href="#kontak">Kontak</a>
-                <?php if ($isAdminLoggedIn): ?>
-                    <a href="admin/dashboard.php" class="nav-admin-btn is-logged" title="Masuk ke Panel Admin">
-                        <?= icon('check', '', 14) ?> <span>Panel Admin</span>
-                    </a>
-                <?php else: ?>
-                    <a href="admin/login.php" class="nav-admin-btn" title="Login Petugas Admin">
-                        <?= icon('user', '', 14) ?> <span>Masuk Admin</span>
-                    </a>
-                <?php endif; ?>
             </nav>
 
         </div>

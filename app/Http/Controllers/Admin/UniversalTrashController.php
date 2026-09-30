@@ -80,13 +80,6 @@ class UniversalTrashController extends Controller
             $pengawasans = $query->latest()->paginate(10)->appends($request->all());
 
 
-        } elseif ($type === 'user') {
-            if (!$user->isPureSuperAdmin()) abort(403);
-            $query = User::onlyTrashed()->with(['department', 'role']);
-            if ($request->search) {
-                $query->where('name', 'LIKE', "%{$request->search}%");
-            }
-            $users = $query->latest()->paginate(10)->appends($request->all());
         }
 
         $categories = Category::with('department')->when(!$user->isPureSuperAdmin(), function($q) use ($user) {
@@ -96,7 +89,7 @@ class UniversalTrashController extends Controller
         $fileTypes = Archive::onlyTrashed()->distinct()->orderBy('file_type')->pluck('file_type');
 
         return view('admin.trash.index', compact(
-            'type', 'archives', 'surveys', 'pengawasans', 'users', 'categories', 'departments', 'fileTypes'
+            'type', 'archives', 'surveys', 'pengawasans', 'categories', 'departments', 'fileTypes'
         ));
     }
 
@@ -120,11 +113,6 @@ class UniversalTrashController extends Controller
             }
             $model->restore();
             log_activity(Auth::user(), 'pulihkan_pengawasan', "Data Pengawasan ({$model->nama_usaha}) berhasil dipulihkan.");
-        } elseif ($type === 'user') {
-            if (!Auth::user()->isPureSuperAdmin()) return back()->with('error', 'Akses ditolak.');
-            $model = User::withTrashed()->findOrFail($id);
-            $model->restore();
-            log_activity(Auth::user(), 'pulihkan_user', "Pengguna ({$model->name}) berhasil dipulihkan.");
         }
         
         return back()->with('success', 'Data berhasil dipulihkan.');
@@ -163,12 +151,6 @@ class UniversalTrashController extends Controller
             $title = $model->nama_usaha;
             $model->forceDelete();
             log_activity(Auth::user(), 'hapus_permanen_pengawasan', "Pengawasan ({$title}) dihapus permanen.");
-        } elseif ($type === 'user') {
-            if (!Auth::user()->isPureSuperAdmin()) return back()->with('error', 'Akses ditolak.');
-            $model = User::withTrashed()->findOrFail($id);
-            $title = $model->name;
-            $model->forceDelete();
-            log_activity(Auth::user(), 'hapus_permanen_user', "Pengguna ({$title}) dihapus permanen.");
         }
 
         return back()->with('success', 'Data telah dihapus permanen.');

@@ -20,8 +20,8 @@ class CheckStatus
 
             // 2. Jika statusnya BUKAN approved
             if ($user->status !== 'approved') {      
-                // Pengecualian: Super Admin boleh lewat meski statusnya aneh (biar admin gak terkunci)
-                if ($user->role && $user->role->name === 'super_admin') {
+                // Pengecualian: Super Admin dan Admin boleh lewat
+                if ($user->role && in_array($user->role->name, ['super_admin', 'admin'])) {
                     return $next($request);
                 }
                 // 3. Ambil status untuk pesan error

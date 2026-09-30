@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class CheckRole
 {
-    public function handle(Request $request, Closure $next, string $roles): Response
+    public function handle(Request $request, Closure $next, string ...$roles): Response
     {
         if (!$request->user()) {
             return redirect()->route('login');
@@ -22,8 +22,16 @@ class CheckRole
 
         $userRole = $request->user()->role->name;
         
-        // Ubah string roles menjadi array (pisahkan dengan koma)
-        $allowedRoles = array_map('trim', explode(',', $roles));
+        // Ubah string roles menjadi array (mendukung variadic arg maupun dipisah koma)
+        $allowedRoles = [];
+        foreach ($roles as $role) {
+            foreach (explode(',', $role) as $r) {
+                $trimmed = trim($r);
+                if ($trimmed !== '') {
+                    $allowedRoles[] = $trimmed;
+                }
+            }
+        }
 
         // Jika role user termasuk dalam daftar yang diizinkan, LANJUTKAN (tidak redirect)
         if (in_array($userRole, $allowedRoles)) {

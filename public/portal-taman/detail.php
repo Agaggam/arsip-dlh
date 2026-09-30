@@ -75,15 +75,6 @@ $slides = array_values(array_filter(array_merge([$park['image']], $gallery)));
                 <a href="index.php">Beranda</a>
                 <a href="index.php#taman">Daftar Taman</a>
                 <a href="index.php#tentang">Tentang</a>
-                <?php if ($isAdminLoggedIn): ?>
-                    <a href="admin/dashboard.php" class="nav-admin-btn is-logged" title="Masuk ke Panel Admin">
-                        <?= icon('check', '', 14) ?> <span>Panel Admin</span>
-                    </a>
-                <?php else: ?>
-                    <a href="admin/login.php" class="nav-admin-btn" title="Login Petugas Admin">
-                        <?= icon('user', '', 14) ?> <span>Masuk Admin</span>
-                    </a>
-                <?php endif; ?>
             </nav>
 
         </div>

@@ -14,17 +14,23 @@ class OtpVerificationMail extends Mailable
 
     public string $otp;
     public string $userName;
+    public string $purpose;
 
-    public function __construct(string $otp, string $userName)
+    public function __construct(string $otp, string $userName, string $purpose = 'register')
     {
         $this->otp      = $otp;
         $this->userName = $userName;
+        $this->purpose  = $purpose;
     }
 
     public function envelope(): Envelope
     {
+        $subject = $this->purpose === 'change_email'
+            ? '[E-Arsip DLH] Kode Verifikasi Perubahan Email Akun'
+            : '[E-Arsip DLH] Kode Verifikasi Email Anda';
+
         return new Envelope(
-            subject: '[E-Arsip DLH] Kode Verifikasi Email Anda',
+            subject: $subject,
         );
     }
 
@@ -32,6 +38,12 @@ class OtpVerificationMail extends Mailable
     {
         return new Content(
             view: 'emails.otp-verification',
+            with: [
+                'otp'      => $this->otp,
+                'userName' => $this->userName,
+                'purpose'  => $this->purpose,
+            ],
         );
     }
 }
+
