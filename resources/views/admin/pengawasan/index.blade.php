@@ -162,7 +162,7 @@
                             {{-- Sesi Pengawasan & Pengawas --}}
                             <td class="px-4 py-3.5 align-middle">
                                 <p class="font-bold text-slate-800 text-sm">
-                                    Pengawasan {{ $session->jenis_label }} — {{ $session->kecamatan }}
+                                    Pengawasan {{ $session->jenis_label }} ({{ $session->kecamatan }})
                                 </p>
                                 <p class="text-xs text-slate-500 mt-0.5 flex items-center gap-1.5">
                                     <span class="font-medium text-slate-600">{{ $session->nama_pengawas }}</span>

@@ -13,33 +13,19 @@
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-        <style>
-            .floating-animation {
-                animation: float 6s ease-in-out infinite;
-            }
-
-            @keyframes float {
-                0%, 100% { transform: translateY(0px); }
-                50% { transform: translateY(-15px); }
-            }
-        </style>
     </head>
-    <body class="font-sans text-gray-900 antialiased selection:bg-emerald-100 selection:text-emerald-700 bg-slate-50">
+    <body class="font-sans text-gray-900 antialiased selection:bg-emerald-100 selection:text-emerald-700 bg-slate-100">
         
         <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
-            <img src="{{ asset('images/1443.jpg') }}" alt="Background" class="absolute inset-0 w-full h-full object-cover opacity-20" />
-            <div class="absolute -top-[10%] -left-[10%] w-[40%] h-[40%] rounded-full bg-indigo-200/50 blur-[120px]"></div>
-            <div class="absolute top-[20%] -right-[5%] w-[30%] h-[40%] rounded-full bg-purple-200/40 blur-[100px]"></div>
-            <div class="absolute -bottom-[10%] left-[20%] w-[50%] h-[30%] rounded-full bg-blue-100/60 blur-[110px]"></div>
-            
-            <div class="absolute inset-0" style="background-image: radial-gradient(#e2e8f0 0.8px, transparent 0.8px); background-size: 24px 24px; opacity: 0.5;"></div>
+            <img src="{{ asset('images/1443.jpg') }}" alt="Background" class="w-full h-full object-cover opacity-15" />
+            <div class="absolute inset-0 bg-slate-100/80"></div>
         </div>
 
         <div class="relative z-10 min-h-screen flex items-center justify-center p-4 sm:p-6 lg:p-8">
             
-            <div class="w-full max-w-4xl bg-white/80 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.1)] rounded-[2.5rem] overflow-hidden flex flex-col md:flex-row border border-white/20">
+            <div class="w-full max-w-4xl bg-white shadow-lg rounded-2xl overflow-hidden flex flex-col md:flex-row border border-slate-200">
                 
-                <div class="hidden md:flex md:w-1/2 bg-slate-50/40 flex-col items-center justify-center p-8 relative border-r border-gray-100/50">
+                <div class="hidden md:flex md:w-1/2 bg-slate-50 flex-col items-center justify-center p-8 relative border-r border-slate-200">
                     
                     <div class="absolute top-10 left-10">
                         <a href="/" class="flex items-center gap-4 group">
@@ -61,7 +47,7 @@
                     <div class="text-center mt-12">
                         <img src="{{ asset('images/auth-vector.png') }}" 
                              alt="Authentication" 
-                             class="w-full max-w-[260px] h-auto mx-auto mb-4 drop-shadow-2xl floating-animation">
+                             class="w-full max-w-[260px] h-auto mx-auto mb-4 drop-shadow-md">
                         
                         <h2 class="text-2xl font-bold text-slate-800 mb-2 tracking-tight">Selamat Datang!</h2>
                         <p class="text-slate-500 leading-relaxed max-w-xs mx-auto text-balance">

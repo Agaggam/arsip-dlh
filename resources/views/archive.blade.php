@@ -3,7 +3,7 @@
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
                 <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-                    {{ __('Daftar Arsip') }} — <span class="text-indigo-600">{{ $currentDeptName }}</span>
+                    {{ __('Daftar Arsip') }}: <span class="text-indigo-600">{{ $currentDeptName }}</span>
                 </h2>
             </div>
         </div>

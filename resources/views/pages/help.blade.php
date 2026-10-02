@@ -7,15 +7,7 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        @keyframes ken-burns {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.15); }
-        }
-        .animate-ken-burns {
-            animation: ken-burns 20s ease-in-out infinite alternate;
-        }
-    </style>
+
 </head>
 <body class="antialiased bg-gray-50 text-gray-800 font-sans">
     
@@ -36,11 +28,10 @@
 
     <!-- Header Section -->
     <div class="relative py-24 sm:py-32 text-center px-4 overflow-hidden">
-        <!-- Animated Background Image -->
         <div class="absolute inset-0 z-0">
             <img src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2000&auto=format&fit=crop" 
                  alt="Abstract Tech Background" 
-                 class="w-full h-full object-cover animate-ken-burns">
+                 class="w-full h-full object-cover">
             <div class="absolute inset-0 bg-slate-900/80 mix-blend-multiply"></div>
             <div class="absolute inset-0 bg-gradient-to-t from-gray-50 via-transparent to-transparent"></div>
         </div>

@@ -5,14 +5,13 @@
                 @if(Auth::user()->isPureSuperAdmin())
                     Dashboard Super Admin
                 @elseif(Auth::user()->isAdmin())
-                    Dashboard — {{ Auth::user()->department->name ?? 'Admin' }}
+                    Dashboard: {{ Auth::user()->department->name ?? 'Admin' }}
                 @endif
             </span>
-            {{-- LIVE Indicator --}}
-            <span id="liveIndicator" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-700 border border-emerald-200 opacity-0 transition-opacity duration-500">
-                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                LIVE
-                <span id="lastUpdatedTime" class="font-normal text-emerald-600 ml-1"></span>
+            {{-- Status Pembaruan Data --}}
+            <span id="liveIndicator" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-medium text-slate-600 bg-slate-100 border border-slate-200 opacity-0 transition-opacity duration-500">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Pembaruan: <span id="lastUpdatedTime" class="font-normal text-slate-500"></span>
             </span>
         </div>
     </x-slot>
@@ -22,167 +21,136 @@
 
     <!-- Stats Cards -->
     @php $isSuperAdmin = Auth::user()->isPureSuperAdmin(); @endphp
-    <div class="grid grid-cols-1 md:grid-cols-2 {{ $isSuperAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }} gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 {{ $isSuperAdmin ? 'lg:grid-cols-4' : 'lg:grid-cols-3' }} gap-5 mb-8">
                 <!-- Total Pengguna (Super Admin saja) -->
                 @if($isSuperAdmin)
-                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="absolute inset-0 bg-gradient-to-r from-indigo-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Pengguna</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalUsers">{{ number_format($totalUsers) }}</p>
-                            </div>
-                            <div class="p-3 rounded-xl bg-indigo-100 text-indigo-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
-                                </svg>
-                            </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pengguna</p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-2" data-stat="totalUsers">{{ number_format($totalUsers) }}</p>
                         </div>
-                        <div class="mt-4 flex items-center text-xs">
-                            <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                            <span class="text-green-600 font-medium" data-stat="usersThisMonth">{{ $usersThisMonth }} baru</span>
-                            <span class="text-gray-400 ml-1">bulan ini</span>
+                        <div class="p-3 rounded-xl bg-indigo-50 text-indigo-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-xs text-slate-500">
+                        <span class="font-semibold text-emerald-600" data-stat="usersThisMonth">+{{ $usersThisMonth }}</span>
+                        <span class="ml-1">pengguna baru bulan ini</span>
                     </div>
                 </div>
                 @endif
 
                 <!-- Total Arsip -->
-                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="absolute inset-0 bg-gradient-to-r from-emerald-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Arsip</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalArchives">{{ number_format($totalArchives) }}</p>
-                            </div>
-                            <div class="p-3 rounded-xl bg-emerald-100 text-emerald-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                </svg>
-                            </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Arsip</p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-2" data-stat="totalArchives">{{ number_format($totalArchives) }}</p>
                         </div>
-                        <div class="mt-4 flex items-center text-xs">
-                            <svg class="w-3 h-3 mr-1 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/></svg>
-                            <span class="text-green-600 font-medium" data-stat="archivesThisMonth">{{ $archivesThisMonth }} baru</span>
-                            <span class="text-gray-400 ml-1">bulan ini</span>
+                        <div class="p-3 rounded-xl bg-emerald-50 text-emerald-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-xs text-slate-500">
+                        <span class="font-semibold text-emerald-600" data-stat="archivesThisMonth">+{{ $archivesThisMonth }}</span>
+                        <span class="ml-1">dokumen baru bulan ini</span>
                     </div>
                 </div>
 
                 <!-- Total Download -->
-                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="absolute inset-0 bg-gradient-to-r from-blue-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Download</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalDownloads">{{ number_format($totalDownloads) }}</p>
-                            </div>
-                            <div class="p-3 rounded-xl bg-blue-100 text-blue-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                                </svg>
-                            </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Unduhan</p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-2" data-stat="totalDownloads">{{ number_format($totalDownloads) }}</p>
                         </div>
-                        <div class="mt-4 flex items-center text-xs">
-                            <svg class="w-3 h-3 mr-1 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                            <span class="text-blue-600 font-medium">Akumulasi</span>
-                            <span class="text-gray-400 ml-1">dari semua arsip</span>
+                        <div class="p-3 rounded-xl bg-slate-100 text-slate-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-xs text-slate-500">
+                        <span>Akumulasi dari seluruh arsip</span>
                     </div>
                 </div>
 
                 {{-- Total Sampah (Trash) --}}
-                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="absolute inset-0 bg-gradient-to-r from-rose-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Tempat Sampah</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalTrashed">{{ number_format($totalTrashed ?? 0) }}</p>
-                            </div>
-                            <div class="p-3 rounded-xl bg-rose-100 text-rose-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
-                            </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tempat Sampah</p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-2" data-stat="totalTrashed">{{ number_format($totalTrashed ?? 0) }}</p>
                         </div>
-                        <div class="mt-4 flex items-center text-xs">
-                            <svg class="w-3 h-3 mr-1 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span class="text-rose-600 font-medium">Menunggu pemulihan</span>
-                            <span class="text-gray-400 ml-1">atau hapus permanen</span>
+                        <div class="p-3 rounded-xl bg-slate-100 text-slate-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-xs text-slate-500">
+                        <span>Menunggu pemulihan atau hapus permanen</span>
                     </div>
                 </div>
 
                 {{-- Total Pegawai --}}
-                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="absolute inset-0 bg-gradient-to-r from-orange-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Total Pegawai</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalPegawai">{{ number_format($totalPegawai ?? 0) }}</p>
-                            </div>
-                            <div class="p-3 rounded-xl bg-orange-100 text-orange-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                                </svg>
-                            </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total Pegawai</p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-2" data-stat="totalPegawai">{{ number_format($totalPegawai ?? 0) }}</p>
                         </div>
-                        <div class="mt-4 flex items-center text-xs">
-                            <svg class="w-3 h-3 mr-1 text-orange-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            <span class="text-orange-600 font-medium">Terdaftar</span>
-                            <span class="text-gray-400 ml-1">di semua unit kerja</span>
+                        <div class="p-3 rounded-xl bg-slate-100 text-slate-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-xs text-slate-500">
+                        <span>Terdaftar di semua unit kerja</span>
                     </div>
                 </div>
 
                 {{-- Total Usulan Harga --}}
-                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="absolute inset-0 bg-gradient-to-r from-amber-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Usulan Harga</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalUsulan">{{ number_format($totalUsulan ?? 0) }}</p>
-                            </div>
-                            <div class="p-3 rounded-xl bg-amber-100 text-amber-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                </svg>
-                            </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Usulan Harga</p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-2" data-stat="totalUsulan">{{ number_format($totalUsulan ?? 0) }}</p>
                         </div>
-                        <div class="mt-4 flex items-center text-xs">
-                            <svg class="w-3 h-3 mr-1 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span class="text-amber-600 font-medium">SSH &amp; SBU</span>
-                            <span class="text-gray-400 ml-1">di departemen Anda</span>
+                        <div class="p-3 rounded-xl bg-slate-100 text-slate-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-xs text-slate-500">
+                        <span>Standar Satuan Harga (SSH &amp; SBU)</span>
                     </div>
                 </div>
 
                 {{-- Total Pengawasan --}}
-                <div class="relative overflow-hidden bg-white rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1 group">
-                    <div class="absolute inset-0 bg-gradient-to-r from-cyan-50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    <div class="p-6 relative z-10">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-sm font-medium text-gray-500 uppercase tracking-wider">Pengawasan</p>
-                                <p class="text-3xl font-extrabold text-gray-800 mt-2" data-stat="totalPengawasan">{{ number_format($totalPengawasan ?? 0) }}</p>
-                            </div>
-                            <div class="p-3 rounded-xl bg-cyan-100 text-cyan-600">
-                                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
-                                </svg>
-                            </div>
+                <div class="bg-white rounded-2xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-all duration-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Pengawasan</p>
+                            <p class="text-3xl font-extrabold text-slate-800 mt-2" data-stat="totalPengawasan">{{ number_format($totalPengawasan ?? 0) }}</p>
                         </div>
-                        <div class="mt-4 flex items-center text-xs">
-                            <svg class="w-3 h-3 mr-1 text-cyan-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            <span class="text-cyan-600 font-medium">Ketaatan Lingkungan</span>
-                            <span class="text-gray-400 ml-1">Pelaku Usaha Kota Batu</span>
+                        <div class="p-3 rounded-xl bg-emerald-50 text-emerald-600">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+                            </svg>
                         </div>
+                    </div>
+                    <div class="mt-4 flex items-center text-xs text-slate-500">
+                        <span>Monitoring ketaatan lingkungan pelaku usaha</span>
+                    </div>
+                </div>
                     </div>
                 </div>
 

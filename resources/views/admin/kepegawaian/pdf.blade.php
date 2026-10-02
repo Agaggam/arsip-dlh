@@ -95,7 +95,7 @@
 <body>
 
     <div class="page-footer text-right">
-        <em>Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i:s') }} — <span class="page-number"></span></em>
+        <em>Dicetak pada: {{ \Carbon\Carbon::now()->translatedFormat('d F Y H:i:s') }} - <span class="page-number"></span></em>
     </div>
 
     <div class="kop-surat">

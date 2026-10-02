@@ -343,7 +343,7 @@
                     <div class="toko-link">{{ $link }}</div>
                     @endif
                 @else
-                    <div class="no-data">— Tidak diisi —</div>
+                    <div class="no-data">- Tidak diisi -</div>
                 @endif
             </div>
         </td>

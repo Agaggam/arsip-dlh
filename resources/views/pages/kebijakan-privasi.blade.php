@@ -8,15 +8,7 @@
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     @vite(['resources/css/app.css', 'resources/js/app.js'])
-    <style>
-        @keyframes ken-burns {
-            0% { transform: scale(1); }
-            100% { transform: scale(1.15); }
-        }
-        .animate-ken-burns {
-            animation: ken-burns 20s ease-in-out infinite alternate;
-        }
-    </style>
+
 </head>
 <body class="antialiased bg-gray-50 text-gray-800 font-sans">
     

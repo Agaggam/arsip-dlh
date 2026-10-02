@@ -6,7 +6,7 @@
             </a>
             <div>
                 <h2 class="text-xl font-bold text-slate-800">Edit Sesi Pengawasan & Kelola Pelaku Usaha</h2>
-                <p class="text-sm text-slate-500 mt-0.5">Sesi: <span class="font-bold text-slate-700">Pengawasan {{ $pengawasan->jenis_label }} — {{ $pengawasan->kecamatan }} ({{ $pengawasan->nama_pengawas }})</span></p>
+                <p class="text-sm text-slate-500 mt-0.5">Sesi: <span class="font-bold text-slate-700">Pengawasan {{ $pengawasan->jenis_label }} ({{ $pengawasan->kecamatan }}) - {{ $pengawasan->nama_pengawas }}</span></p>
             </div>
         </div>
     </x-slot>

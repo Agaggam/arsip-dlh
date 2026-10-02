@@ -105,33 +105,46 @@
         <img src="{{ asset('images/1443.jpg') }}" class="w-full h-full object-cover" alt="Background">
         <div class="absolute inset-0 bg-white/80"></div>
     </div>
-<div class="min-h-screen lg:flex relative z-0">
+<div class="flex flex-col sm:flex-row relative z-0"
+    style="min-height: calc(100vh / 0.75)"
+    x-data="{ sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true' }"
+    @sidebar-toggled.window="sidebarCollapsed = $event.detail.collapsed">
 
     @include('layouts.navigation')
 
-    <main class="flex-1 lg:ml-64 min-h-screen flex flex-col bg-slate-50/30">
+    <main
+        :class="sidebarCollapsed ? 'sm:ml-0' : 'sm:ml-64'"
+        class="flex-1 flex flex-col bg-slate-50/30 transition-all duration-300"
+    >
 
         <!-- Header Baru dengan desain lebih bersih -->
         @isset($header)
             <header class="bg-white/90 backdrop-blur-sm sticky top-0 z-30 border-b border-slate-200/80 shadow-sm">
                 <div class="w-full mx-auto px-4 sm:px-6 lg:px-8 py-3 lg:py-4">
                     <div class="flex items-center justify-between gap-4">
-                        {{-- Kiri: Judul Halaman --}}
+                        {{-- Kiri: Tombol Toggle Sidebar + Judul Halaman --}}
                         <div class="flex items-center gap-3 min-w-0">
-                            <div class="hidden sm:block w-1 h-7 bg-indigo-500 rounded-full flex-shrink-0"></div>
+                            {{-- Hamburger toggle sidebar --}}
+                            <button
+                                @click.stop="
+                                    sidebarCollapsed = !sidebarCollapsed;
+                                    localStorage.setItem('sidebarCollapsed', sidebarCollapsed);
+                                    window.dispatchEvent(new CustomEvent('sidebar-toggled', { detail: { collapsed: sidebarCollapsed }, bubbles: true }));
+                                "
+                                title="Toggle Sidebar"
+                                class="hidden sm:flex items-center justify-center w-9 h-9 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50 transition-all duration-200 flex-shrink-0"
+                            >
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                                </svg>
+                            </button>
                             <div class="min-w-0">
                                 <h1 class="text-lg lg:text-xl font-bold text-slate-800 tracking-tight truncate">
                                     {{ $header }}
                                 </h1>
-                                <div class="hidden sm:flex items-center gap-2 mt-0.5">
-                                    <span class="relative flex h-1.5 w-1.5">
-                                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
-                                    </span>
-                                    <p class="text-xs text-slate-400 font-medium">
-                                        {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }} &bull; {{ \Carbon\Carbon::now()->format('H:i') }} WIB
-                                    </p>
-                                </div>
+                                <p class="hidden sm:block text-xs text-slate-400 font-medium mt-0.5">
+                                    {{ \Carbon\Carbon::now()->translatedFormat('l, d F Y') }} &bull; {{ \Carbon\Carbon::now()->format('H:i') }} WIB
+                                </p>
                             </div>
                         </div>
 

@@ -114,7 +114,7 @@
             <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
         </div>
         <div>
-            <p class="text-xs font-bold text-indigo-800">Akses Terbatas — Bidang: {{ $scopedDepartment->name }}</p>
+            <p class="text-xs font-bold text-indigo-800">Akses Terbatas: Bidang {{ $scopedDepartment->name }}</p>
             <p class="text-xs text-indigo-600 mt-0.5">Anda hanya dapat melihat data pegawai dari bidang Anda. Hubungi Super Admin untuk akses penuh.</p>
         </div>
     </div>
@@ -368,11 +368,11 @@
                             </td>
                             <td class="px-5 py-4 text-sm text-slate-700 font-medium">{{ $p->jabatan }}</td>
                             <td class="px-5 py-4 text-sm text-slate-500">{{ $p->unit_kerja }}</td>
-                            <td class="px-5 py-4 text-xs text-slate-500 font-mono whitespace-nowrap">{{ $p->pangkat_golongan ?? '—' }}</td>
+                            <td class="px-5 py-4 text-xs text-slate-500 font-mono whitespace-nowrap">{{ $p->pangkat_golongan ?? '-' }}</td>
                             <td class="px-5 py-4 text-xs text-slate-500 whitespace-nowrap">
-                                {{ $p->tmt_sk ? $p->tmt_sk->format('d/m/Y') : '—' }}
+                                {{ $p->tmt_sk ? $p->tmt_sk->format('d/m/Y') : '-' }}
                             </td>
-                            <td class="px-5 py-4 text-xs text-slate-500 whitespace-nowrap">{{ $p->masa_kontrak ?? '—' }}</td>
+                            <td class="px-5 py-4 text-xs text-slate-500 whitespace-nowrap">{{ $p->masa_kontrak ?? '-' }}</td>
                             <td class="px-5 py-4 text-center text-xs font-bold text-slate-600">{{ $p->jam_kerja_mingguan }} jam</td>
                             <td class="px-5 py-4 text-center">
                                 <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold {{ $stBadge }}">

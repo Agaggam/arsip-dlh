@@ -1,16 +1,29 @@
-<nav x-data="{ open: false }">
-    <div class="hidden sm:flex flex-col w-64 bg-white border-r border-slate-200 fixed h-full z-40 shadow-sm transition-all duration-300">
+<nav x-data="{
+    open: false,
+    sidebarCollapsed: localStorage.getItem('sidebarCollapsed') === 'true',
+    toggleSidebar() {
+        this.sidebarCollapsed = !this.sidebarCollapsed;
+        localStorage.setItem('sidebarCollapsed', this.sidebarCollapsed);
+        this.$dispatch('sidebar-toggled', { collapsed: this.sidebarCollapsed });
+    }
+}" @sidebar-toggled.window="sidebarCollapsed = $event.detail.collapsed">
+    <div
+        :class="sidebarCollapsed ? 'w-0 -translate-x-full opacity-0 pointer-events-none' : 'w-64 translate-x-0 opacity-100'"
+        class="hidden sm:flex flex-col bg-white border-r border-slate-200 fixed h-full z-40 shadow-sm transition-all duration-300 overflow-hidden"
+        style="width:256px"
+        :style="sidebarCollapsed ? 'width:0;overflow:hidden' : 'width:256px;overflow:visible'"
+    >
         
         <div class="flex items-center px-8 h-20 border-b border-slate-50">
             @php
                 $logoRoute = auth()->user()->isUser() ? route('dashboard') : route('admin.dashboard');
             @endphp
             <a href="{{ $logoRoute }}" class="flex items-center gap-3 group">
-                <div class="p-1.5 bg-indigo-50 rounded-xl group-hover:bg-indigo-100 transition-colors">
+                <div class="p-1.5 bg-indigo-50 rounded-xl group-hover:bg-indigo-100 transition-colors flex-shrink-0">
                     <x-application-logo class="block h-7 w-auto fill-current text-indigo-600 transition-transform group-hover:scale-110" />
                 </div>
-                <div>
-                    <span class="text-base font-extrabold tracking-tight text-slate-800 leading-tight block">
+                <div class="min-w-0">
+                    <span class="text-base font-extrabold tracking-tight text-slate-800 leading-tight block truncate">
                         {{ config('app.name') }}
                     </span>
                     <span class="text-[10px] font-medium text-slate-400 uppercase tracking-widest">

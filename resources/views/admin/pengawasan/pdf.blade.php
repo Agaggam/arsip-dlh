@@ -179,7 +179,7 @@
                 @empty
                 <tr>
                     <td colspan="{{ 4 + count($hasilCols) + 4 }}" style="color:#94a3b8; font-style:italic; padding:8px;">
-                        — Tidak ada data —
+                        - Tidak ada data -
                     </td>
                 </tr>
                 @endforelse
