@@ -340,4 +340,51 @@ class CheckStatusMiddlewareTest extends TestCase
         $this->assertEquals(route('login'), $response->getTargetUrl());
         $this->assertEquals(302, $response->getStatusCode());
     }
+
+    /**
+     * TC-07 (Positif): Pengguna login dengan role 'admin' dan status 'pending' (non-approved)
+     * Ekspektasi: Sesuai kode aktual CheckStatus baris 23, role 'admin' mendapat pengecualian dan lanjut ke $next($request).
+     */
+    public function test_tc07_admin_with_pending_status_passes_through(): void
+    {
+        // Arrange
+        // [TEST DOUBLE - STUB]: Stub objek Admin dengan status 'pending'
+        $adminStub = (object) [
+            'status' => 'pending',
+            'role'   => (object) ['name' => 'admin'],
+        ];
+
+        // [TEST DOUBLE - STUB]: Stub facade Auth
+        Auth::shouldReceive('check')
+            ->once()
+            ->andReturn(true);
+
+        Auth::shouldReceive('user')
+            ->once()
+            ->andReturn($adminStub);
+
+        // [TEST DOUBLE - MOCK]: Memastikan Auth::logout() tidak pernah dipanggil untuk admin
+        Auth::shouldReceive('logout')
+            ->never();
+
+        $request = Request::create('/admin/dashboard', 'GET');
+
+        // [TEST DOUBLE - DUMMY]: Dummy Response untuk nilai balik $next
+        $dummyResponse = new Response('passed_to_next_admin', 200);
+
+        // [TEST DOUBLE - SPY]: Spy Closure untuk memantau pemanggilan $next
+        $nextCalled = false;
+        $next = function (Request $req) use (&$nextCalled, $dummyResponse) {
+            $nextCalled = true;
+            return $dummyResponse;
+        };
+
+        // Act
+        $response = $this->middleware->handle($request, $next);
+
+        // Assert
+        $this->assertTrue($nextCalled, 'Admin berstatus pending harus tetap lolos ke $next.');
+        $this->assertSame($dummyResponse, $response);
+        $this->assertEquals(200, $response->getStatusCode());
+    }
 }
