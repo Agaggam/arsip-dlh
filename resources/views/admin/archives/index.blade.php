@@ -199,7 +199,7 @@
         <x-slot name="tbody">
             @foreach($archives as $archive)
                 @php
-                    $fileExists = \Illuminate\Support\Facades\Storage::disk('public')->exists($archive->file_path);
+                    $fileExists = $archive->file_path && (\Illuminate\Support\Facades\Storage::disk('local')->exists($archive->file_path) || \Illuminate\Support\Facades\Storage::disk('public')->exists($archive->file_path));
                     $ext = strtolower($archive->file_type);
                     
                     if (!$fileExists) {

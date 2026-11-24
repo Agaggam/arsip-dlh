@@ -310,8 +310,9 @@ class ArchiveController extends Controller
         if ($request->hasFile('file')) {
             $file = $request->file('file');
             
-            // 1. Tentukan penamaan berkas unik
-            $fileName = \Illuminate\Support\Str::slug($request->title) . '-' . time() . '.' . $file->getClientOriginalExtension();
+            // 1. Tentukan penamaan berkas unik (batasi slug judul maks 80 karakter agar tidak melebihi batas panjang nama file OS / Windows)
+            $titleSlug = \Illuminate\Support\Str::limit(\Illuminate\Support\Str::slug($request->title), 80, '');
+            $fileName  = ($titleSlug ?: 'archive') . '-' . time() . '-' . \Illuminate\Support\Str::random(6) . '.' . $file->getClientOriginalExtension();
             
             // 2. Baca slug departemen secara dinamis dari kategori target
             $deptSlug = $category->department->slug ?? 'default-dept';
@@ -321,6 +322,10 @@ class ArchiveController extends Controller
             
             // 4. Simpan ke private storage (tidak dapat diakses langsung via URL)
             $path = $file->storeAs($folderPath, $fileName, 'local');
+
+            if (!$path) {
+                return back()->with('error', 'Gagal menyimpan file fisik ke server storage. Silakan coba lagi.');
+            }
 
             $ArchiveDate = $request->filled('archive_date')
                 ? \Carbon\Carbon::parse($request->archive_date)
@@ -448,13 +453,18 @@ class ArchiveController extends Controller
 
             // Simpan file baru ke private storage
             $file = $request->file('file');
-            $fileName = Str::slug($request->title) . '-' . time() . '.' . $file->getClientOriginalExtension();
+            $titleSlug = Str::limit(Str::slug($request->title), 80, '');
+            $fileName  = ($titleSlug ?: 'archive') . '-' . time() . '-' . Str::random(6) . '.' . $file->getClientOriginalExtension();
             
             // Ambil nama slug bidang terbaru
             $deptSlug = $category->department->slug ?? 'default-dept';
             $folderPath = "archives/{$deptSlug}/" . now()->format('Y/m');
             
             $path = $file->storeAs($folderPath, $fileName, 'local');
+
+            if (!$path) {
+                return back()->with('error', 'Gagal menyimpan file fisik ke server storage.');
+            }
 
             // Update informasi berkas fisik di database
             $archive->file_path = $path;

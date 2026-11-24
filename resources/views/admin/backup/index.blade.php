@@ -38,6 +38,16 @@
                 </div>
             @endif
 
+            @if($errors->any())
+                <div class="p-4 bg-red-100 border-l-4 border-red-500 text-red-700 dark:bg-red-900/30 dark:text-red-300 rounded-r-xl shadow-sm text-sm">
+                    <ul class="list-disc pl-5 space-y-1">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
                 <!-- Form Restore Database -->
@@ -55,6 +65,12 @@
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Pilih File SQL (.sql)</label>
                             <input type="file" name="backup_file" accept=".sql" required class="block w-full text-xs text-slate-500 dark:text-slate-400 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 dark:file:bg-emerald-950 dark:file:text-emerald-300 hover:file:bg-emerald-100 border border-slate-300 dark:border-slate-600 rounded-xl cursor-pointer">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-600 dark:text-slate-300 mb-1">Konfirmasi Password Admin</label>
+                            <input type="password" name="restore_password" required placeholder="Masukkan password akun Anda..." class="block w-full text-xs text-slate-800 dark:text-slate-100 px-3 py-2 border border-slate-300 dark:border-slate-600 rounded-xl focus:ring-amber-500 focus:border-amber-500 dark:bg-slate-700">
+                            <p class="text-[10px] text-slate-400 mt-1">Wajib masukkan password Super Admin untuk konfirmasi keamanan.</p>
                         </div>
 
                         <button type="submit" onclick="return confirm('PERHATIAN: Restore akan menimpa seluruh data database yang ada saat ini. Apakah Anda yakin ingin melanjutkan?')" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs rounded-xl shadow-md transition">

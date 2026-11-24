@@ -13,19 +13,10 @@ class LogActivityJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    /**
-     * Jumlah percobaan ulang jika job gagal.
-     */
     public int $tries = 3;
 
-    /**
-     * Timeout per job (detik).
-     */
     public int $timeout = 30;
 
-    /**
-     * Create a new job instance.
-     */
     public function __construct(
         public readonly ?int    $userId,
         public readonly ?string $causerName,
@@ -36,9 +27,6 @@ class LogActivityJob implements ShouldQueue
         public readonly ?string $userAgent,
     ) {}
 
-    /**
-     * Execute the job — tulis log ke database secara background.
-     */
     public function handle(): void
     {
         ActivityLog::create([

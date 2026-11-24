@@ -75,29 +75,29 @@ Route::middleware(['auth', 'role:super_admin,admin', 'status'])->prefix('admin')
     Route::patch('/categories/{category}', [CategoryController::class, 'update'])->name('categories.update');
     Route::post('/categories/migrate', [CategoryController::class, 'migrateArchives'])->name('categories.migrate');
     Route::delete('/categories/{category}', [CategoryController::class, 'destroy'])->name('categories.destroy');
-    
+
     // Route Activity Logs
     Route::get('/activity-logs', [ActivityLogController::class, 'index'])->name('activity-logs.index');
     Route::get('/activity-logs/download/{filename}', [ActivityLogController::class, 'downloadExport'])->name('activity-logs.download');
 
     // Route Backup & Restore Database
     Route::get('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'index'])->name('admin.backup.index');
-    // [MEDIUM-04] Rate limiting: max 3 backup per 5 menit, max 1 restore per 10 menit
-    Route::post('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'create'])->name('admin.backup.create')->middleware('throttle:3,5');
+    // [MEDIUM-04] Rate limiting: max 5 backup per 5 menit, max 5 restore per 5 menit
+    Route::post('/backup', [\App\Http\Controllers\Admin\BackupController::class, 'create'])->name('admin.backup.create')->middleware('throttle:5,5');
     Route::get('/backup/download/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'download'])->name('admin.backup.download')->where('filename', '[a-zA-Z0-9_\-\.]+');
     Route::delete('/backup/{filename}', [\App\Http\Controllers\Admin\BackupController::class, 'destroy'])->name('admin.backup.destroy')->where('filename', '[a-zA-Z0-9_\-\.]+');
-    Route::post('/backup/restore', [\App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('admin.backup.restore')->middleware('throttle:1,10');
+    Route::post('/backup/restore', [\App\Http\Controllers\Admin\BackupController::class, 'restore'])->name('admin.backup.restore')->middleware('throttle:5,5');
 
-        // Route Manage Archives (CRUD & Soft Delete)
+    // Route Manage Archives (CRUD & Soft Delete)
     Route::prefix('archives')->name('admin.archives.')->group(function () {
-        
+
         Route::get('/', [ArchiveController::class, 'index'])->name('index');
         Route::post('/', [ArchiveController::class, 'store'])->name('store')->middleware('throttle:10,1');
         Route::get('/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel');
         Route::get('/export/pdf', [ArchiveController::class, 'exportPdf'])->name('export-pdf');
         Route::get('/{archive}/export/excel', [ArchiveController::class, 'exportExcel'])->name('export-excel-single');
         Route::get('/{archive}/export/pdf', [ArchiveController::class, 'exportPdf'])->name('export-pdf-single');
-        
+
         Route::get('/preview/{token}', [ArchiveController::class, 'Preview'])->name('preview');
         Route::put('/{archive}', [ArchiveController::class, 'update'])->name('update'); // Update Data Arsip
         Route::get('/{archive}/download', [ArchiveController::class, 'download'])->name('download'); // Download
@@ -127,8 +127,6 @@ Route::middleware(['auth', 'role:super_admin,admin', 'status'])->prefix('admin')
         // Quick Export 1-click per kategori/status
         Route::get('/quick-export/{type}/{format}', [\App\Http\Controllers\Admin\PegawaiController::class, 'quickExport'])->name('quick.export');
     });
-
-
 }); // End admin middleware group
 
 // Route Modul Usulan SSH/SBU — diakses semua role (admin & user)
@@ -183,4 +181,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';

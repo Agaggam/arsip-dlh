@@ -81,10 +81,12 @@ class PegawaiExcelService
         $updated = 0;
         $skipped = 0;
         $errors = [];
+        $currentRow = null;
 
         DB::beginTransaction();
         try {
             for ($r = 2; $r <= $highestRow; $r++) {
+                $currentRow = $r;
                 $nama = trim((string)$masterSheet->getCell('B' . $r)->getValue());
                 $nipRaw = trim((string)$masterSheet->getCell('C' . $r)->getValue());
 
@@ -167,7 +169,8 @@ class PegawaiExcelService
             DB::commit();
         } catch (\Throwable $e) {
             DB::rollBack();
-            throw new \Exception("Gagal memproses data pada baris {$r}: " . $e->getMessage());
+            $rowMsg = $currentRow ? " pada baris {$currentRow}" : "";
+            throw new \Exception("Gagal memproses data{$rowMsg}: " . $e->getMessage());
         }
 
         return [
@@ -355,8 +358,10 @@ class PegawaiExcelService
 
     /**
      * Konversi nilai tanggal Excel ke format YYYY-MM-DD.
+     *
+     * @param mixed $raw
      */
-    protected function parseExcelDate($raw): ?string
+    protected function parseExcelDate(mixed $raw): ?string
     {
         if ($raw === null || $raw === '') {
             return null;
